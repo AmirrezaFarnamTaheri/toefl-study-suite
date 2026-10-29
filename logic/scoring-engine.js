@@ -50,49 +50,49 @@ function createRepeatFeedback(question, transcript, duration, context = {}) {
   const issues = [];
   const strengths = [];
 
-  if (processingScore >= 0.82) strengths.push("听到的核心信息处理比较准确，关键词保留较好。");
-  if (completenessScore >= 0.82) strengths.push("原句覆盖较完整，没有明显只复述一小段。");
-  if (sequenceScore >= 0.8) strengths.push("语序和句子骨架比较稳定，听起来更接近原句。");
-  if (pronunciationScore >= 0.74) strengths.push("发音可识别度较好，系统能较稳定地捕捉到你的词。");
-  if (deliveryScore >= 0.78) strengths.push("节奏接近自然复述速度，没有明显拖长或抢跑。");
+  if (processingScore >= 0.82) strengths.push("Strong auditory processing and retention of core content words.");
+  if (completenessScore >= 0.82) strengths.push("High sentence completeness with minimal phrase omissions.");
+  if (sequenceScore >= 0.8) strengths.push("Stable word order and syntactic structure matching the original sentence.");
+  if (pronunciationScore >= 0.74) strengths.push("Clear pronunciation and high speech recognition intelligibility.");
+  if (deliveryScore >= 0.78) strengths.push("Natural speaking pace without rushing or dragging.");
 
-  if (stats.missing > 0) issues.push(`漏掉 ${stats.missing} 个原句词，下一遍先抓主语、动词、时间和地点信息。`);
-  if (stats.substitutions > 0) issues.push(`有 ${stats.substitutions} 处替换词；复述题先追求准确，不要主动改写。`);
-  if (stats.extras > 2) issues.push("多说了较多原句没有的词，可能影响“准确复述”这一项。");
-  if (contentRecall < 0.75) issues.push("内容词保留不够，优先听清名词、动词、形容词和数字信息。");
-  if (pronunciationScore < 0.55) issues.push("发音可识别度偏低；优先放慢重读内容词，并把词尾音说完整。");
-  if (audioQualityScore < 0.55) issues.push("录音质量会影响评分，建议离麦克风近一点并避开背景噪音。");
-  if (duration && deliveryScore < 0.58) issues.push("节奏与原句差距较大，建议按意群复述，而不是逐词挤出来。");
-  if (!issues.length) issues.push("下一遍可以挑战只听一遍，并保持同样准确度。");
-  if (!strengths.length) strengths.push("你已经完成了一次可分析的复述，下一遍从减少漏词和替换词开始。");
+  if (stats.missing > 0) issues.push(`Omitted ${stats.missing} word(s) from the prompt; focus on anchoring the subject, main verb, and modifiers.`);
+  if (stats.substitutions > 0) issues.push(`Substituted ${stats.substitutions} word(s); aim for verbatim repetition rather than paraphrasing.`);
+  if (stats.extras > 2) issues.push("Inserted extra words not present in the original prompt, which reduces repetition accuracy.");
+  if (contentRecall < 0.75) issues.push("Low content-word retention; prioritize nouns, main verbs, adjectives, and numbers.");
+  if (pronunciationScore < 0.55) issues.push("Intelligibility is low; slow down slightly to stress content words and articulate word endings.");
+  if (audioQualityScore < 0.55) issues.push("Audio signal quality is low; speak closer to the microphone in a quiet room.");
+  if (duration && deliveryScore < 0.58) issues.push("Pacing diverged from natural speech; repeat in 2-3 cohesive thought groups instead of word-by-word.");
+  if (!issues.length) issues.push("Challenge yourself next time by listening only once while keeping the same accuracy.");
+  if (!strengths.length) strengths.push("Completed an analyzable repetition attempt; focus next on reducing omitted and substituted words.");
 
   return {
     type: "repeat",
     score,
-    summary: `专业模拟评分：${getBandLabel(score)}。听辨准确约 ${Math.round(processingScore * 100)}%，完整度约 ${Math.round(completenessScore * 100)}%。`,
+    summary: `Simulated Band: ${getBandLabel(score)}. Accuracy: ${Math.round(processingScore * 100)}%, Completeness: ${Math.round(completenessScore * 100)}%.`,
     strengths,
     issues: issues.slice(0, 3),
-    improvedAnswer: "下一遍按 ETS 新口语的复述目标练：先保留原句含义和关键词，再追求自然节奏。听完后用 2-3 个意群复述，避免主动换词。",
+    improvedAnswer: "Target for Listen & Repeat: retain the exact meaning and key content words first, then smooth out your rhythm across 2-3 thought groups without paraphrasing.",
     metrics: [
-      { label: "听辨处理", value: `${Math.round(processingScore * 100)}%` },
-      { label: "完整复述", value: `${Math.round(completenessScore * 100)}%` },
-      { label: "语序稳定", value: `${Math.round(sequenceScore * 100)}%` },
-      { label: "发音可识别", value: `${Math.round(pronunciationScore * 100)}%` },
-      { label: "清晰节奏", value: `${Math.round(deliveryScore * 100)}%` },
-      { label: "漏/换/多", value: `${stats.missing}/${stats.substitutions}/${stats.extras}` }
+      { label: "Accuracy", value: `${Math.round(processingScore * 100)}%` },
+      { label: "Completeness", value: `${Math.round(completenessScore * 100)}%` },
+      { label: "Word Order", value: `${Math.round(sequenceScore * 100)}%` },
+      { label: "Intelligibility", value: `${Math.round(pronunciationScore * 100)}%` },
+      { label: "Pacing", value: `${Math.round(deliveryScore * 100)}%` },
+      { label: "Miss/Sub/Extra", value: `${stats.missing}/${stats.substitutions}/${stats.extras}` }
     ],
     detailScores: [
-      { label: "听辨处理", score: processingScore, detail: "原句词、内容词和复述文本的匹配程度。" },
-      { label: "完整复述", score: completenessScore, detail: "漏词比例、句子长度和整体覆盖度。" },
-      { label: "语序稳定", score: sequenceScore, detail: "替换、多说和漏说对原句结构的影响。" },
-      { label: "发音可识别", score: pronunciationScore, detail: "ASR 识别稳定性、内容词匹配和录音质量的综合代理分。" },
-      { label: "清晰节奏", score: deliveryScore, detail: "回答时长、停顿比例和自然复述节奏。" }
+      { label: "Accuracy", score: processingScore, detail: "Exact word and content-word match against the original prompt." },
+      { label: "Completeness", score: completenessScore, detail: "Proportion of original words retained and overall sentence coverage." },
+      { label: "Word Order", score: sequenceScore, detail: "Preservation of original syntactic sequence without substitutions or insertions." },
+      { label: "Intelligibility", score: pronunciationScore, detail: "Combined proxy of ASR confidence, content-word clarity, and audio quality." },
+      { label: "Pacing", score: deliveryScore, detail: "Response duration, pause ratio, and natural rhythmic delivery." }
     ],
     rubricProfile: [
-      { label: "复述准确", weight: 0.54, note: "听到的词和核心信息能否被准确保留下来。" },
-      { label: "完整与顺序", weight: 0.22, note: "是否漏掉关键片段，句子骨架是否接近原句。" },
-      { label: "清晰可懂", weight: 0.14, note: "语音识别稳定性、音频质量和内容词清晰度。" },
-      { label: "自然节奏", weight: 0.1, note: "是否按意群自然复述，而不是拖长或抢跑。" }
+      { label: "Repetition Accuracy", weight: 0.54, note: "How accurately heard words and core meaning are preserved." },
+      { label: "Completeness & Order", weight: 0.22, note: "Whether key segments are retained in the original sequence." },
+      { label: "Intelligibility", weight: 0.14, note: "ASR recognition stability, audio clarity, and content-word articulation." },
+      { label: "Natural Rhythm", weight: 0.1, note: "Chunked delivery across thought groups without choppy pauses." }
     ],
     pronunciation: buildPronunciationReport({
       pronunciationScore,
@@ -185,57 +185,57 @@ function createInterviewFeedback(question, transcript, duration, context = {}) {
   const strengths = [];
   const issues = [];
 
-  if (taskScore >= 0.72) strengths.push("回答能回应题目要求，开头观点比较明确。");
-  if (developmentScore >= 0.72) strengths.push("有理由和具体例子，内容展开比单句结论更充分。");
-  if (organizationScore >= 0.7) strengths.push("答案有一定组织，听者能跟上观点推进。");
-  if (languageScore >= 0.68) strengths.push("词汇和句式有一定变化，表达不只是重复简单词。");
-  if (pronunciationScore >= 0.72) strengths.push("发音可识别度较好，关键词更容易被稳定听清。");
-  if (deliveryScore >= 0.72) strengths.push("语速和停顿大致自然，适合口语面试回答。");
+  if (taskScore >= 0.72) strengths.push("Directly addresses the prompt with a clear opening position.");
+  if (developmentScore >= 0.72) strengths.push("Well-developed response supported by reasons and specific examples.");
+  if (organizationScore >= 0.7) strengths.push("Coherent discourse progression that is easy for a listener to follow.");
+  if (languageScore >= 0.68) strengths.push("Good lexical variety and sentence complexity beyond simple clauses.");
+  if (pronunciationScore >= 0.72) strengths.push("Clear articulation with strong keyword intelligibility.");
+  if (deliveryScore >= 0.72) strengths.push("Natural speaking rate and pause profile suitable for an academic interview.");
 
-  if (wordCount < 35) issues.push("回答偏短，建议扩展到 45-75 词，至少包含一个理由和一个例子。");
-  if (!hasDirectAnswer) issues.push("开头没有直接回应题目，建议第一句就给出选择、观点或对象。");
-  if (!hasReason) issues.push("缺少明确理由，可以加入 because 或 the main reason is。");
-  if (!hasExample) issues.push("缺少个人经历或课堂例子，建议用 for example 或 once 展开。");
-  if (!hasResult) issues.push("例子后缺少结果或意义，可以补一句 this helped me 或 as a result。");
-  if (organizationScore < 0.52) issues.push("组织感偏弱，建议使用“观点-理由-例子-结果”的顺序。");
-  if (wpm && wpm < 85) issues.push("语速偏慢，下一遍先准备关键词，再连续说完整句。");
-  if (wpm > 170) issues.push("语速偏快，容易牺牲清晰度，建议每个意群后自然停顿。");
-  if (fillerMatches.length >= 3) issues.push("填充词较多，可以用短暂停顿代替 um、uh、like。");
-  if (pronunciationScore < 0.55) issues.push("发音可识别度偏低，建议放慢内容词并加强词尾音。");
-  if (audioQualityScore < 0.55) issues.push("录音质量会影响口语判断，建议减少背景噪音并保持稳定音量。");
-  if (repeatedWordPenalty > 0.08) issues.push("重复词偏多，试着替换一两个高频动词或形容词。");
+  if (wordCount < 35) issues.push("Response is too brief; expand to 45-75 words with at least one reason and one concrete example.");
+  if (!hasDirectAnswer) issues.push("Missing a direct opening claim; state your choice or opinion in the very first sentence.");
+  if (!hasReason) issues.push("Lacks an explicit reason; connect your claim with 'because' or 'the main reason is'.");
+  if (!hasExample) issues.push("Missing a concrete personal or academic example; introduce one with 'for example' or 'last semester'.");
+  if (!hasResult) issues.push("Add a concluding result or takeaway after your example using 'as a result' or 'this helped me'.");
+  if (organizationScore < 0.52) issues.push("Weak discourse structure; follow the 4-step 'Claim -> Reason -> Example -> Result' sequence.");
+  if (wpm && wpm < 85) issues.push("Speaking rate is slow; outline key content words mentally and link full clauses smoothly.");
+  if (wpm > 170) issues.push("Speaking rate is rushed, which can hurt clarity; pause briefly between thought groups.");
+  if (fillerMatches.length >= 3) issues.push("Excessive filler words ('um', 'uh', 'like'); replace verbal fillers with silent micro-pauses.");
+  if (pronunciationScore < 0.55) issues.push("Pronunciation clarity is low; slow down on multisyllabic content words and final consonants.");
+  if (audioQualityScore < 0.55) issues.push("Audio recording quality is low; reduce background noise and maintain steady microphone distance.");
+  if (repeatedWordPenalty > 0.08) issues.push("Noticeable word repetition; vary your high-frequency verbs and adjectives.");
 
-  if (!strengths.length) strengths.push("你已经给出可分析的回答，下一遍先补足观点、理由和例子。");
-  if (!issues.length) issues.push("下一遍可以压缩开头，把更多时间留给具体例子和结果。");
+  if (!strengths.length) strengths.push("Completed an analyzable response; focus next on pairing a clear claim with a specific example.");
+  if (!issues.length) issues.push("Strong overall response; tighten your opening sentence to leave even more time for detailed examples.");
 
   return {
     type: "interview",
     score,
-    summary: `专业模拟评分：${getBandLabel(score)}。回答约 ${wordCount} 词，语速约 ${wpm || "-"} WPM。`,
+    summary: `Simulated Band: ${getBandLabel(score)}. Length: ${wordCount} words, Pace: ${wpm || "-"} WPM.`,
     strengths: strengths.slice(0, 3),
     issues: issues.slice(0, 3),
     improvedAnswer: question.sample,
     metrics: [
-      { label: "任务回应", value: `${Math.round(taskScore * 100)}%` },
-      { label: "观点展开", value: `${Math.round(developmentScore * 100)}%` },
-      { label: "组织逻辑", value: `${Math.round(organizationScore * 100)}%` },
-      { label: "语言使用", value: `${Math.round(languageScore * 100)}%` },
-      { label: "发音可识别", value: `${Math.round(pronunciationScore * 100)}%` },
-      { label: "表达流利", value: `${Math.round(deliveryScore * 100)}%` }
+      { label: "Task Fulfillment", value: `${Math.round(taskScore * 100)}%` },
+      { label: "Topic Development", value: `${Math.round(developmentScore * 100)}%` },
+      { label: "Organization", value: `${Math.round(organizationScore * 100)}%` },
+      { label: "Language Use", value: `${Math.round(languageScore * 100)}%` },
+      { label: "Intelligibility", value: `${Math.round(pronunciationScore * 100)}%` },
+      { label: "Fluency", value: `${Math.round(deliveryScore * 100)}%` }
     ],
     detailScores: [
-      { label: "任务回应", score: taskScore, detail: "是否直接回应题目，并围绕题目关键词展开。" },
-      { label: "观点展开", score: developmentScore, detail: "是否给出理由、例子、结果或意义说明。" },
-      { label: "组织逻辑", score: organizationScore, detail: "是否形成清楚的观点、理由、例子、结果顺序。" },
-      { label: "语言使用", score: languageScore, detail: "词汇多样性、内容词密度和复合句使用情况。" },
-      { label: "发音可识别", score: pronunciationScore, detail: "识别置信度、音频质量和关键词清晰度的综合代理分。" },
-      { label: "表达流利", score: deliveryScore, detail: "语速、时长、停顿、填充词和音频稳定性。" }
+      { label: "Task Fulfillment", score: taskScore, detail: "Directness of opening response and alignment with prompt keywords." },
+      { label: "Topic Development", score: developmentScore, detail: "Presence of supporting reasons, concrete examples, and outcomes." },
+      { label: "Organization", score: organizationScore, detail: "Logical progression across Claim -> Reason -> Example -> Result." },
+      { label: "Language Use", score: languageScore, detail: "Vocabulary diversity, content-word density, and subordinate clause usage." },
+      { label: "Intelligibility", score: pronunciationScore, detail: "Combined proxy of ASR confidence, audio quality, and keyword clarity." },
+      { label: "Fluency", score: deliveryScore, detail: "Speaking rate (WPM), duration fit, pause profile, and filler control." }
     ],
     rubricProfile: [
-      { label: "任务与展开", weight: 0.54, note: "是否直接回应题目，并用理由和例子充分展开。" },
-      { label: "组织逻辑", weight: 0.2, note: "观点、理由、例子、结果是否形成清晰顺序。" },
-      { label: "语言使用", weight: 0.16, note: "词汇、句式、语法和表达自然度。" },
-      { label: "清晰流利", weight: 0.1, note: "发音可识别、语速、停顿和音频稳定性。" }
+      { label: "Task & Development", weight: 0.54, note: "Directly answering the prompt and elaborating with reasons and examples." },
+      { label: "Organization", weight: 0.2, note: "Clear rhetorical progression across claim, reason, example, and result." },
+      { label: "Language Use", weight: 0.16, note: "Lexical precision, syntactic variety, and grammatical control." },
+      { label: "Fluency & Clarity", weight: 0.1, note: "Intelligibility, natural pacing, pause control, and audio stability." }
     ],
     pronunciation: buildPronunciationReport({
       pronunciationScore,
@@ -252,11 +252,11 @@ function createInterviewFeedback(question, transcript, duration, context = {}) {
 }
 
 function getBandLabel(score) {
-  if (score >= 5.5) return "高级水平";
-  if (score >= 4.5) return "良好水平";
-  if (score >= 3.5) return "中等水平";
-  if (score >= 2.5) return "基础水平";
-  return "需要大量练习";
+  if (score >= 5.5) return "Advanced (C1-C2)";
+  if (score >= 4.5) return "High-Intermediate (B2+)";
+  if (score >= 3.5) return "Intermediate (B1-B2)";
+  if (score >= 2.5) return "Basic (A2-B1)";
+  return "Developing (Needs Practice)";
 }
 
 async function enhanceFeedbackWithExternalScorers(feedback, question, transcript, duration, context, audioBlob = state.audioBlob) {
@@ -264,24 +264,24 @@ async function enhanceFeedbackWithExternalScorers(feedback, question, transcript
   const errors = [];
 
   if (setup.ai.enabled) {
-    state.status = "正在调用 AI 内容评分";
+    state.status = "Calling AI Content Evaluator...";
     render();
     try {
       const aiResult = await callAiScorer(setup.ai, question, transcript, duration, feedback);
       mergeAiFeedback(feedback, aiResult);
     } catch (error) {
-      errors.push(`AI评分失败：${error.message}`);
+      errors.push(`AI evaluation failed: ${error.message}`);
     }
   }
 
   if (setup.pronunciation.enabled) {
-    state.status = "正在调用外部发音评分";
+    state.status = "Calling External Pronunciation Scorer...";
     render();
     try {
       const pronunciationResult = await callPronunciationScorer(setup.pronunciation, question, transcript, duration, context, audioBlob);
       mergeExternalPronunciation(feedback, pronunciationResult, question.type);
     } catch (error) {
-      errors.push(`发音评分失败：${error.message}`);
+      errors.push(`Pronunciation scoring failed: ${error.message}`);
     }
   }
 
@@ -293,7 +293,7 @@ async function enhanceFeedbackWithExternalScorers(feedback, question, transcript
 
 async function callAiScorer(config, question, transcript, duration, feedback) {
   if (!config.endpoint || !config.apiKey || !config.model) {
-    throw new Error("请在 Setup 里填写 AI endpoint、API key 和 model。");
+    throw new Error("Please configure AI endpoint, API key, and model in Setup.");
   }
 
   const systemPrompt = [
@@ -367,7 +367,7 @@ function parseJsonLike(text) {
   } catch (error) {
     const match = String(text).match(/\{[\s\S]*\}/);
     if (match) return JSON.parse(match[0]);
-    throw new Error("AI 返回的不是可解析 JSON。");
+    throw new Error("AI response did not contain valid JSON.");
   }
 }
 
@@ -385,18 +385,18 @@ function mergeAiFeedback(feedback, aiResult) {
   if (feedback.externalAi.score) {
     feedback.localScore = feedback.localScore || feedback.score;
     feedback.score = roundHalf(feedback.localScore * 0.65 + feedback.externalAi.score * 0.35);
-    feedback.metrics.push({ label: "AI评分", value: `${feedback.externalAi.score}/6` });
-    feedback.summary = `${feedback.summary} AI增强后总分 ${feedback.score}/6。`;
+    feedback.metrics.push({ label: "AI Score", value: `${feedback.externalAi.score}/6` });
+    feedback.summary = `${feedback.summary} AI-blended score: ${feedback.score}/6.`;
   }
   if (cleanupSpacing(aiResult.improvedAnswer || "")) feedback.improvedAnswer = aiResult.improvedAnswer;
 }
 
 async function callPronunciationScorer(config, question, transcript, duration, context, audioBlob) {
-  if (!config.apiKey) throw new Error("请在 Setup 里填写发音评分 API key。");
-  if (!audioBlob) throw new Error("没有可发送的录音，请先录音再分析。");
+  if (!config.apiKey) throw new Error("Please configure a pronunciation API key in Setup.");
+  if (!audioBlob) throw new Error("No audio recording available to send. Please record first.");
 
   if (config.provider === "custom") {
-    if (!config.endpoint) throw new Error("Custom provider 需要 endpoint URL。");
+    if (!config.endpoint) throw new Error("Custom provider requires an endpoint URL.");
     return callCustomPronunciationEndpoint(config, question, transcript, duration, context, audioBlob);
   }
 
@@ -404,7 +404,7 @@ async function callPronunciationScorer(config, question, transcript, duration, c
   const endpoint = config.endpoint || (region
     ? `https://${region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US&format=detailed`
     : "");
-  if (!endpoint) throw new Error("Azure provider 需要 region 或 endpoint override。");
+  if (!endpoint) throw new Error("Azure provider requires a region or endpoint override.");
 
   const wavBlob = await convertBlobToWav16k(audioBlob);
   const referenceText = question.type === "repeat" ? question.text : transcript;
@@ -520,13 +520,13 @@ function mergeExternalPronunciation(feedback, pronunciationResult, taskType) {
     feedback.pronunciation.external = pronunciationResult;
     if (Number.isFinite(pronunciationResult.score)) {
       feedback.pronunciation.score = clamp01(feedback.pronunciation.score * 0.5 + pronunciationResult.score * 0.5);
-      feedback.metrics.push({ label: "外部发音", value: `${Math.round(pronunciationResult.score * 100)}%` });
+      feedback.metrics.push({ label: "Ext. Pron.", value: `${Math.round(pronunciationResult.score * 100)}%` });
     }
     if (pronunciationResult.phonemes && pronunciationResult.phonemes.length) {
       const externalFocus = pronunciationResult.phonemes.map((item) => ({
         sound: item.sound || item.phoneme || "",
         label: `${item.word || ""} ${Number.isFinite(Number(item.score)) ? Math.round(Number(item.score)) : ""}`.trim(),
-        tip: item.errorType ? `外部评测标记：${item.errorType}` : "外部评测认为这个音素需要重点练习。",
+        tip: item.errorType ? `External assessment flag: ${item.errorType}` : "External assessment flagged this phoneme for practice.",
         words: [item.word || ""].filter(Boolean)
       }));
       feedback.pronunciation.phonemeFocus = [...externalFocus, ...(feedback.pronunciation.phonemeFocus || [])].slice(0, 8);
@@ -560,17 +560,17 @@ function buildScoringConfidence(question, feedback, transcript, duration, contex
 
   if (words.length < 8) {
     score -= 0.24;
-    reasons.push("转写文本太短，系统可判断的信息不足。");
+    reasons.push("Transcript is very short; limited evidence available for scoring.");
   } else if (words.length < 20 && question.type === "interview") {
     score -= 0.14;
-    reasons.push("问答回答偏短，内容完成度判断会更不稳定。");
+    reasons.push("Interview response is brief; content development estimate is less stable.");
   } else {
     signals.push(`${words.length} words`);
   }
 
   if (!duration) {
     score -= 0.1;
-    reasons.push("缺少有效录音时长，语速和节奏只能部分估算。");
+    reasons.push("No audio duration recorded; speaking pace and rhythm are partially estimated.");
   } else {
     signals.push(`${formatTime(duration)} audio`);
   }
@@ -578,46 +578,46 @@ function buildScoringConfidence(question, feedback, transcript, duration, contex
   const audioStats = context.audioStats || feedback.pronunciation?.audioStats || null;
   if (!audioStats || !audioStats.available) {
     score -= 0.12;
-    reasons.push("没有完整音频特征，本地可理解度主要依赖转写文本。");
+    reasons.push("Full acoustic features unavailable; intelligibility relies primarily on transcript.");
   } else {
     const audioQuality = getAudioQualityScore(audioStats);
-    signals.push(`录音质量 ${Math.round(audioQuality * 100)}%`);
+    signals.push(`Audio quality ${Math.round(audioQuality * 100)}%`);
     if (audioQuality < 0.55) {
       score -= 0.18;
-      reasons.push("录音质量偏低，可能影响可理解度和节奏判断。");
+      reasons.push("Low audio recording quality may affect intelligibility and pause detection.");
     }
     if (audioStats.clippingPercent > 0.01) {
       score -= 0.08;
-      reasons.push("录音出现削波，音量过大会影响评分稳定性。");
+      reasons.push("Audio clipping detected; excessive microphone gain can reduce scoring accuracy.");
     }
   }
 
   const confidenceSamples = context.recognitionStats?.confidenceSamples || [];
   if (!confidenceSamples.length) {
     score -= 0.06;
-    reasons.push("没有浏览器 ASR 置信样本，发音可理解度是代理判断。");
+    reasons.push("No browser ASR confidence samples available; pronunciation is a heuristic proxy.");
   } else {
     const recognitionScore = getRecognitionConfidenceScore(context.recognitionStats);
-    signals.push(`ASR 置信 ${Math.round(recognitionScore * 100)}%`);
+    signals.push(`ASR confidence ${Math.round(recognitionScore * 100)}%`);
     if (recognitionScore < 0.55) {
       score -= 0.16;
-      reasons.push("语音识别置信度偏低，可能存在发音、音量或背景噪音问题。");
+      reasons.push("Low speech recognition confidence; check articulation, volume, or background noise.");
     }
   }
 
   if (feedback.externalAi) {
     score += 0.06;
-    signals.push("AI 内容评分已合并");
+    signals.push("AI content evaluation merged");
   }
   if (feedback.externalPronunciation || feedback.pronunciation?.external) {
     score += 0.08;
-    signals.push("外部发音评分已合并");
+    signals.push("External pronunciation assessment merged");
   }
 
   const safeScore = clamp(0.25, 0.95, score);
   const level = safeScore >= 0.78 ? "high" : safeScore >= 0.56 ? "medium" : "low";
-  const label = level === "high" ? "高" : level === "medium" ? "中" : "低";
-  if (!reasons.length) reasons.push("转写、录音质量和回答长度都足够支撑本次训练反馈。");
+  const label = level === "high" ? "High" : level === "medium" ? "Medium" : "Low";
+  if (!reasons.length) reasons.push("Transcript length, audio signal quality, and ASR confidence strongly support this evaluation.");
 
   return {
     score: safeScore,
@@ -625,7 +625,7 @@ function buildScoringConfidence(question, feedback, transcript, duration, contex
     label,
     signals: signals.slice(0, 5),
     reasons: reasons.slice(0, 4),
-    note: "这是训练用模拟评分可信度，不代表 ETS 官方评分置信度。"
+    note: "Simulated training confidence indicator (not an official ETS score guarantee)."
   };
 }
 
@@ -749,7 +749,7 @@ function createAudioStatsFallback(duration, reason) {
 
 async function convertBlobToWav16k(blob) {
   const AudioContextApi = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContextApi) throw new Error("当前浏览器不支持 Web Audio，无法转换 WAV。");
+  if (!AudioContextApi) throw new Error("Web Audio API is not supported in this browser; cannot convert WAV.");
   let audioContext;
   try {
     const arrayBuffer = await blob.arrayBuffer();
@@ -831,7 +831,7 @@ function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(reader.error || new Error("Blob 转 base64 失败。"));
+    reader.onerror = () => reject(reader.error || new Error("Failed to convert Blob to base64."));
     reader.readAsDataURL(blob);
   });
 }
@@ -894,13 +894,13 @@ function buildPronunciationReport(data) {
     : 0;
   const notes = [];
 
-  if (!audioStats.available) notes.push("当前报告未拿到完整音频特征，本地可理解度主要依赖转写文本和语速。");
-  if (data.recognitionConfidenceScore < 0.58) notes.push("语音识别置信度偏低，可能存在发音不清、音量不足或背景噪音。");
-  if (data.audioQualityScore < 0.58) notes.push("录音质量偏低，会影响发音判断，建议使用安静环境和稳定麦克风距离。");
-  if (data.pauseScore < 0.58) notes.push("停顿偏多或长停顿明显，建议按意群连续说完。");
-  if (audioStats.available && audioStats.clippingPercent > 0.01) notes.push("录音出现削波，音量可能过大，建议降低输入音量。");
-  if (audioStats.available && audioStats.rms < 0.012) notes.push("整体音量偏低，建议靠近麦克风或提高输入音量。");
-  if (!notes.length) notes.push("本地发音诊断未发现明显录音或可识别度问题。");
+  if (!audioStats.available) notes.push("Full acoustic features were not captured; local intelligibility is estimated from transcript and speaking rate.");
+  if (data.recognitionConfidenceScore < 0.58) notes.push("Browser ASR confidence is low; check pronunciation clarity, microphone volume, or background noise.");
+  if (data.audioQualityScore < 0.58) notes.push("Recording quality is low; use a quiet room and maintain a steady microphone distance.");
+  if (data.pauseScore < 0.58) notes.push("Frequent or extended pauses detected; practice speaking in connected thought groups.");
+  if (audioStats.available && audioStats.clippingPercent > 0.01) notes.push("Audio clipping detected; lower your microphone input gain slightly.");
+  if (audioStats.available && audioStats.rms < 0.012) notes.push("Overall input volume is low; move closer to the microphone.");
+  if (!notes.length) notes.push("Local acoustic diagnostics found no significant recording or intelligibility issues.");
 
   return {
     mode: "Local intelligibility proxy",
@@ -926,13 +926,13 @@ function inferPronunciationFocus({ alignment = [], refWords = [], hypWords = [],
   const sourceWords = [...mismatchWords, ...getContentWords(refWords), ...getContentWords(hypWords), ...normalizeWords(transcript)];
   const uniqueWords = [...new Set(sourceWords)].filter((word) => word.length > 2);
   const rules = [
-    { key: "th-voiceless", sound: "/θ/", label: "think / three / method", pattern: /(^th|th$|th)/, tip: "舌尖轻触上齿背，气流出去，不要说成 /s/ 或 /t/。" },
-    { key: "th-voiced", sound: "/ð/", label: "this / those / rather", pattern: /(the|this|that|these|those|there|rather|another)/, tip: "保持舌尖轻触上齿背并带声带振动，不要说成 /d/。" },
-    { key: "r-l", sound: "/r/ vs /l/", label: "right / library / clearly", pattern: /[rl]/, tip: "/r/ 舌尖不要碰上齿龈，/l/ 舌尖需要轻触上齿龈。" },
-    { key: "v-w", sound: "/v/ vs /w/", label: "very / review / available", pattern: /v|w/, tip: "/v/ 用上齿轻触下唇，/w/ 是圆唇滑音，不要混在一起。" },
-    { key: "final-consonant", sound: "final consonants", label: "asked / helps / project", pattern: /(ed|s|t|d|k|p|g|m|n)$/, tip: "词尾音要短而清楚，尤其是 -s、-ed、/t/、/d/。" },
-    { key: "consonant-cluster", sound: "clusters", label: "students / strengths / projects", pattern: /(str|spr|skr|sts|nts|cts|ghts|rts|lds|lps|mps)/, tip: "辅音连缀不要吞音，可以先慢速拆开再连起来。" },
-    { key: "long-vowel", sound: "long vowels", label: "leave / reach / improve", pattern: /(ee|ea|oo|ou|oa|ai)/, tip: "长元音需要拉开一点，但不要把一个词拖得过长。" }
+    { key: "th-voiceless", sound: "/θ/", label: "think / three / method", pattern: /(^th|th$|th)/, tip: "Place the tongue tip lightly against the upper teeth and release air without substituting /s/ or /t/." },
+    { key: "th-voiced", sound: "/ð/", label: "this / those / rather", pattern: /(the|this|that|these|those|there|rather|another)/, tip: "Touch the tongue tip lightly to the upper teeth with vocal cord vibration; avoid substituting /d/." },
+    { key: "r-l", sound: "/r/ vs /l/", label: "right / library / clearly", pattern: /[rl]/, tip: "For /r/, curl or bunch the tongue without touching the alveolar ridge; for /l/, touch the ridge firmly." },
+    { key: "v-w", sound: "/v/ vs /w/", label: "very / review / available", pattern: /v|w/, tip: "For /v/, touch upper teeth to lower lip; for /w/, round both lips without tooth contact." },
+    { key: "final-consonant", sound: "final consonants", label: "asked / helps / project", pattern: /(ed|s|t|d|k|p|g|m|n)$/, tip: "Crisply release word-final consonants, especially -s, -ed, /t/, and /d/." },
+    { key: "consonant-cluster", sound: "clusters", label: "students / strengths / projects", pattern: /(str|spr|skr|sts|nts|cts|ghts|rts|lds|lps|mps)/, tip: "Avoid dropping consonants inside clusters; practice slowly segmenting and blending them." },
+    { key: "long-vowel", sound: "long vowels", label: "leave / reach / improve", pattern: /(ee|ea|oo|ou|oa|ai)/, tip: "Sustain tense/long vowels clearly to distinguish minimal pairs without over-dragging." }
   ];
 
   rules.forEach((rule) => {
@@ -993,7 +993,7 @@ function buildAttemptComparison(feedback, previousAttempt) {
     if (!Number.isFinite(previousDetails[label])) return;
     const diff = Math.round((currentDetails[label] - previousDetails[label]) * 100);
     if (Math.abs(diff) >= 6) {
-      notes.push(`${label}${diff > 0 ? "提升" : "下降"} ${Math.abs(diff)}%。`);
+      notes.push(`${label} ${diff > 0 ? "improved by" : "decreased by"} ${Math.abs(diff)}%.`);
     }
   });
 
@@ -1001,19 +1001,19 @@ function buildAttemptComparison(feedback, previousAttempt) {
   const previousPron = previousAttempt.pronunciation ? previousAttempt.pronunciation.score : null;
   if (Number.isFinite(currentPron) && Number.isFinite(previousPron)) {
     const pronDiff = Math.round((currentPron - previousPron) * 100);
-    if (Math.abs(pronDiff) >= 6) notes.push(`发音可识别度${pronDiff > 0 ? "提升" : "下降"} ${Math.abs(pronDiff)}%。`);
+    if (Math.abs(pronDiff) >= 6) notes.push(`Intelligibility ${pronDiff > 0 ? "improved by" : "decreased by"} ${Math.abs(pronDiff)}%.`);
   }
 
-  if (!notes.length) notes.push("这次表现与上次接近，下一遍建议只盯一个最弱维度重练。");
+  if (!notes.length) notes.push("Performance is similar to your previous attempt; focus on your single weakest dimension on the next retry.");
 
   return {
     previousScore,
     delta,
     summary: delta > 0
-      ? `比上次同题提高 ${delta} 分，复练有效。`
+      ? `Improved by +${delta} band points over your last attempt on this prompt.`
       : delta < 0
-        ? `比上次同题低 ${Math.abs(delta)} 分，建议回看弱项后再录一次。`
-        : "与上次同题分数持平，可以继续打磨细节。",
+        ? `Scored ${Math.abs(delta)} band points lower than your previous attempt; review the flagged issues and retry.`
+        : "Matched your previous band score on this prompt; keep refining details.",
     notes: notes.slice(0, 4)
   };
 }

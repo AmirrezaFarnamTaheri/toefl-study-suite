@@ -9,7 +9,7 @@ const state = {
   transcript: "",
   feedback: null,
   isRecording: false,
-  status: "准备开始",
+  status: "Ready",
   elapsed: 0,
   duration: 0,
   audioUrl: "",
@@ -76,22 +76,22 @@ function renderTopbar() {
   const history = loadHistory();
   const average = averageScore(history);
   const todayCount = history.filter((item) => isToday(item.createdAt)).length;
-  const ladderLabel = state.ladder && state.ladder.diagnosed ? (LADDER_LEVELS[state.ladder.level] || LADDER_LEVELS[1]).name : "未诊断";
+  const ladderLabel = state.ladder && state.ladder.diagnosed ? (LADDER_LEVELS[state.ladder.level] || LADDER_LEVELS[1]).name : "Undiagnosed";
   return `
     <header class="topbar">
       <div class="brand">
         <div class="brand-mark">TS</div>
         <div>
           <h1 class="brand-title">VoxPilot Speaking Lab</h1>
-          <p class="brand-subtitle">2026 口语练习台 · 本地保存 · 无需登录</p>
+          <p class="brand-subtitle">2026 Academic Speaking Studio · Local-First · Zero Login</p>
         </div>
       </div>
       <div class="top-actions">
-        <span class="stat-pill"><strong>${todayCount}</strong> 今日练习</span>
-        <span class="stat-pill"><strong>${average || "-"}</strong> 近况均分</span>
-        <span class="stat-pill"><strong>${history.length}</strong> 本地记录</span>
+        <span class="stat-pill"><strong>${todayCount}</strong> Today</span>
+        <span class="stat-pill"><strong>${average || "-"}</strong> Recent Avg</span>
+        <span class="stat-pill"><strong>${history.length}</strong> Saved Runs</span>
         <span class="stat-pill"><strong>${escapeHtml(ladderLabel)}</strong> Ladder</span>
-        <span class="stat-pill"><strong>${QUESTION_BANK.repeat.length + QUESTION_BANK.interview.length}</strong> 仿真题</span>
+        <span class="stat-pill"><strong>${QUESTION_BANK.repeat.length + QUESTION_BANK.interview.length}</strong> Prompts</span>
       </div>
     </header>
   `;
@@ -99,13 +99,13 @@ function renderTopbar() {
 
 function renderNav() {
   const tabs = [
-    ["starter", "起步训练"],
+    ["starter", "Start Easy"],
     ["ladder", "Ladder"],
-    ["practice", "练习台"],
-    ["full", "完整练习"],
-    ["bank", "题库"],
-    ["mistakes", "错题本"],
-    ["history", "历史"],
+    ["practice", "Studio"],
+    ["full", "Full Sim"],
+    ["bank", "Prompt Bank"],
+    ["mistakes", "Error Log"],
+    ["history", "History"],
     ["setup", "Setup"]
   ];
   return `
@@ -138,8 +138,8 @@ function renderPracticeView() {
   return `
     <section class="workspace">
       <aside class="panel">
-        <h2>今日训练</h2>
-        <p class="compact-copy">先听准，再说稳。每题完成后立刻看反馈，然后重录一次。</p>
+        <h2>Daily Studio</h2>
+        <p class="compact-copy">Listen carefully, speak steadily. Review diagnostic feedback immediately after each attempt and record a focused retake.</p>
         <div class="segmented" role="group" aria-label="Practice mode">
           <button class="${state.mode === "repeat" ? "active" : ""}" data-mode="repeat">Listen & Repeat</button>
           <button class="${state.mode === "interview" ? "active" : ""}" data-mode="interview">Interview</button>
@@ -165,11 +165,11 @@ function renderStarterView() {
     <section class="workspace starter-workspace">
       <aside class="panel starter-panel">
         <span class="badge blue">Start Easy</span>
-        <h2>起步训练</h2>
-        <p class="compact-copy">先不追求高分，把一道题拆成 4 个小台阶。Step 1-3 只看本步目标，Step 4 再回到完整题。</p>
+        <h2>Start Easy · 4-Step Scaffold</h2>
+        <p class="compact-copy">Break each speaking prompt into 4 manageable micro-steps. Steps 1–3 evaluate only the immediate target; Step 4 returns to full local scoring.</p>
         <div class="segmented" role="group" aria-label="Starter mode">
-          <button class="${starter.mode === "interview" ? "active" : ""}" data-starter-mode="interview">Interview 起步</button>
-          <button class="${starter.mode === "repeat" ? "active" : ""}" data-starter-mode="repeat">Repeat 起步</button>
+          <button class="${starter.mode === "interview" ? "active" : ""}" data-starter-mode="interview">Interview Scaffold</button>
+          <button class="${starter.mode === "repeat" ? "active" : ""}" data-starter-mode="repeat">Repeat Scaffold</button>
         </div>
         <div class="starter-step-list">
           ${steps.map((item, index) => `
@@ -184,11 +184,11 @@ function renderStarterView() {
         </div>
         <div class="mini-stats">
           <div class="mini-stat">
-            <span>今日完成</span>
+            <span>Completed Today</span>
             <strong>${completedToday}</strong>
           </div>
           <div class="mini-stat">
-            <span>当前台阶</span>
+            <span>Current Step</span>
             <strong>${starter.step}/4</strong>
           </div>
         </div>
@@ -208,15 +208,15 @@ function renderStarterView() {
               <p class="prompt-note">${escapeHtml(step.promptNote)}</p>
             </div>
             <div class="question-actions">
-              ${isRepeat && starter.step === 4 ? `<button class="ghost-button" data-starter-show-sentence="true"><span class="button-icon">Aa</span>${state.showSentence ? "隐藏原句" : "显示原句"}</button>` : ""}
-              <button class="ghost-button" data-play-prompt="true"><span class="button-icon">▶</span>${isRepeat ? "播放句子" : "朗读题目"}</button>
-              <button class="ghost-button" data-starter-new-question="true"><span class="button-icon">↻</span>换一题</button>
+              ${isRepeat && starter.step === 4 ? `<button class="ghost-button" data-starter-show-sentence="true"><span class="button-icon">Aa</span>${state.showSentence ? "Hide Sentence" : "Show Sentence"}</button>` : ""}
+              <button class="ghost-button" data-play-prompt="true"><span class="button-icon">▶</span>${isRepeat ? "Play Sentence" : "Read Prompt"}</button>
+              <button class="ghost-button" data-starter-new-question="true"><span class="button-icon">↻</span>New Prompt</button>
             </div>
           </div>
 
           <div class="starter-mission">
             <div>
-              <span class="badge">本步目标</span>
+              <span class="badge">Step Goal</span>
               <h3>${escapeHtml(step.title)}</h3>
               <p>${escapeHtml(step.mission)}</p>
             </div>
@@ -230,7 +230,7 @@ function renderStarterView() {
 
           <div class="control-band">
             <div class="record-control">
-              <button class="record-button ${state.isRecording && state.recordingTarget === "starter" ? "recording" : ""}" data-starter-record-toggle="true" aria-label="${state.isRecording ? "停止录音" : "开始录音"}">
+              <button class="record-button ${state.isRecording && state.recordingTarget === "starter" ? "recording" : ""}" data-starter-record-toggle="true" aria-label="${state.isRecording ? "Stop Recording" : "Start Recording"}">
                 <span class="record-dot"></span>
               </button>
               <span class="timer" id="timer">${formatTime(state.elapsed)}</span>
@@ -239,12 +239,12 @@ function renderStarterView() {
               <div class="control-actions">
                 <button class="primary-button" data-starter-record-toggle="true">
                   <span class="button-icon">${state.isRecording && state.recordingTarget === "starter" ? "■" : "●"}</span>
-                  ${state.isRecording && state.recordingTarget === "starter" ? "停止录音" : "开始录音"}
+                  ${state.isRecording && state.recordingTarget === "starter" ? "Stop Recording" : "Start Recording"}
                 </button>
-                <button class="tool-button" data-analyze-starter="true"><span class="button-icon">✓</span>分析这一步</button>
-                <button class="tool-button" data-clear-starter="true"><span class="button-icon">×</span>清空本步</button>
-                ${starter.feedback && starter.step < 4 ? `<button class="tool-button" data-starter-next-step="true"><span class="button-icon">→</span>下一步</button>` : ""}
-                ${starter.feedback && starter.step === 4 ? `<button class="tool-button" data-starter-to-practice="true"><span class="button-icon">→</span>去练习台完整练</button>` : ""}
+                <button class="tool-button" data-analyze-starter="true"><span class="button-icon">✓</span>Check Step</button>
+                <button class="tool-button" data-clear-starter="true"><span class="button-icon">×</span>Clear Step</button>
+                ${starter.feedback && starter.step < 4 ? `<button class="tool-button" data-starter-next-step="true"><span class="button-icon">→</span>Next Step</button>` : ""}
+                ${starter.feedback && starter.step === 4 ? `<button class="tool-button" data-starter-to-practice="true"><span class="button-icon">→</span>Open in Studio</button>` : ""}
               </div>
               <div class="status-line">
                 <span class="status-dot ${state.isRecording && state.recordingTarget === "starter" ? "recording" : starter.feedback ? "done" : "ready"}"></span>
@@ -255,8 +255,8 @@ function renderStarterView() {
           </div>
 
           <div class="transcript-area">
-            <label for="starterTranscriptInput">你的回答</label>
-            <textarea id="starterTranscriptInput" placeholder="${SpeechRecognitionApi ? "录音时会自动生成，也可以手动修改。" : "当前浏览器不支持自动识别，请手动输入你刚才说的内容。"}">${escapeHtml(state.transcript)}</textarea>
+            <label for="starterTranscriptInput">Your Response Transcript</label>
+            <textarea id="starterTranscriptInput" placeholder="${SpeechRecognitionApi ? "Auto-transcribed while recording, or type/edit your response manually." : "Browser speech recognition is unavailable; please type what you said manually."}">${escapeHtml(state.transcript)}</textarea>
           </div>
         </section>
         ${renderStarterFeedback()}
@@ -271,7 +271,7 @@ function renderStarterScaffold(step) {
   return `
     <section class="starter-scaffold ${step.scaffoldType || ""}">
       <div class="section-title-row">
-        <h3>${escapeHtml(step.scaffoldTitle || "本步扶手")}</h3>
+        <h3>${escapeHtml(step.scaffoldTitle || "Step Scaffold")}</h3>
         <span class="badge">${escapeHtml(step.interactionLabel)}</span>
       </div>
       <div class="starter-scaffold-grid">
@@ -292,7 +292,7 @@ function renderStarterFeedback() {
   if (!feedback) {
     return `
       <section class="feedback-board starter-feedback">
-        <div class="empty-feedback">完成本步录音或输入后，系统只检查当前小目标，不会调用 AI。</div>
+        <div class="empty-feedback">Record or enter your response for this step. Only the current micro-goal is evaluated locally (no external AI calls).</div>
       </section>
     `;
   }
@@ -320,7 +320,7 @@ function renderStarterFeedback() {
       </div>
       ${feedback.fullFeedback ? `
         <section class="feedback-section wide-section">
-          <h3>完整题本地评分</h3>
+          <h3>Full Prompt Local Evaluation</h3>
           <p class="compact-copy">${escapeHtml(feedback.fullFeedback.summary)}</p>
           ${feedback.fullFeedback.confidence ? renderScoringConfidence(feedback.fullFeedback.confidence) : ""}
           ${feedback.fullFeedback.detailScores ? renderScoreBreakdown(feedback.fullFeedback.detailScores) : ""}
@@ -337,20 +337,20 @@ function renderMiniStats() {
   return `
     <div class="mini-stats">
       <div class="mini-stat">
-        <span>复述均分</span>
+        <span>Repeat Avg</span>
         <strong>${averageScore(repeatItems) || "-"}</strong>
       </div>
       <div class="mini-stat">
-        <span>问答均分</span>
+        <span>Interview Avg</span>
         <strong>${averageScore(interviewItems) || "-"}</strong>
       </div>
       <div class="mini-stat">
-        <span>最近题数</span>
+        <span>Recent Items</span>
         <strong>${history.slice(0, 10).length}</strong>
       </div>
       <div class="mini-stat">
-        <span>连续目标</span>
-        <strong>${history.length ? "再练" : "开始"}</strong>
+        <span>Action</span>
+        <strong>${history.length ? "Practice" : "Start"}</strong>
       </div>
     </div>
   `;
@@ -411,7 +411,7 @@ function renderLadderView() {
           </div>
           ${state.setup.coach?.enabled ? `
             <div class="coach-inline-actions">
-              <button class="primary-button" data-start-coach-ladder="true"><span class="button-icon">◎</span>用 Coach 练这个 Fix</button>
+              <button class="primary-button" data-start-coach-ladder="true"><span class="button-icon">◎</span>Practice Fix with Coach</button>
             </div>
           ` : ""}
         </section>
@@ -424,9 +424,9 @@ function renderLadderView() {
         <div class="history-top">
           <div>
             <h3>Today's Ladder</h3>
-            <p class="compact-copy">按顺序练：热身、核心任务、补弱、检查点。每题评分后会自动更新阶梯。</p>
+            <p class="compact-copy">Follow the sequence: Warm-up, Core Task, Weakness Fix, and Checkpoint. Your Ladder rank updates automatically after each scored item.</p>
           </div>
-          <button class="ghost-button" data-reset-ladder-plan="true"><span class="button-icon">↻</span>换一组</button>
+          <button class="ghost-button" data-reset-ladder-plan="true"><span class="button-icon">↻</span>Regenerate Plan</button>
         </div>
         <div class="ladder-plan">
           ${plan.tasks
@@ -439,9 +439,9 @@ function renderLadderView() {
         <div class="history-top">
           <div>
             <h3>Level Control</h3>
-            <p class="compact-copy">想重新定位水平，可以重做 6 题诊断。</p>
+            <p class="compact-copy">Want to recalibrate your placement level? Retake the 6-item diagnostic anytime.</p>
           </div>
-          <button class="danger-button" data-reset-ladder="true"><span class="button-icon">×</span>重置 Ladder</button>
+          <button class="danger-button" data-reset-ladder="true"><span class="button-icon">×</span>Reset Ladder</button>
         </div>
       </section>
     </section>
@@ -464,7 +464,7 @@ function renderLadderDiagnostic(profile) {
             <span class="badge blue">Diagnostic</span>
           </div>
           <h2>Start From Your Real Level</h2>
-          <p>先做 6 题短诊断：3 道复述 + 3 道问答。系统会根据稳定表现分配等级和第一阶段训练。</p>
+          <p>Complete a 6-item diagnostic (3 Listen & Repeat + 3 Interview questions). The engine assigns your starting Ladder tier and training focus.</p>
         </div>
         <div class="ladder-score">
           <span>Progress</span>
@@ -475,7 +475,7 @@ function renderLadderDiagnostic(profile) {
       <section class="feedback-section wide-section">
         <h3>${active ? "Continue Diagnostic" : "Diagnostic Set"}</h3>
         <p class="compact-copy">
-          ${active && currentQuestion ? `下一题：${escapeHtml(currentQuestion.text)}` : "诊断会从简单题开始，逐步覆盖中等和高难题。"}
+          ${active && currentQuestion ? `Next Prompt: ${escapeHtml(currentQuestion.text)}` : "The diagnostic starts with accessible items and scales up to medium and challenging prompts."}
         </p>
         <div class="summary-grid">
           <div class="summary-tile"><span>Repeat</span><strong>3</strong></div>
@@ -485,9 +485,9 @@ function renderLadderDiagnostic(profile) {
         </div>
         <div class="control-actions" style="margin-top: 16px">
           <button class="primary-button" data-ladder-diagnostic-next="true">
-            <span class="button-icon">▶</span>${active ? "继续诊断" : "开始诊断"}
+            <span class="button-icon">▶</span>${active ? "Resume Diagnostic" : "Start Diagnostic"}
           </button>
-          ${active ? `<button class="ghost-button" data-reset-ladder="true"><span class="button-icon">×</span>重新开始</button>` : ""}
+          ${active ? `<button class="ghost-button" data-reset-ladder="true"><span class="button-icon">×</span>Restart</button>` : ""}
         </div>
       </section>
     </section>
@@ -509,7 +509,7 @@ function renderLadderTask(task, index) {
         <p class="compact-copy">${question ? escapeHtml(question.text) : "Question will be selected when you start."}</p>
       </div>
       <button class="${task.completed ? "ghost-button" : "small-button"}" data-ladder-plan-index="${index}">
-        ${task.completed ? "再练" : "开始"}
+        ${task.completed ? "Redo" : "Start"}
       </button>
     </article>
   `;
@@ -519,7 +519,7 @@ function renderPracticeCard(isFullRun) {
   const question = getActiveQuestion(isFullRun);
   const isRepeat = question.type === "repeat";
   const examLocked = isFullRun && state.full.examMode;
-  const text = isRepeat && !state.showSentence ? "播放句子后复述，完成后再显示原句。" : question.text;
+  const text = isRepeat && !state.showSentence ? "Click Play to hear the prompt and repeat it verbatim. Reveal the sentence afterward to compare." : question.text;
   const difficultyClass = question.difficulty === "Hard" ? "orange" : question.difficulty === "Medium" ? "blue" : "";
   const fullProgress = isFullRun ? renderFullProgress() : "";
 
@@ -537,19 +537,19 @@ function renderPracticeCard(isFullRun) {
             ${escapeHtml(text)}
           </h2>
           <p class="prompt-note">
-            ${isRepeat ? escapeHtml(question.focus) : "建议 35-60 秒：直接回答、给理由、给例子、收束观点。"}
+            ${isRepeat ? escapeHtml(question.focus) : "Target 35–60s: State your claim directly, give a clear reason, add a concrete example, and wrap up."}
           </p>
         </div>
         <div class="question-actions">
-          ${isRepeat && !examLocked ? `<button class="ghost-button" data-show-sentence="true"><span class="button-icon">Aa</span>${state.showSentence ? "隐藏原句" : "显示原句"}</button>` : ""}
-          <button class="ghost-button" data-play-prompt="true"><span class="button-icon">▶</span>${isRepeat ? "播放" : "朗读题目"}</button>
-          ${!examLocked ? `<button class="ghost-button" data-next-question="true"><span class="button-icon">↻</span>${isFullRun ? "换本题" : "下一题"}</button>` : ""}
+          ${isRepeat && !examLocked ? `<button class="ghost-button" data-show-sentence="true"><span class="button-icon">Aa</span>${state.showSentence ? "Hide Sentence" : "Show Sentence"}</button>` : ""}
+          <button class="ghost-button" data-play-prompt="true"><span class="button-icon">▶</span>${isRepeat ? "Play Audio" : "Read Prompt"}</button>
+          ${!examLocked ? `<button class="ghost-button" data-next-question="true"><span class="button-icon">↻</span>${isFullRun ? "Swap Item" : "Next Prompt"}</button>` : ""}
         </div>
       </div>
 
       <div class="control-band">
         <div class="record-control">
-          <button class="record-button ${state.isRecording ? "recording" : ""}" data-record-toggle="true" aria-label="${state.isRecording ? "停止录音" : "开始录音"}">
+          <button class="record-button ${state.isRecording ? "recording" : ""}" data-record-toggle="true" aria-label="${state.isRecording ? "Stop Recording" : "Start Recording"}">
             <span class="record-dot"></span>
           </button>
           <span class="timer" id="timer">${formatTime(state.elapsed)}</span>
@@ -558,11 +558,11 @@ function renderPracticeCard(isFullRun) {
           <div class="control-actions">
             <button class="primary-button" data-record-toggle="true">
               <span class="button-icon">${state.isRecording ? "■" : "●"}</span>
-              ${state.isRecording ? "停止录音" : "开始录音"}
+              ${state.isRecording ? "Stop Recording" : "Start Recording"}
             </button>
-            <button class="tool-button" data-analyze="true"><span class="button-icon">✓</span>分析</button>
-            <button class="tool-button" data-clear-current="true"><span class="button-icon">×</span>清空</button>
-            ${isFullRun && state.feedback ? `<button class="tool-button" data-full-next="true"><span class="button-icon">→</span>${state.full.index === state.full.sequence.length - 1 ? "完成" : "下一题"}</button>` : ""}
+            <button class="tool-button" data-analyze="true"><span class="button-icon">✓</span>Analyze</button>
+            <button class="tool-button" data-clear-current="true"><span class="button-icon">×</span>Clear</button>
+            ${isFullRun && state.feedback ? `<button class="tool-button" data-full-next="true"><span class="button-icon">→</span>${state.full.index === state.full.sequence.length - 1 ? "Finish Run" : "Next Item"}</button>` : ""}
           </div>
           <div class="status-line">
             <span class="status-dot ${state.isRecording ? "recording" : state.feedback ? "done" : "ready"}"></span>
@@ -573,8 +573,8 @@ function renderPracticeCard(isFullRun) {
       </div>
 
       <div class="transcript-area">
-        <label for="transcriptInput">转写文本</label>
-        <textarea id="transcriptInput" placeholder="${SpeechRecognitionApi ? "录音时会自动生成，也可以手动修改。" : "当前浏览器不支持自动识别，请在这里输入你刚才说的内容。"}">${escapeHtml(state.transcript)}</textarea>
+        <label for="transcriptInput">Response Transcript</label>
+        <textarea id="transcriptInput" placeholder="${SpeechRecognitionApi ? "Auto-transcribed while recording, or type/edit your response manually." : "Browser speech recognition is unavailable; please type your spoken response here."}">${escapeHtml(state.transcript)}</textarea>
       </div>
     </section>
   `;
@@ -586,8 +586,8 @@ function renderFullProgress() {
   const percent = total ? Math.round((state.full.index / total) * 100) : 0;
   return `
     <div class="badge-row">
-      <span class="badge violet">完整练习 ${current}/${total}</span>
-      <span class="badge blue">约 8 分钟</span>
+      <span class="badge violet">Full Sim ${current}/${total}</span>
+      <span class="badge blue">~8 Min</span>
     </div>
     <div class="progress-track" aria-label="Full practice progress">
       <div class="progress-fill" style="width: ${percent}%"></div>
@@ -600,7 +600,7 @@ function renderFeedback() {
   if (!state.feedback) {
     return `
       <section class="feedback-board">
-        <div class="empty-feedback">${state.isScoring ? "正在生成评分报告，外部 API 可能需要几秒。" : "完成录音后，这里会显示分数、问题诊断和复练建议。"}</div>
+        <div class="empty-feedback">${state.isScoring ? "Generating diagnostic report (external APIs may take a few seconds)..." : "Record and analyze a response to view your band score, rubric breakdown, and targeted retake advice."}</div>
       </section>
     `;
   }
@@ -609,7 +609,7 @@ function renderFeedback() {
   const meterWidth = Math.max(0, Math.min(100, Math.round((feedback.score / 6) * 100)));
   return `
     <section class="feedback-board">
-      <h2>本次反馈</h2>
+      <h2>Diagnostic Feedback</h2>
       <p class="compact-copy">${escapeHtml(feedback.summary)}</p>
       ${feedback.confidence ? renderScoringConfidence(feedback.confidence) : ""}
       <div class="feedback-grid">
@@ -631,11 +631,11 @@ function renderFeedback() {
         </aside>
         <div class="feedback-columns">
           <section class="feedback-section">
-            <h3>做得好的地方</h3>
+            <h3>Key Strengths</h3>
             <ul>${feedback.strengths.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
           </section>
           <section class="feedback-section">
-            <h3>优先修正</h3>
+            <h3>Priority Fixes</h3>
             <ul>${feedback.issues.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
           </section>
           ${feedback.detailScores ? renderScoreBreakdown(feedback.detailScores) : ""}
@@ -645,7 +645,7 @@ function renderFeedback() {
           ${feedback.pronunciation ? renderPronunciationSection(feedback.pronunciation) : ""}
           ${feedback.alignment ? renderDiffSection(feedback.alignment) : ""}
           <section class="feedback-section wide-section">
-            <h3>${feedback.type === "repeat" ? "下一遍怎么练" : "示范升级答案"}</h3>
+            <h3>${feedback.type === "repeat" ? "How to Improve Next Attempt" : "Model Upgraded Response"}</h3>
             <p class="upgrade-answer">${escapeHtml(feedback.improvedAnswer)}</p>
           </section>
         </div>
@@ -664,12 +664,12 @@ function renderCoachEntryFromFeedback() {
       <div>
         <div class="badge-row">
           <span class="badge violet">Coach Capsule</span>
-          <span class="badge">${aiReady ? "AI 深度复练可用" : "Basic 本地复练"}</span>
+          <span class="badge">${aiReady ? "AI Deep Coach Ready" : "Local Rule Coach"}</span>
         </div>
-        <h3>想知道下一遍具体怎么改？</h3>
-        <p class="compact-copy">Coach 会把这次回答拆成一个小练习，并让你重答一次看变化。没配置 API 时走 Basic 本地规则；开启 AI 后会用你的 Setup 配置生成更细诊断。</p>
+        <h3>Want a targeted micro-drill for your retake?</h3>
+        <p class="compact-copy">Coach isolates your single highest-leverage weakness, builds a focused micro-drill, and compares your retake against your first attempt.</p>
       </div>
-      <button class="primary-button" data-start-coach-current="true"><span class="button-icon">◎</span>让 Coach 拆解这题</button>
+      <button class="primary-button" data-start-coach-current="true"><span class="button-icon">◎</span>Launch Coach Capsule</button>
     </section>
   `;
 }
@@ -687,10 +687,10 @@ function renderCoachCapsule() {
             <span class="badge blue">${escapeHtml(modeLabel)}</span>
             <span class="badge">${escapeHtml(coach.source || "practice")}</span>
           </div>
-          <h2>从反馈到行动</h2>
-          <p class="compact-copy">一次只抓一个主要问题：诊断 → 小练习 → 重答 → 对比。</p>
+          <h2>From Feedback to Action</h2>
+          <p class="compact-copy">Target one primary bottleneck at a time: Diagnose → Micro-Drill → Retake → Compare.</p>
         </div>
-        <button class="ghost-button" data-coach-reset="true"><span class="button-icon">×</span>收起 Coach</button>
+        <button class="ghost-button" data-coach-reset="true"><span class="button-icon">×</span>Close Coach</button>
       </div>
       ${renderCoachStepper(coach.phase)}
       ${coach.error ? `<div class="coach-alert">${escapeHtml(coach.error)}</div>` : ""}
@@ -727,7 +727,7 @@ function renderCoachDiagnosis() {
     return `
       <section class="coach-card coach-diagnosis">
         <h3>Step 1 · Diagnosis</h3>
-        <p class="upgrade-answer">Coach 正在读取题目、转写、本地评分、音频指标和最近弱项。</p>
+        <p class="upgrade-answer">Coach is analyzing the prompt, transcript, rubric scores, audio telemetry, and recent weakness history...</p>
       </section>
     `;
   }
@@ -740,7 +740,7 @@ function renderCoachDiagnosis() {
         <span class="badge orange">${escapeHtml(weaknessLabel)}</span>
       </div>
       <p class="upgrade-answer">${escapeHtml(coach.diagnosis.mainDiagnosis)}</p>
-      <h4>为什么这么判断</h4>
+      <h4>Diagnostic Evidence</h4>
       <ul class="coach-evidence">
         ${(coach.diagnosis.evidence || []).slice(0, 4).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
       </ul>
@@ -767,7 +767,7 @@ function renderCoachDrill() {
       </div>
       ${coach.phase === "drill-ready" ? `
         <div class="control-actions">
-          <button class="primary-button" data-start-coach-retake="true"><span class="button-icon">●</span>开始 Coach 重答</button>
+          <button class="primary-button" data-start-coach-retake="true"><span class="button-icon">●</span>Start Coach Retake</button>
         </div>
       ` : ""}
     </section>
@@ -784,25 +784,25 @@ function renderCoachRetake() {
     <section class="coach-card">
       <div class="section-title-row">
         <h3>Step 3 · Retake</h3>
-        <span class="badge">${retakeText ? `${normalizeWords(retakeText).length} words` : "等待重答"}</span>
+        <span class="badge">${retakeText ? `${normalizeWords(retakeText).length} words` : "Awaiting Retake"}</span>
       </div>
       <div class="recorder-row compact-recorder">
         <div class="timer">${formatTime(isCoachRecording ? state.elapsed : coach.retake.duration || 0)}</div>
         <button class="record-button ${isCoachRecording ? "recording" : ""}" data-coach-record-toggle="true" ${recordingBlocked ? "disabled" : ""} aria-label="Coach retake record">
           <span class="record-dot"></span>
-          <span>${isCoachRecording ? "停止录音" : "录 Coach 重答"}</span>
+          <span>${isCoachRecording ? "Stop Recording" : "Record Coach Retake"}</span>
         </button>
         <div class="control-actions">
-          <button class="primary-button" data-analyze-coach-retake="true" ${coach.phase === "reflecting" ? "disabled" : ""}><span class="button-icon">✓</span>分析重答</button>
-          <button class="ghost-button" data-start-coach-retake="true"><span class="button-icon">↻</span>重新重答</button>
+          <button class="primary-button" data-analyze-coach-retake="true" ${coach.phase === "reflecting" ? "disabled" : ""}><span class="button-icon">✓</span>Analyze Retake</button>
+          <button class="ghost-button" data-start-coach-retake="true"><span class="button-icon">↻</span>Redo Retake</button>
         </div>
       </div>
       ${coach.retake.audioUrl ? `<audio class="audio-player" controls src="${coach.retake.audioUrl}"></audio>` : ""}
       <label class="transcript-box">
-        <span>Coach 重答转写</span>
-        <textarea id="coachTranscriptInput" placeholder="${SpeechRecognitionApi ? "录音时会自动生成，也可以手动修改。" : "当前浏览器不支持自动识别，请在这里输入 Coach 重答内容。"}">${escapeHtml(coach.retake.transcript)}</textarea>
+        <span>Coach Retake Transcript</span>
+        <textarea id="coachTranscriptInput" placeholder="${SpeechRecognitionApi ? "Auto-transcribed while recording, or type/edit your response manually." : "Browser speech recognition is unavailable; please enter your Coach retake transcript here."}">${escapeHtml(coach.retake.transcript)}</textarea>
       </label>
-      ${coach.phase === "reflecting" ? `<p class="compact-copy">Coach 正在比较第一遍和第二遍。</p>` : ""}
+      ${coach.phase === "reflecting" ? `<p class="compact-copy">Coach is comparing your initial attempt against your retake...</p>` : ""}
     </section>
   `;
 }
@@ -814,16 +814,16 @@ function renderCoachReflection() {
     <section class="coach-card coach-reflection">
       <div class="section-title-row">
         <h3>Step 4 · Reflection</h3>
-        <span class="badge ${coach.reflection.improved ? "blue" : "orange"}">${coach.reflection.improved ? "有明显改进" : "还需要一遍"}</span>
+        <span class="badge ${coach.reflection.improved ? "blue" : "orange"}">${coach.reflection.improved ? "Clear Improvement" : "Needs Another Pass"}</span>
       </div>
       <div class="coach-before-after">
         <div>
           <h4>Before</h4>
-          <p>${escapeHtml(coach.original.transcript || "暂无第一遍文本")}</p>
+          <p>${escapeHtml(coach.original.transcript || "No first-attempt transcript")}</p>
         </div>
         <div>
           <h4>After</h4>
-          <p>${escapeHtml(coach.retake.transcript || "暂无重答文本")}</p>
+          <p>${escapeHtml(coach.retake.transcript || "No retake transcript")}</p>
         </div>
       </div>
       <p class="upgrade-answer">${escapeHtml(coach.reflection.improvementSummary)}</p>
@@ -841,14 +841,14 @@ function renderCoachReflection() {
 function renderCoachProfileSummary(profile = loadCoachProfile()) {
   const weakness = profile.primaryWeakness
     ? getWeaknessLabel(profile.primaryWeakness, profile.primaryWeakness in REPEAT_WEAKNESSES ? "repeat" : "interview")
-    : "还没有稳定弱项";
+    : "No recurring bottleneck yet";
   const drill = DRILL_LIBRARY[profile.currentDrill] || DRILL_LIBRARY["example-builder"];
   return `
     <section class="feedback-section wide-section coach-profile-summary">
       <div class="history-top">
         <div>
           <h3>Coach Profile</h3>
-          <p class="compact-copy">长期记忆只存在当前浏览器。Basic 会记录弱项和复练结果；AI 只在你开启 Setup 后用于生成更细诊断。</p>
+          <p class="compact-copy">Long-term progress is stored locally in your browser. Basic mode tracks recurring bottlenecks and retake gains automatically.</p>
         </div>
         <div class="coach-profile-chip">
           <span>${escapeHtml(weakness)}</span>
@@ -858,7 +858,7 @@ function renderCoachProfileSummary(profile = loadCoachProfile()) {
       <div class="item-meta">
         <span class="badge violet">${escapeHtml(profile.levelHint || "L?")}</span>
         <span class="badge blue">${escapeHtml(drill.label)}</span>
-        <span class="badge orange">${escapeHtml(profile.currentCoachGoal || "完成一次 Coach 重答后生成目标")}</span>
+        <span class="badge orange">${escapeHtml(profile.currentCoachGoal || "Complete one Coach retake to establish your current goal")}</span>
       </div>
     </section>
   `;
@@ -869,13 +869,13 @@ function renderScoringConfidence(confidence) {
   return `
     <section class="feedback-section wide-section confidence-section">
       <div class="section-title-row">
-        <h3>评分可信度</h3>
+        <h3>Scoring Confidence</h3>
         <span class="badge ${confidence.level === "high" ? "blue" : confidence.level === "medium" ? "orange" : ""}">${escapeHtml(confidence.label)}</span>
       </div>
-      <div class="confidence-meter" aria-label="评分可信度">
+      <div class="confidence-meter" aria-label="Scoring Confidence">
         <div style="width: ${Math.round((confidence.score || 0) * 100)}%"></div>
       </div>
-      <p class="compact-copy">${escapeHtml(confidence.note || "本地评分是模拟训练反馈，不等同 ETS 官方评分。")}</p>
+      <p class="compact-copy">${escapeHtml(confidence.note || "Local scoring provides simulated training diagnostics and is not an official ETS score.")}</p>
       <div class="item-meta">
         ${signals.map((item) => `<span class="badge">${escapeHtml(item)}</span>`).join("")}
       </div>
@@ -891,7 +891,7 @@ function renderScoringConfidence(confidence) {
 function renderDiffSection(alignment) {
   return `
     <section class="feedback-section wide-section">
-      <h3>原句对比</h3>
+      <h3>Verbatim Alignment</h3>
       <div class="diff-line">
         ${alignment
           .map((token) => {
@@ -909,7 +909,7 @@ function renderDiffSection(alignment) {
 function renderScoreBreakdown(detailScores) {
   return `
     <section class="feedback-section wide-section">
-      <h3>评分细目</h3>
+      <h3>Rubric Breakdown</h3>
       <div class="score-breakdown">
         ${detailScores
           .map(
@@ -935,7 +935,7 @@ function renderScoreBreakdown(detailScores) {
 function renderRubricProfile(rubricProfile) {
   return `
     <section class="feedback-section wide-section">
-      <h3>考试权重</h3>
+      <h3>Rubric Weights</h3>
       <div class="rubric-grid">
         ${rubricProfile
           .map(
@@ -956,10 +956,10 @@ function renderRubricProfile(rubricProfile) {
 function renderAttemptComparison(comparison) {
   return `
     <section class="feedback-section wide-section">
-      <h3>复练对比</h3>
+      <h3>Retry Comparison</h3>
       <div class="comparison-grid">
         <div class="comparison-score ${comparison.delta >= 0 ? "up" : "down"}">
-          <span>相对上次</span>
+          <span>vs. Previous Attempt</span>
           <strong>${comparison.delta >= 0 ? "+" : ""}${comparison.delta}</strong>
         </div>
         <div>
@@ -977,14 +977,14 @@ function renderExternalAiSection(externalAi) {
   const dimensions = Object.entries(externalAi.dimensionScores || {}).slice(0, 8);
   return `
     <section class="feedback-section wide-section">
-      <h3>AI 评分增强</h3>
+      <h3>AI Evaluation Enhancement</h3>
       <div class="external-grid">
         <div class="pron-tile">
-          <span>AI 分数</span>
+          <span>AI Band</span>
           <strong>${externalAi.score ? `${externalAi.score}/6` : "-"}</strong>
         </div>
         <div class="external-copy">
-          <p class="upgrade-answer">${escapeHtml(externalAi.summary || "AI 已返回评分补充。")}</p>
+          <p class="upgrade-answer">${escapeHtml(externalAi.summary || "AI evaluation insights received.")}</p>
           ${externalAi.grammarNotes && externalAi.grammarNotes.length ? `
             <ul class="pron-notes">
               ${externalAi.grammarNotes.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
@@ -1004,19 +1004,19 @@ function renderExternalAiSection(externalAi) {
 function renderPronunciationSection(pronunciation) {
   const stats = pronunciation.audioStats || {};
   const statsItems = [
-    ["本地可理解度代理", `${Math.round(pronunciation.score * 100)}%`],
-    ["识别置信", `${Math.round(pronunciation.confidence * 100)}%`],
-    ["录音质量", `${Math.round(pronunciation.audioQuality * 100)}%`],
-    ["停顿控制", `${Math.round(pronunciation.pauseControl * 100)}%`],
-    ["发声语速", pronunciation.articulationRate ? `${pronunciation.articulationRate} WPM` : "-"],
-    ["最长停顿", stats.available ? `${stats.longestSilence.toFixed(1)}s` : "-"],
-    ["静音占比", stats.available ? `${Math.round(stats.silenceRatio * 100)}%` : "-"],
-    ["估算 SNR", stats.available ? `${Math.round(stats.snrDb)} dB` : "-"]
+    ["Intelligibility Proxy", `${Math.round(pronunciation.score * 100)}%`],
+    ["ASR Confidence", `${Math.round(pronunciation.confidence * 100)}%`],
+    ["Audio Quality", `${Math.round(pronunciation.audioQuality * 100)}%`],
+    ["Pause Control", `${Math.round(pronunciation.pauseControl * 100)}%`],
+    ["Articulation Rate", pronunciation.articulationRate ? `${pronunciation.articulationRate} WPM` : "-"],
+    ["Longest Pause", stats.available ? `${stats.longestSilence.toFixed(1)}s` : "-"],
+    ["Silence Ratio", stats.available ? `${Math.round(stats.silenceRatio * 100)}%` : "-"],
+    ["Estimated SNR", stats.available ? `${Math.round(stats.snrDb)} dB` : "-"]
   ];
 
   return `
     <section class="feedback-section wide-section">
-      <h3>本地可理解度与音频诊断</h3>
+      <h3>Intelligibility & Acoustic Telemetry</h3>
       <div class="pron-grid">
         ${statsItems
           .map(
@@ -1034,8 +1034,8 @@ function renderPronunciationSection(pronunciation) {
       </ul>
       ${pronunciation.external ? renderExternalPronunciation(pronunciation.external) : ""}
       ${pronunciation.phonemeFocus && pronunciation.phonemeFocus.length ? `
-        <h4 class="subsection-title">疑似音素训练点</h4>
-        <p class="compact-copy">Basic 本地模式只给出练习靶点，不等同真正逐音素评分；外部 API 返回的 phoneme score 会优先显示在这里。</p>
+        <h4 class="subsection-title">Targeted Phoneme & Sound Focus</h4>
+        <p class="compact-copy">Basic mode identifies high-value pronunciation targets from transcript alignment; external phoneme API scores take priority when configured.</p>
         <div class="phoneme-list">
           ${pronunciation.phonemeFocus
             .map(
@@ -1065,7 +1065,7 @@ function renderExternalPronunciation(external) {
   ];
   return `
     <div class="external-pron">
-      <h4 class="subsection-title">外部发音 / 逐音素评分</h4>
+      <h4 class="subsection-title">External Phoneme Assessment</h4>
       <div class="pron-grid">
         ${stats
           .map(
@@ -1097,10 +1097,10 @@ function renderFullRunView() {
       <section class="full-run-board">
         <div class="full-setup">
           <div>
-            <h2>完整练习</h2>
-            <p class="compact-copy">一次完成 11 题：6 道复述，5 道面试问答。考试模式会自动朗读题目，锁定换题和显示原句。</p>
+            <h2>Full 11-Item Simulation</h2>
+            <p class="compact-copy">Complete a full 11-item speaking set: 6 Listen & Repeat items followed by 5 Interview prompts. Exam mode auto-plays audio and locks sentence reveals.</p>
           </div>
-          <button class="primary-button" data-start-full="true"><span class="button-icon">▶</span>开始完整练习</button>
+          <button class="primary-button" data-start-full="true"><span class="button-icon">▶</span>Start Full Simulation</button>
         </div>
         ${renderFullTips()}
       </section>
@@ -1119,20 +1119,20 @@ function renderFullTips() {
   return `
     <div class="summary-grid">
       <div class="summary-tile">
-        <span>题量</span>
+        <span>Items</span>
         <strong>11</strong>
       </div>
       <div class="summary-tile">
-        <span>复述</span>
+        <span>Repeat</span>
         <strong>6</strong>
       </div>
       <div class="summary-tile">
-        <span>问答</span>
+        <span>Interview</span>
         <strong>5</strong>
       </div>
       <div class="summary-tile">
-        <span>保存</span>
-        <strong>本地</strong>
+        <span>Storage</span>
+        <strong>Local</strong>
       </div>
     </div>
   `;
@@ -1149,20 +1149,20 @@ function renderFullSummary() {
     <section class="full-run-board">
       <div class="history-top">
         <div>
-          <h2>本轮总结</h2>
-          <p class="compact-copy">平均分 ${avg || "-"}。下一轮建议优先重练分数最低的两题。</p>
+          <h2>Simulation Summary</h2>
+          <p class="compact-copy">Average Band: ${avg || "-"}. Prioritize retaking your two lowest-scoring prompts in the next session.</p>
         </div>
-        <button class="primary-button" data-start-full="true"><span class="button-icon">↻</span>再来一轮</button>
+        <button class="primary-button" data-start-full="true"><span class="button-icon">↻</span>Start New Simulation</button>
       </div>
       <div class="summary-grid">
-        <div class="summary-tile"><span>总均分</span><strong>${avg || "-"}</strong></div>
-        <div class="summary-tile"><span>复述均分</span><strong>${repeatAvg || "-"}</strong></div>
-        <div class="summary-tile"><span>问答均分</span><strong>${interviewAvg || "-"}</strong></div>
-        <div class="summary-tile"><span>完成题数</span><strong>${results.length}</strong></div>
+        <div class="summary-tile"><span>Overall Avg</span><strong>${avg || "-"}</strong></div>
+        <div class="summary-tile"><span>Repeat Avg</span><strong>${repeatAvg || "-"}</strong></div>
+        <div class="summary-tile"><span>Interview Avg</span><strong>${interviewAvg || "-"}</strong></div>
+        <div class="summary-tile"><span>Completed</span><strong>${results.length}</strong></div>
       </div>
       <section class="feedback-section" style="margin-top: 16px">
-        <h3>下次优先修正</h3>
-        <ul>${(commonIssues.length ? commonIssues : ["继续保持完整回答，并在每题结束后立刻复练一次。"]).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        <h3>Priority Action Items</h3>
+        <ul>${(commonIssues.length ? commonIssues : ["Keep delivering complete responses and perform an immediate retake after each prompt."]).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
       </section>
     </section>
   `;
@@ -1174,19 +1174,19 @@ function renderBankView() {
     <section>
       <div class="history-top">
         <div>
-          <h2>题库</h2>
-          <p class="compact-copy">现在共有 ${QUESTION_BANK.repeat.length + QUESTION_BANK.interview.length} 道仿真题。题目基于 ETS 公开题型说明原创编写，不包含泄露考场题。</p>
+          <h2>Simulation Prompt Bank</h2>
+          <p class="compact-copy">Browse all ${QUESTION_BANK.repeat.length + QUESTION_BANK.interview.length} original prompts modeled on public ETS task descriptions. No leaked exam content is included.</p>
         </div>
-        <button class="primary-button" data-random-bank="true"><span class="button-icon">↻</span>随机练一题</button>
+        <button class="primary-button" data-random-bank="true"><span class="button-icon">↻</span>Practice Random Prompt</button>
       </div>
       <div class="filters">
         <select id="bankType">
-          <option value="all" ${state.bankType === "all" ? "selected" : ""}>全部题型</option>
+          <option value="all" ${state.bankType === "all" ? "selected" : ""}>All Task Types</option>
           <option value="repeat" ${state.bankType === "repeat" ? "selected" : ""}>Listen and Repeat</option>
           <option value="interview" ${state.bankType === "interview" ? "selected" : ""}>Take an Interview</option>
         </select>
         <select id="bankDifficulty">
-          <option value="all" ${state.bankDifficulty === "all" ? "selected" : ""}>全部难度</option>
+          <option value="all" ${state.bankDifficulty === "all" ? "selected" : ""}>All Difficulties</option>
           <option value="Easy" ${state.bankDifficulty === "Easy" ? "selected" : ""}>Easy</option>
           <option value="Medium" ${state.bankDifficulty === "Medium" ? "selected" : ""}>Medium</option>
           <option value="Hard" ${state.bankDifficulty === "Hard" ? "selected" : ""}>Hard</option>
@@ -1205,7 +1205,7 @@ function renderBankView() {
                     <span class="badge orange">${escapeHtml(item.difficulty)}</span>
                   </div>
                 </div>
-                <button class="small-button" data-practice-question="${item.id}">练这题</button>
+                <button class="small-button" data-practice-question="${item.id}">Practice</button>
               </article>
             `
           )
@@ -1221,13 +1221,13 @@ function renderHistoryView() {
     <section>
       <div class="history-top">
         <div>
-          <h2>本地历史</h2>
-          <p class="compact-copy">记录保存在当前浏览器，不会上传到服务器。</p>
+          <h2>Local Practice History</h2>
+          <p class="compact-copy">All practice logs are stored privately in your browser localStorage and never uploaded to a server.</p>
         </div>
         <div class="control-actions">
-          <button class="ghost-button" data-export-history="true"><span class="button-icon">↓</span>导出历史</button>
-          <button class="ghost-button" data-export-local-data="true"><span class="button-icon">⇩</span>导出全部本地数据</button>
-          <button class="danger-button" data-clear-history="true"><span class="button-icon">×</span>清空本地记录</button>
+          <button class="ghost-button" data-export-history="true"><span class="button-icon">↓</span>Export History</button>
+          <button class="ghost-button" data-export-local-data="true"><span class="button-icon">⇩</span>Export All Local Data</button>
+          <button class="danger-button" data-clear-history="true"><span class="button-icon">×</span>Clear Local History</button>
         </div>
       </div>
       ${renderLocalDataPanel(history)}
@@ -1249,14 +1249,14 @@ function renderHistoryView() {
                         </div>
                       </div>
                       <div class="history-actions">
-                        <button class="small-button" data-review-history="${item.id}">查看</button>
-                        ${item.trainingMode === "starter" ? "" : `<button class="small-button" data-start-coach-history="${item.id}">Coach 复盘</button>`}
+                        <button class="small-button" data-review-history="${item.id}">Review</button>
+                        ${item.trainingMode === "starter" ? "" : `<button class="small-button" data-start-coach-history="${item.id}">Coach Review</button>`}
                       </div>
                     </article>
                   `
                 )
                 .join("")
-            : `<div class="empty-feedback">还没有练习记录。</div>`
+            : `<div class="empty-feedback">No practice attempts recorded yet.</div>`
         }
       </div>
     </section>
@@ -1279,32 +1279,32 @@ function renderMistakeBookView() {
     <section class="mistake-book">
       <div class="history-top">
         <div>
-          <h2>发音错题本</h2>
-          <p class="compact-copy">根据本地历史里的发音诊断、Repeat 词对齐和外部逐词结果自动整理。这里只记录当前浏览器的数据，不会上传。</p>
+          <h2>Pronunciation & Recall Error Log</h2>
+          <p class="compact-copy">Automatically compiled from your local pronunciation diagnostics, Listen & Repeat word alignments, and word-level accuracy scores.</p>
         </div>
         <div class="control-actions">
-          <button class="ghost-button" data-tab="history"><span class="button-icon">↗</span>查看来源历史</button>
-          <button class="ghost-button" data-export-local-data="true"><span class="button-icon">⇩</span>导出本地数据</button>
+          <button class="ghost-button" data-tab="history"><span class="button-icon">↗</span>View Source History</button>
+          <button class="ghost-button" data-export-local-data="true"><span class="button-icon">⇩</span>Export Local Data</button>
         </div>
       </div>
 
       <div class="segmented mistake-mode-toggle" role="group" aria-label="Mistake book mode">
-        <button class="${activeMode === "sounds" ? "active" : ""}" data-mistake-book-mode="sounds">音素错题</button>
-        <button class="${activeMode === "words" ? "active" : ""}" data-mistake-book-mode="words">单词错题</button>
+        <button class="${activeMode === "sounds" ? "active" : ""}" data-mistake-book-mode="sounds">Sound Patterns</button>
+        <button class="${activeMode === "words" ? "active" : ""}" data-mistake-book-mode="words">Target Words</button>
       </div>
 
       ${isWordMode ? renderWordMistakeFilter(categoryCounts) : ""}
 
       <section class="feedback-section wide-section notebook-summary">
         <div class="summary-grid">
-          <div class="summary-tile"><span>高频音素</span><strong>${soundNotebook.length}</strong></div>
-          <div class="summary-tile"><span>单词错题</span><strong>${rawWordNotebook.length}</strong></div>
-          <div class="summary-tile"><span>${isWordMode ? "错词次数" : "关联单词"}</span><strong>${isWordMode ? totalWordHits : totalWords}</strong></div>
-          <div class="summary-tile"><span>来源记录</span><strong>${activeSourceCount}</strong></div>
+          <div class="summary-tile"><span>Sound Patterns</span><strong>${soundNotebook.length}</strong></div>
+          <div class="summary-tile"><span>Flagged Words</span><strong>${rawWordNotebook.length}</strong></div>
+          <div class="summary-tile"><span>${isWordMode ? "Total Misses" : "Linked Words"}</span><strong>${isWordMode ? totalWordHits : totalWords}</strong></div>
+          <div class="summary-tile"><span>Source Runs</span><strong>${activeSourceCount}</strong></div>
         </div>
         <p class="compact-copy">${isWordMode
-          ? "单词错题现在会区分疑似发音、疑似漏词、语义替换和不确定；系统只根据行为证据推断，不会把漏词直接说成发音错误。"
-          : "音素错题展示系统推断的疑似训练点；如果你接了 Azure 或自定义发音 API，外部返回的 phoneme score 也会被放进这里。"}</p>
+          ? "Flagged words are categorized into Pronunciation-Likely, Recall Omission, Semantic Substitution, or Uncertain based on alignment evidence."
+          : "Sound patterns aggregate recurring phoneme and cluster targets from local alignment and optional external phoneme assessments."}</p>
       </section>
 
       ${isWordMode ? renderMistakeReviewEntry(rawWordNotebook) : ""}
@@ -1323,8 +1323,8 @@ function renderMistakeBookView() {
                 : soundNotebook.map((item) => renderPronunciationNotebookCard(item)).join("")}
             </div>`
           : `<div class="empty-feedback">${isWordMode
-            ? "还没有可整理的单词错题。先做几次 Listen & Repeat，系统会从漏词、替换词和外部逐词评分里自动收集。"
-            : "还没有可整理的发音错题。先完成几次练习，系统会从反馈里的“疑似音素训练点”自动收集。"}</div>`
+            ? "No flagged words yet. Complete a few Listen & Repeat items to automatically collect omitted, substituted, or low-scoring words."
+            : "No sound patterns logged yet. Complete a few practice prompts to automatically aggregate pronunciation targets."}</div>`
       }
     </section>
   `;
@@ -1339,24 +1339,24 @@ function renderMistakeReviewEntry(wordNotebook) {
     <section class="mistake-review-entry">
       <div>
         <span class="badge blue">Mistake Deck</span>
-        <h3>刷错词</h3>
-        <p class="compact-copy">一次只练一个词：发音错词练词句复述，漏词回忆先帮助你想起目标词。练完划过，没稳的词会回到队尾。</p>
+        <h3>Targeted Word Deck</h3>
+        <p class="compact-copy">Drill one word at a time: isolate word pronunciation first, then anchor it inside a full sentence. Unstable words cycle back to the queue.</p>
       </div>
       <div class="control-actions">
         <button class="primary-button" data-start-mistake-review="weakest" ${wordNotebook.length ? "" : "disabled"}>
-          <span class="button-icon">▶</span>开始刷错词
+          <span class="button-icon">▶</span>Start Word Deck
         </button>
         <button class="ghost-button" data-start-mistake-review="pronunciation" ${pronunciationCount ? "" : "disabled"}>
-          <span class="button-icon">◉</span>发音 ${pronunciationCount}
+          <span class="button-icon">◉</span>Pronunciation ${pronunciationCount}
         </button>
         <button class="ghost-button" data-start-mistake-review="recall" ${recallCount ? "" : "disabled"}>
-          <span class="button-icon">□</span>漏词 ${recallCount}
+          <span class="button-icon">□</span>Recall ${recallCount}
         </button>
         <button class="ghost-button" data-start-mistake-review="frequent" ${highFrequencyCount ? "" : "disabled"}>
-          <span class="button-icon">↺</span>高频 ${highFrequencyCount}
+          <span class="button-icon">↺</span>Frequent ${highFrequencyCount}
         </button>
         <button class="ghost-button" data-start-mistake-review="recent" ${recentCount ? "" : "disabled"}>
-          <span class="button-icon">⏱</span>最近 ${recentCount}
+          <span class="button-icon">⏱</span>Recent ${recentCount}
         </button>
       </div>
     </section>
@@ -1365,11 +1365,11 @@ function renderMistakeReviewEntry(wordNotebook) {
 
 function renderWordMistakeFilter(categoryCounts) {
   const filters = [
-    ["all", "全部", categoryCounts.all],
-    ["pronunciationLikely", "疑似发音", categoryCounts.pronunciationLikely],
-    ["recallLikely", "疑似漏词", categoryCounts.recallLikely],
-    ["semanticSubstitution", "语义替换", categoryCounts.semanticSubstitution],
-    ["uncertain", "不确定", categoryCounts.uncertain]
+    ["all", "All", categoryCounts.all],
+    ["pronunciationLikely", "Pronunciation", categoryCounts.pronunciationLikely],
+    ["recallLikely", "Omission / Recall", categoryCounts.recallLikely],
+    ["semanticSubstitution", "Paraphrase", categoryCounts.semanticSubstitution],
+    ["uncertain", "Uncertain", categoryCounts.uncertain]
   ];
   return `
     <div class="segmented word-mistake-filter" role="group" aria-label="Word mistake filter">
@@ -1387,7 +1387,7 @@ function renderPronunciationNotebookCard(item) {
     <article class="mistake-card">
       <div class="mistake-card-head">
         <div>
-          <span class="badge ${item.hasExternal ? "blue" : ""}">${item.hasExternal ? "含外部评分" : "Basic 训练点"}</span>
+          <span class="badge ${item.hasExternal ? "blue" : ""}">${item.hasExternal ? "External Score" : "Local Target"}</span>
           <h3>${escapeHtml(item.sound)}</h3>
         </div>
         <strong>${item.count}x</strong>
@@ -1397,7 +1397,7 @@ function renderPronunciationNotebookCard(item) {
         ${item.words.map((word) => `<span>${escapeHtml(word.word)} <small>${word.count}</small></span>`).join("")}
       </div>
       <div class="notebook-drill">
-        <span>回顾句</span>
+        <span>Practice Sentence</span>
         <p>${escapeHtml(item.reviewSentence)}</p>
       </div>
       <div class="recent-source-list">
@@ -1408,7 +1408,7 @@ function renderPronunciationNotebookCard(item) {
         `).join("")}
       </div>
       <div class="control-actions">
-        <button class="primary-button" data-review-pronunciation="${escapeHtml(item.key)}"><span class="button-icon">▶</span>回顾这个音</button>
+        <button class="primary-button" data-review-pronunciation="${escapeHtml(item.key)}"><span class="button-icon">▶</span>Practice This Sound</button>
       </div>
     </article>
   `;
@@ -1433,7 +1433,7 @@ function renderWordPronunciationNotebookCard(item) {
         <p>${escapeHtml(category.tip)}</p>
       </div>
       <div class="word-breakdown">
-        <span>拆读辅助</span>
+        <span>Syllable Breakdown</span>
         <div class="breakdown-parts">
           ${item.breakdown.map((part) => `<b>${escapeHtml(part)}</b>`).join("")}
         </div>
@@ -1441,20 +1441,20 @@ function renderWordPronunciationNotebookCard(item) {
       </div>
       <div class="word-mistake-tags">
         ${reasonBadges}
-        ${scoreLabel ? `<span>最低逐词分 ${scoreLabel}</span>` : ""}
+        ${scoreLabel ? `<span>Lowest Word Score: ${scoreLabel}</span>` : ""}
         ${item.evidence.slice(0, 3).map((evidence) => `<span>${escapeHtml(getWordMistakeEvidenceLabel(evidence))}</span>`).join("")}
         ${item.phonemeSounds.map((sound) => `<span>${escapeHtml(sound)}</span>`).join("")}
       </div>
       ${
         heardAs.length
           ? `<div class="heard-as-list">
-              <span>常被听成</span>
+              <span>Often Heard As</span>
               ${heardAs.map((entry) => `<strong>${escapeHtml(entry.word)} <small>${entry.count}</small></strong>`).join("")}
             </div>`
           : ""
       }
       <div class="notebook-drill">
-        <span>三段练习</span>
+        <span>3-Step Drill</span>
         <p>${escapeHtml(item.word)} → the ${escapeHtml(item.word)} → ${escapeHtml(item.practiceLine)}</p>
       </div>
       <div class="recent-source-list">
@@ -1465,10 +1465,10 @@ function renderWordPronunciationNotebookCard(item) {
         `).join("")}
       </div>
       <div class="control-actions word-action-row">
-        <button class="ghost-button" data-speak-word-slow="${escapeHtml(item.key)}"><span class="button-icon">◌</span>慢速听</button>
-        <button class="ghost-button" data-speak-word="${escapeHtml(item.key)}"><span class="button-icon">▶</span>正常听</button>
-        <button class="tool-button" data-start-word-drill="${escapeHtml(item.key)}"><span class="button-icon">◎</span>词句精练</button>
-        <button class="primary-button" data-review-word-pronunciation="${escapeHtml(item.key)}"><span class="button-icon">↻</span>放进 Repeat</button>
+        <button class="ghost-button" data-speak-word-slow="${escapeHtml(item.key)}"><span class="button-icon">◌</span>Listen Slow</button>
+        <button class="ghost-button" data-speak-word="${escapeHtml(item.key)}"><span class="button-icon">▶</span>Listen Normal</button>
+        <button class="tool-button" data-start-word-drill="${escapeHtml(item.key)}"><span class="button-icon">◎</span>Word + Sentence Drill</button>
+        <button class="primary-button" data-review-word-pronunciation="${escapeHtml(item.key)}"><span class="button-icon">↻</span>Load in Repeat</button>
       </div>
     </article>
   `;
@@ -1484,18 +1484,18 @@ function renderWordEchoDrill(options = {}) {
     <section class="word-drill-capsule">
       <div class="section-title-row">
         <div>
-          <span class="badge blue">${inDeck ? "Deck Card" : "词句精练"}</span>
+          <span class="badge blue">${inDeck ? "Deck Card" : "Word + Sentence Drill"}</span>
           <h3>${escapeHtml(drill.word)}</h3>
-          <p class="compact-copy">先把单词读到能被识别，再放进完整句子。这个检查只用本地转写和 Basic 规则，不调用 AI。</p>
+          <p class="compact-copy">First articulate the isolated word clearly, then embed it in a complete sentence. Evaluated locally without external AI calls.</p>
         </div>
-        ${inDeck ? "" : `<button class="ghost-button" data-reset-word-drill="true"><span class="button-icon">×</span>关闭</button>`}
+        ${inDeck ? "" : `<button class="ghost-button" data-reset-word-drill="true"><span class="button-icon">×</span>Close</button>`}
       </div>
 
       <div class="word-drill-grid">
         <article class="word-drill-step ${drill.wordCheck ? `result-${drill.wordCheck.result}` : ""}">
           <div class="word-drill-step-head">
             <span>Step 1</span>
-            <strong>复述单词</strong>
+            <strong>Step 1: Speak Word</strong>
           </div>
           <div class="word-drill-target">
             <b>${escapeHtml(drill.word)}</b>
@@ -1503,16 +1503,16 @@ function renderWordEchoDrill(options = {}) {
           </div>
           <p class="compact-copy">${escapeHtml(drill.stressHint)}</p>
           <div class="control-actions">
-            <button class="ghost-button" data-word-drill-speak="word" data-word-drill-slow="true"><span class="button-icon">◌</span>慢速听</button>
-            <button class="ghost-button" data-word-drill-speak="word"><span class="button-icon">▶</span>正常听</button>
+            <button class="ghost-button" data-word-drill-speak="word" data-word-drill-slow="true"><span class="button-icon">◌</span>Listen Slow</button>
+            <button class="ghost-button" data-word-drill-speak="word"><span class="button-icon">▶</span>Listen Normal</button>
             <button class="primary-button" data-word-drill-record="word" ${blocked ? "disabled" : ""}>
-              <span class="button-icon">${wordRecording ? "■" : "●"}</span>${wordRecording ? "停止" : "录单词"}
+              <span class="button-icon">${wordRecording ? "■" : "●"}</span>${wordRecording ? "Stop" : "Record Word"}
             </button>
-            <button class="tool-button" data-check-word-drill="word"><span class="button-icon">✓</span>检查</button>
+            <button class="tool-button" data-check-word-drill="word"><span class="button-icon">✓</span>Check</button>
           </div>
           <label class="transcript-box">
-            <span>单词转写</span>
-            <textarea id="wordDrillWordInput" placeholder="${SpeechRecognitionApi ? "录音后会自动出现，也可以手动输入。" : "当前浏览器不支持自动识别，请手动输入。"}">${escapeHtml(drill.wordTranscript)}</textarea>
+            <span>Word Transcript</span>
+            <textarea id="wordDrillWordInput" placeholder="${SpeechRecognitionApi ? "Auto-transcribed after recording, or type manually." : "Browser speech recognition unavailable; please type manually."}">${escapeHtml(drill.wordTranscript)}</textarea>
           </label>
           ${renderWordDrillCheck(drill.wordCheck)}
         </article>
@@ -1520,23 +1520,23 @@ function renderWordEchoDrill(options = {}) {
         <article class="word-drill-step ${drill.sentenceCheck ? `result-${drill.sentenceCheck.result}` : ""}">
           <div class="word-drill-step-head">
             <span>Step 2</span>
-            <strong>复述句子</strong>
+            <strong>Step 2: Speak Sentence</strong>
           </div>
           <div class="notebook-drill sentence-target">
-            <span>目标句</span>
+            <span>Target Sentence</span>
             <p>${escapeHtml(drill.sentence)}</p>
           </div>
           <div class="control-actions">
-            <button class="ghost-button" data-word-drill-speak="sentence" data-word-drill-slow="true"><span class="button-icon">◌</span>慢速听</button>
-            <button class="ghost-button" data-word-drill-speak="sentence"><span class="button-icon">▶</span>正常听</button>
+            <button class="ghost-button" data-word-drill-speak="sentence" data-word-drill-slow="true"><span class="button-icon">◌</span>Listen Slow</button>
+            <button class="ghost-button" data-word-drill-speak="sentence"><span class="button-icon">▶</span>Listen Normal</button>
             <button class="primary-button" data-word-drill-record="sentence" ${blocked ? "disabled" : ""}>
-              <span class="button-icon">${sentenceRecording ? "■" : "●"}</span>${sentenceRecording ? "停止" : "录句子"}
+              <span class="button-icon">${sentenceRecording ? "■" : "●"}</span>${sentenceRecording ? "Stop" : "Record Sentence"}
             </button>
-            <button class="tool-button" data-check-word-drill="sentence"><span class="button-icon">✓</span>检查</button>
+            <button class="tool-button" data-check-word-drill="sentence"><span class="button-icon">✓</span>Check</button>
           </div>
           <label class="transcript-box">
-            <span>句子转写</span>
-            <textarea id="wordDrillSentenceInput" placeholder="${SpeechRecognitionApi ? "录音后会自动出现，也可以手动输入。" : "当前浏览器不支持自动识别，请手动输入。"}">${escapeHtml(drill.sentenceTranscript)}</textarea>
+            <span>Sentence Transcript</span>
+            <textarea id="wordDrillSentenceInput" placeholder="${SpeechRecognitionApi ? "Auto-transcribed after recording, or type manually." : "Browser speech recognition unavailable; please type manually."}">${escapeHtml(drill.sentenceTranscript)}</textarea>
           </label>
           ${renderWordDrillCheck(drill.sentenceCheck)}
         </article>
@@ -1547,16 +1547,16 @@ function renderWordEchoDrill(options = {}) {
 
 function renderWordDrillCheck(check) {
   if (!check) {
-    return `<div class="word-drill-feedback muted">等待检查。你可以先听、再录，也可以直接输入自己说出的内容。</div>`;
+    return `<div class="word-drill-feedback muted">Ready to check. Listen to the model, record your voice, or type your transcript directly.</div>`;
   }
   const labelMap = {
-    pass: "通过",
-    almost: "接近",
-    retry: "再练一次"
+    pass: "Pass",
+    almost: "Almost",
+    retry: "Retry"
   };
   return `
     <div class="word-drill-feedback result-${check.result}">
-      <strong>${labelMap[check.result] || "结果"}${Number.isFinite(check.score) ? ` · ${Math.round(check.score * 100)}%` : ""}</strong>
+      <strong>${labelMap[check.result] || "Result"}${Number.isFinite(check.score) ? ` · ${Math.round(check.score * 100)}%` : ""}</strong>
       <p>${escapeHtml(check.message)}</p>
       ${check.nextAction ? `<span>${escapeHtml(check.nextAction)}</span>` : ""}
     </div>
@@ -1576,33 +1576,33 @@ function renderMistakeReviewDeck() {
       <div class="deck-topline">
         <div>
           <span class="badge blue">${escapeHtml(getMistakeReviewFilterLabel(review.filter))}</span>
-          <h3>错词刷题</h3>
-          <p class="compact-copy">当前第 ${progress} 题。完成单词和句子后，划过进入下一题；不稳的词会回到队尾。</p>
+          <h3>Active Word Review Deck</h3>
+          <p class="compact-copy">Card ${progress}. Complete both the isolated word and target sentence checks, then advance to the next card.</p>
         </div>
         <div class="deck-progress">
           <strong>${progress}</strong>
-          <span>${review.results.length} 已完成</span>
+          <span>${review.results.length} Completed</span>
         </div>
       </div>
 
       <div class="deck-card-shell" data-mistake-review-card="true">
         <div class="deck-card-meta">
           <span>${escapeHtml(getWordMistakeCategoryMeta(current.category).label)}</span>
-          <span>错误 ${current.count}x</span>
-          ${current.heardAs?.length ? `<span>常被听成 ${escapeHtml(current.heardAs[0].word)}</span>` : ""}
-          ${Number.isFinite(current.lowestScore) ? `<span>最低逐词分 ${Math.round(current.lowestScore * 100)}%</span>` : ""}
-          ${marked ? `<span>重点</span>` : ""}
+          <span>Flagged ${current.count}x</span>
+          ${current.heardAs?.length ? `<span>Heard as "${escapeHtml(current.heardAs[0].word)}"</span>` : ""}
+          ${Number.isFinite(current.lowestScore) ? `<span>Lowest Score: ${Math.round(current.lowestScore * 100)}%</span>` : ""}
+          ${marked ? `<span>Starred</span>` : ""}
         </div>
         ${renderWordEchoDrill({ inDeck: true })}
       </div>
 
       <div class="deck-action-bar">
-        <button class="ghost-button" data-mistake-review-action="retry"><span class="button-icon">↺</span>再练一次</button>
+        <button class="ghost-button" data-mistake-review-action="retry"><span class="button-icon">↺</span>Retry Card</button>
         <button class="primary-button" data-mistake-review-action="pass">
-          <span class="button-icon">→</span>${outcome === "pass" ? "划过" : "先划过"}
+          <span class="button-icon">→</span>${outcome === "pass" ? "Next Card" : "Skip for Now"}
         </button>
-        <button class="tool-button ${marked ? "active" : ""}" data-mistake-review-star="true"><span class="button-icon">★</span>${marked ? "已重点" : "加入重点"}</button>
-        <button class="ghost-button" data-end-mistake-review="true"><span class="button-icon">×</span>结束</button>
+        <button class="tool-button ${marked ? "active" : ""}" data-mistake-review-star="true"><span class="button-icon">★</span>${marked ? "Starred" : "Star Word"}</button>
+        <button class="ghost-button" data-end-mistake-review="true"><span class="button-icon">×</span>End Session</button>
       </div>
     </section>
   `;
@@ -1625,20 +1625,20 @@ function renderMistakeReviewSummary() {
     <section class="mistake-review-deck summary">
       <div class="deck-topline">
         <div>
-          <span class="badge blue">本轮完成</span>
-          <h3>错词刷题总结</h3>
-          <p class="compact-copy">这一轮结果只保存在当前页面状态里；回到错题本后仍可重新生成新一轮。</p>
+          <span class="badge blue">Deck Complete</span>
+          <h3>Word Deck Summary</h3>
+          <p class="compact-copy">Session results are summarized below. Return to the Error Log anytime to launch a fresh deck.</p>
         </div>
         <div class="deck-progress">
           <strong>${review.results.length}</strong>
-          <span>本轮题数</span>
+          <span>Cards Reviewed</span>
         </div>
       </div>
       <div class="summary-grid">
-        <div class="summary-tile"><span>掌握</span><strong>${counts.pass || 0}</strong></div>
-        <div class="summary-tile"><span>接近</span><strong>${counts.almost || 0}</strong></div>
-        <div class="summary-tile"><span>待复练</span><strong>${counts.retry || 0}</strong></div>
-        <div class="summary-tile"><span>重点</span><strong>${review.starredKeys.length}</strong></div>
+        <div class="summary-tile"><span>Mastered</span><strong>${counts.pass || 0}</strong></div>
+        <div class="summary-tile"><span>Almost</span><strong>${counts.almost || 0}</strong></div>
+        <div class="summary-tile"><span>Needs Retry</span><strong>${counts.retry || 0}</strong></div>
+        <div class="summary-tile"><span>Starred</span><strong>${review.starredKeys.length}</strong></div>
       </div>
       ${
         weakItems.length
@@ -1648,8 +1648,8 @@ function renderMistakeReviewSummary() {
           : ""
       }
       <div class="control-actions">
-        <button class="primary-button" data-start-mistake-review="retry"><span class="button-icon">↺</span>再刷未掌握</button>
-        <button class="ghost-button" data-end-mistake-review="true"><span class="button-icon">←</span>回到错题本</button>
+        <button class="primary-button" data-start-mistake-review="retry"><span class="button-icon">↺</span>Retry Unmastered Words</button>
+        <button class="ghost-button" data-end-mistake-review="true"><span class="button-icon">←</span>Back to Error Log</button>
       </div>
     </section>
   `;
@@ -2190,20 +2190,20 @@ function getPastEdPronunciation(base) {
 
 function getWordStressHint(word) {
   const clean = normalizeNotebookWord(word);
-  if (clean === "stores") return "stores 是一音节，接近 /storz/；末尾 -s 在 /r/ 后发 /z/，不要读成 sto-re-s。";
-  if (/(ches|shes|sses|xes|zes|ces|ges|ses)$/.test(clean)) return "这个词尾通常多加一拍 /iz/，先读清楚前面的词，再接短促的 iz。";
+  if (clean === "stores") return "\"stores\" is one syllable (/storz/); the final -s is voiced as /z/ after /r/—do not add an extra syllable.";
+  if (/(ches|shes|sses|xes|zes|ces|ges|ses)$/.test(clean)) return "This ending adds a short /iz/ syllable; articulate the base word clearly before linking the final /iz/.";
   if (/[^s]s$/.test(clean) && !/(us|ss|is|ous)$/.test(clean)) {
     const base = /ies$/.test(clean) ? `${clean.slice(0, -3)}y` : clean.slice(0, -1);
-    return `这个词尾 -s 在这里更接近 /${getPluralSPronunciation(base)}/；先读清楚 ${base}，再轻轻接词尾。`;
+    return `The final -s here sounds like /${getPluralSPronunciation(base)}/; pronounce "${base}" clearly and link the ending lightly.`;
   }
   if (/ed$/.test(clean)) {
     const base = /ied$/.test(clean) ? `${clean.slice(0, -3)}y` : normalizePastEdBase(clean);
-    return `这个过去式 -ed 在这里更接近 /${getPastEdPronunciation(base)}/；先读原词 ${base}，再接词尾。`;
+    return `The past-tense -ed here sounds like /${getPastEdPronunciation(base)}/; articulate "${base}" first and link the ending.`;
   }
-  if (/(tion|sion|cian)$/.test(clean)) return "常见规律：-tion/-sion 前一拍更明显；最终请用词典音标确认。";
-  if (/(ic|ical|ity|ety)$/.test(clean)) return "常见规律：-ic/-ity 附近常有重音；先慢速跟读再连成整词。";
-  if (clean.length <= 5) return "短词先把元音和词尾说完整，再放回短语里。";
-  return "拆读只是练习辅助，不等于官方音标；不确定时用词典确认重音。";
+  if (/(tion|sion|cian)$/.test(clean)) return "Primary stress typically falls on the syllable right before -tion/-sion.";
+  if (/(ic|ical|ity|ety)$/.test(clean)) return "Primary stress typically falls right before -ic or -ity; practice slowly in chunks before linking.";
+  if (clean.length <= 5) return "For short words, open the core vowel and release the final consonant clearly before embedding in a phrase.";
+  return "Syllable chunking is a practice scaffold; consult a phonetic dictionary if unsure about primary stress.";
 }
 
 function buildWordReviewSentence(word) {
@@ -2238,11 +2238,11 @@ function buildWordReviewSentence(word) {
 
 function getWordMistakeReasonLabel(reason) {
   const labels = {
-    "repeat-mismatch": "Repeat 错词",
-    "repeat-substitute": "Repeat 替换",
-    "repeat-missing": "Repeat 漏词",
-    "low-word-score": "逐词低分",
-    "phoneme-focus": "关联音素"
+    "repeat-mismatch": "Repeat Mismatch",
+    "repeat-substitute": "Repeat Substitution",
+    "repeat-missing": "Repeat Omission",
+    "low-word-score": "Low Word Score",
+    "phoneme-focus": "Phoneme Target"
   };
   return labels[reason] || reason;
 }
@@ -2250,27 +2250,27 @@ function getWordMistakeReasonLabel(reason) {
 function getWordMistakeCategoryMeta(category) {
   const map = {
     pronunciationLikely: {
-      label: "疑似发音",
-      title: "更像发音/识别混淆",
-      tip: "系统看到你在目标词位置说出了相近词，或外部逐词发音分偏低。适合先练单词发音，再放进句子。",
+      label: "Pronunciation",
+      title: "Likely Pronunciation / ASR Confusion",
+      tip: "You produced a sound-similar word at this position or received a low word-level pronunciation score. Drill the isolated word first, then embed it in the sentence.",
       badgeClass: "blue"
     },
     recallLikely: {
-      label: "疑似漏词",
-      title: "更像没想起或漏说",
-      tip: "系统没有看到你尝试说出这个词，或替代词和目标词声音差距较大。适合先做提示回忆，再完整复述。",
+      label: "Recall / Omission",
+      title: "Likely Omitted or Missed in Working Memory",
+      tip: "The word was omitted or replaced with a phonetically unrelated word. Practice keyword recall first, then repeat the full sentence.",
       badgeClass: ""
     },
     semanticSubstitution: {
-      label: "语义替换",
-      title: "可能是换了同义/近义表达",
-      tip: "自由回答里这不一定是错；但在 Repeat 任务里，它说明原句词没有被完整复述。",
+      label: "Paraphrase",
+      title: "Likely Synonym or Semantic Substitution",
+      tip: "Acceptable in open-ended responses, but in Listen & Repeat it indicates the exact target word was paraphrased instead of repeated verbatim.",
       badgeClass: "green"
     },
     uncertain: {
-      label: "不确定",
-      title: "证据不足，先保守处理",
-      tip: "系统还不能确定是发音、漏词还是替换。建议先听词，再做一次词句复述。",
+      label: "Uncertain",
+      title: "Mixed Signal — Practice Both Sound & Recall",
+      tip: "Listen to the model word first, then complete a two-step word and sentence repetition.",
       badgeClass: ""
     }
   };
@@ -2279,17 +2279,17 @@ function getWordMistakeCategoryMeta(category) {
 
 function getWordMistakeEvidenceLabel(evidence) {
   const labels = {
-    external_low_word_score: "外部低分",
-    phoneme_focus: "音素线索",
-    repeat_missing: "完全漏掉",
-    repeat_substitute: "说成别词",
-    known_semantic_substitution: "近义替换",
-    spelling_shape_close: "拼写轮廓近",
-    phonetic_key_close: "音近",
-    common_learner_confusion: "常见混淆",
-    similar_syllable_shape: "节奏相近",
-    substitution_not_sound_similar: "不像音近",
-    insufficient_signal: "证据不足"
+    external_low_word_score: "Low API Score",
+    phoneme_focus: "Phoneme Cue",
+    repeat_missing: "Omitted",
+    repeat_substitute: "Substituted",
+    known_semantic_substitution: "Synonym Used",
+    spelling_shape_close: "Similar Spelling",
+    phonetic_key_close: "Sound-Similar",
+    common_learner_confusion: "Common Confusion Pair",
+    similar_syllable_shape: "Similar Syllable Shape",
+    substitution_not_sound_similar: "Not Sound-Similar",
+    insufficient_signal: "Limited Signal"
   };
   return labels[evidence] || evidence;
 }
@@ -2308,9 +2308,9 @@ function normalizePronunciationFocusItem(focus) {
     key,
     sound,
     label: cleanupSpacing(focus?.label || ""),
-    tip: cleanupSpacing(focus?.tip || focus?.errorType || "慢速读清楚这个音，再放回完整句里。"),
+    tip: cleanupSpacing(focus?.tip || focus?.errorType || "Articulate this target sound slowly, then anchor it inside a full sentence."),
     words: [...new Set(words.map((word) => cleanupSpacing(String(word).toLowerCase())).filter((word) => word && word.length > 1))].slice(0, 8),
-    hasExternal: /外部|azure|phoneme|score/i.test(`${focus?.tip || ""} ${focus?.errorType || ""}`)
+    hasExternal: /external|azure|phoneme|score/i.test(`${focus?.tip || ""} ${focus?.errorType || ""}`)
   };
 }
 
@@ -2326,7 +2326,7 @@ function buildPronunciationReviewSentence(item) {
 function startPronunciationReview(key) {
   const item = buildPronunciationNotebook().find((entry) => entry.key === key);
   if (!item) {
-    showToast("没有找到这个发音错题。");
+    showToast("Could not find that pronunciation target.");
     return;
   }
   stopIfRecording();
@@ -2345,14 +2345,14 @@ function startPronunciationReview(key) {
   state.full.complete = false;
   clearCurrentWork(true);
   state.showSentence = true;
-  state.status = `正在回顾 ${item.sound}`;
+  state.status = `Reviewing sound: ${item.sound}`;
   render();
 }
 
 function startWordPronunciationReview(key) {
   const item = buildWordPronunciationNotebook().find((entry) => entry.key === key);
   if (!item) {
-    showToast("没有找到这个单词错题。");
+    showToast("Could not find that target word.");
     return;
   }
   stopIfRecording();
@@ -2371,25 +2371,25 @@ function startWordPronunciationReview(key) {
   state.full.complete = false;
   clearCurrentWork(true);
   state.showSentence = true;
-  state.status = `正在回顾 ${item.word}`;
+  state.status = `Reviewing word: ${item.word}`;
   render();
 }
 
 function speakNotebookWord(key, slow = false) {
   const item = buildWordPronunciationNotebook().find((entry) => entry.key === key);
   if (!item) {
-    showToast("没有找到这个单词错题。");
+    showToast("Could not find that target word.");
     return;
   }
   const text = slow
     ? `${item.word}. ${item.breakdown.join(" ")}. ${item.word}. the ${item.word}.`
     : item.practiceLine;
-  speakText(text, slow ? 0.68 : 0.9, slow ? `正在慢速播放 ${item.word}` : `正在播放 ${item.word}`);
+  speakText(text, slow ? 0.68 : 0.9, slow ? `Playing "${item.word}" (slow)` : `Playing "${item.word}"`);
 }
 
-function speakText(text, rate = 0.9, statusMessage = "正在播放示范") {
+function speakText(text, rate = 0.9, statusMessage = "Playing audio model") {
   if (!window.speechSynthesis) {
-    showToast("当前浏览器不支持语音播放。");
+    showToast("Speech synthesis is not supported in this browser.");
     return;
   }
   const utterance = new SpeechSynthesisUtterance(text);
@@ -2418,7 +2418,7 @@ function createWordDrillStateFromNotebookItem(item) {
 function startWordEchoDrill(key) {
   const item = buildWordPronunciationNotebook().find((entry) => entry.key === key);
   if (!item) {
-    showToast("没有找到这个单词错题。");
+    showToast("Could not find that target word.");
     return;
   }
   stopIfRecording();
@@ -2426,7 +2426,7 @@ function startWordEchoDrill(key) {
   state.mistakeReview = getDefaultMistakeReviewState();
   state.mistakeBookMode = "words";
   state.wordDrill = createWordDrillStateFromNotebookItem(item);
-  state.status = `开始词句精练：${item.word}`;
+  state.status = `Word + Sentence Drill: ${item.word}`;
   render();
 }
 
@@ -2441,7 +2441,7 @@ function resetWordEchoDrill(renderNow = true) {
 function startMistakeReview(filter = "weakest") {
   const deck = buildMistakeReviewDeck(filter);
   if (!deck.length) {
-    showToast("当前没有符合条件的单词错题。");
+    showToast("No flagged words match the selected filter.");
     return;
   }
   stopIfRecording();
@@ -2456,7 +2456,7 @@ function startMistakeReview(filter = "weakest") {
     startedAt: new Date().toISOString()
   };
   loadMistakeReviewCard(0);
-  state.status = "开始刷错词";
+  state.status = "Start Word Deck";
   render();
 }
 
@@ -2528,7 +2528,7 @@ function finishMistakeReviewCard(action = "pass") {
   const nextIndex = state.mistakeReview.index + 1;
   if (nextIndex >= state.mistakeReview.deck.length) completeMistakeReview();
   else loadMistakeReviewCard(nextIndex);
-  state.status = action === "retry" ? "已放回队尾" : "已划过，进入下一题";
+  state.status = action === "retry" ? "Returned card to end of queue" : "Advanced to next card";
   render();
 }
 
@@ -2546,14 +2546,14 @@ function toggleMistakeReviewStar() {
 function completeMistakeReview() {
   state.mistakeReview.complete = true;
   resetWordEchoDrill(false);
-  state.status = "本轮错词刷题完成";
+  state.status = "Word Review Deck complete";
 }
 
 function endMistakeReview() {
   stopIfRecording();
   state.mistakeReview = getDefaultMistakeReviewState();
   resetWordEchoDrill(false);
-  state.status = "已回到错题本";
+  state.status = "Returned to Error Log";
   render();
 }
 
@@ -2567,30 +2567,30 @@ function getMistakeReviewOutcome() {
 
 function getMistakeReviewOutcomeLabel(outcome) {
   const labels = {
-    pass: "掌握",
-    almost: "接近",
-    retry: "待复练"
+    pass: "Mastered",
+    almost: "Almost",
+    retry: "Needs Retry"
   };
   return labels[outcome] || outcome;
 }
 
 function getMistakeReviewFilterLabel(filter) {
   const labels = {
-    weakest: "优先级队列",
-    frequent: "高频错词",
-    recent: "最近 7 天",
-    pronunciation: "疑似发音",
-    recall: "疑似漏词",
-    semantic: "语义替换",
-    uncertain: "不确定",
-    retry: "未掌握复刷"
+    weakest: "Priority Queue",
+    frequent: "High-Frequency Words",
+    recent: "Last 7 Days",
+    pronunciation: "Pronunciation Focus",
+    recall: "Recall & Omissions",
+    semantic: "Paraphrase Substitutions",
+    uncertain: "Uncertain Cases",
+    retry: "Unmastered Retry Queue"
   };
-  return labels[filter] || "错词队列";
+  return labels[filter] || "Word Review Queue";
 }
 
 function toggleWordDrillRecording(target = "word") {
   if (!state.wordDrill.active) {
-    showToast("先从单词错题卡片开始词句精练。");
+    showToast("Launch a Word + Sentence Drill from a word card first.");
     return;
   }
   if (state.isRecording && state.recordingTarget === "wordDrill" && state.wordDrill.target === target) {
@@ -2598,7 +2598,7 @@ function toggleWordDrillRecording(target = "word") {
     return;
   }
   if (state.isRecording) {
-    showToast("请先停止当前录音。");
+    showToast("Please stop the active recording first.");
     return;
   }
   state.wordDrill.target = target === "sentence" ? "sentence" : "word";
@@ -2608,7 +2608,7 @@ function toggleWordDrillRecording(target = "word") {
 
 function speakWordDrillPart(part = "word", slow = false) {
   if (!state.wordDrill.active) {
-    showToast("先开始一个词句精练。");
+    showToast("Start a Word + Sentence Drill first.");
     return;
   }
   const isSentence = part === "sentence";
@@ -2620,7 +2620,7 @@ function speakWordDrillPart(part = "word", slow = false) {
   speakText(
     text,
     slow ? 0.68 : isSentence ? 0.88 : 0.92,
-    isSentence ? "正在播放目标句" : `正在播放 ${state.wordDrill.word}`
+    isSentence ? "Playing target sentence" : `Playing "${state.wordDrill.word}"`
   );
 }
 
@@ -2630,7 +2630,7 @@ function analyzeWordDrillPart(part = "word") {
   const check = target === "sentence" ? checkWordDrillSentence() : checkWordDrillWord();
   if (target === "sentence") state.wordDrill.sentenceCheck = check;
   else state.wordDrill.wordCheck = check;
-  state.status = check.result === "pass" ? "词句精练通过" : "词句精练已检查";
+  state.status = check.result === "pass" ? "Drill check passed" : "Drill check evaluated";
   render();
 }
 
@@ -2641,8 +2641,8 @@ function checkWordDrillWord() {
     return {
       result: "retry",
       score: 0,
-      message: "还没有单词转写。请先录音，或者手动输入你刚才说出的词。",
-      nextAction: "先听慢速示范，再只说这个单词一次。"
+      message: "No word transcript found. Record the word first or type what you said.",
+      nextAction: "Listen to the slow model once, then speak just the target word."
     };
   }
   const targetWord = normalizeNotebookWord(state.wordDrill.word);
@@ -2652,23 +2652,23 @@ function checkWordDrillWord() {
     return {
       result: "pass",
       score: best.score,
-      message: `系统识别到了 ${state.wordDrill.word}。下一步把它放进完整句子里。`,
-      nextAction: "进入 Step 2，听一句、复述一句。"
+      message: `Recognized "${state.wordDrill.word}" clearly. Now anchor it in the full target sentence.`,
+      nextAction: "Move to Step 2: listen to the target sentence and repeat it completely."
     };
   }
   if (best.score >= 0.72) {
     return {
       result: "almost",
       score: best.score,
-      message: `很接近，但本地识别更像 ${best.word || "另一个词"}。这通常说明元音、重音或词尾还不够稳。`,
-      nextAction: "再慢速听一次，先夸张一点读出重音和词尾。"
+      message: `Close, but ASR heard "${best.word || "another word"}". Check primary stress, core vowel quality, and final consonant release.`,
+      nextAction: "Listen to the slow model again and slightly exaggerate the stressed syllable and word ending."
     };
   }
   return {
     result: "retry",
     score: best.score,
-    message: `这次还没有稳定识别到 ${state.wordDrill.word}。`,
-    nextAction: "先拆成小块读，再连成完整单词。"
+    message: `Did not reliably recognize "${state.wordDrill.word}" on this attempt.`,
+    nextAction: "Practice the syllable chunks first, then blend them into the whole word."
   };
 }
 
@@ -2679,8 +2679,8 @@ function checkWordDrillSentence() {
     return {
       result: "retry",
       score: 0,
-      message: "还没有句子转写。请先录一句完整目标句。",
-      nextAction: "先听目标句，再尽量完整复述。"
+      message: "No sentence transcript found. Record or type the full target sentence first.",
+      nextAction: "Listen to the target sentence and repeat it as completely as possible."
     };
   }
   const question = {
@@ -2695,16 +2695,16 @@ function checkWordDrillSentence() {
   });
   const targetWord = normalizeNotebookWord(state.wordDrill.word);
   const includesWord = normalizeWords(transcript).includes(targetWord);
-  const recallScore = getDetailScoreValue(feedback.detailScores, "完整复述") ?? ((feedback.score - 1) / 5);
+  const recallScore = getDetailScoreValue(feedback.detailScores, "Completeness") ?? ((feedback.score - 1) / 5);
   const score = Math.max(0, Math.min(1, recallScore));
   const result = includesWord && score >= 0.72 ? "pass" : score >= 0.52 ? "almost" : "retry";
   return {
     result,
     score,
     message: includesWord
-      ? `目标词已经放进句子里了。句子完整度约 ${Math.round(score * 100)}%。`
-      : `句子里还没有稳定出现 ${state.wordDrill.word}，先把目标词说清楚再接后半句。`,
-    nextAction: result === "pass" ? "可以回到错题本继续下一个词。" : "再听一次目标句，注意不要漏掉目标词。",
+      ? `Target word anchored in the sentence! Sentence completeness: ~${Math.round(score * 100)}%.`
+      : `The target word "${state.wordDrill.word}" was not stably detected in the sentence; articulate the target word clearly before linking the rest of the clause.`,
+    nextAction: result === "pass" ? "Great work! Return to the Error Log or advance to the next card." : "Listen to the target sentence once more and make sure to include the target word.",
     feedback
   };
 }
@@ -2759,24 +2759,24 @@ function renderLocalDataPanel(history = loadHistory()) {
   return `
     <section class="feedback-section wide-section data-panel">
       <div class="section-title-row">
-        <h3>本地数据管理</h3>
-        <span class="badge">只影响当前浏览器</span>
+        <h3>Local Data Management</h3>
+        <span class="badge">Browser-Local Only</span>
       </div>
       <div class="summary-grid compact-summary">
-        <div class="summary-tile"><span>练习历史</span><strong>${history.length}</strong></div>
-        <div class="summary-tile"><span>Coach 复练</span><strong>${coachSessions.length}</strong></div>
-        <div class="summary-tile"><span>Coach Profile</span><strong>${hasCoachProfile ? "有" : "无"}</strong></div>
-        <div class="summary-tile"><span>Ladder</span><strong>${hasLadder ? "有" : "无"}</strong></div>
+        <div class="summary-tile"><span>Practice Runs</span><strong>${history.length}</strong></div>
+        <div class="summary-tile"><span>Coach Sessions</span><strong>${coachSessions.length}</strong></div>
+        <div class="summary-tile"><span>Coach Profile</span><strong>${hasCoachProfile ? "Active" : "None"}</strong></div>
+        <div class="summary-tile"><span>Ladder</span><strong>${hasLadder ? "Active" : "None"}</strong></div>
       </div>
-      <p class="compact-copy">“导出全部本地数据”会导出练习、Ladder 和 Coach 记录，但会自动隐藏 API key。</p>
+      <p class="compact-copy">"Export All Local Data" downloads your practice history, Ladder state, and Coach sessions while automatically redacting any API keys.</p>
       <div class="control-actions">
-        <button class="ghost-button" data-export-local-data="true"><span class="button-icon">⇩</span>导出全部本地数据</button>
-        <button class="ghost-button" data-clear-coach-data="true"><span class="button-icon">×</span>只清空 Coach 数据</button>
-        <button class="danger-button" data-clear-history="true"><span class="button-icon">×</span>清空历史和 Coach</button>
+        <button class="ghost-button" data-export-local-data="true"><span class="button-icon">⇩</span>Export All Local Data</button>
+        <button class="ghost-button" data-clear-coach-data="true"><span class="button-icon">×</span>Clear Coach Data Only</button>
+        <button class="danger-button" data-clear-history="true"><span class="button-icon">×</span>Clear All History & Coach</button>
       </div>
       <div class="item-meta">
-        <span class="badge ${hasSetup ? "blue" : ""}">Setup ${hasSetup ? "已保存" : "未保存"}</span>
-        <span class="badge ${state.setup.ai?.apiKey ? "orange" : ""}">API key ${state.setup.ai?.apiKey || state.setup.pronunciation?.apiKey ? "仅本地保存，不会导出明文" : "未填写"}</span>
+        <span class="badge ${hasSetup ? "blue" : ""}">Setup ${hasSetup ? "Saved" : "Default"}</span>
+        <span class="badge ${state.setup.ai?.apiKey ? "orange" : ""}">API key ${state.setup.ai?.apiKey || state.setup.pronunciation?.apiKey ? "Stored locally (redacted on export)" : "Not configured"}</span>
       </div>
     </section>
   `;
@@ -2789,32 +2789,32 @@ function renderSetupView() {
       <div class="history-top">
         <div>
           <h2>API Setup</h2>
-          <p class="compact-copy">API key、endpoint 和 model 只保存在当前浏览器 localStorage，不会写入 GitHub 仓库。</p>
+          <p class="compact-copy">API keys, endpoints, and model names are saved exclusively in your browser localStorage and never committed to git.</p>
         </div>
         <div class="control-actions">
-          <button class="primary-button" data-save-setup="true"><span class="button-icon">✓</span>保存设置</button>
-          <button class="ghost-button" data-clear-setup="true"><span class="button-icon">×</span>清空设置</button>
+          <button class="primary-button" data-save-setup="true"><span class="button-icon">✓</span>Save Settings</button>
+          <button class="ghost-button" data-clear-setup="true"><span class="button-icon">×</span>Reset Settings</button>
         </div>
       </div>
 
       <div class="setup-grid">
         <section class="feedback-section setup-basic">
-          <h3>Basic 本地功能</h3>
+          <h3>Built-In Local Engine (Zero API Required)</h3>
           <ul>
-            <li>本地 1-6 分模拟评分、rubric 细目、发音代理诊断和弱项追踪默认开启。</li>
-            <li>Ladder 和 Coach Capsule 的基础版本不需要 API，不会把录音或文本发到外部服务。</li>
-            <li>历史、Ladder profile 和 Coach profile 都只保存在当前浏览器 localStorage。</li>
+            <li>Simulated 1–6 half-band scoring, rubric breakdown, acoustic telemetry, and weakness tracking run 100% locally by default.</li>
+            <li>Adaptive Ladder and Coach Capsule work out of the box using local diagnostic rules without sending audio or text to external servers.</li>
+            <li>All practice history, Ladder progression, and Coach profiles persist privately in browser localStorage.</li>
           </ul>
         </section>
 
         <section class="feedback-section">
-          <h3>AI 内容评分</h3>
+          <h3>Optional AI Content Evaluation</h3>
           <label class="check-row">
             <input id="aiEnabled" type="checkbox" ${setup.ai.enabled ? "checked" : ""}>
-            <span>启用外部 AI 评分增强</span>
+            <span>Enable external AI content evaluation</span>
           </label>
           <label class="setup-field">
-            <span>API 类型</span>
+            <span>API Provider Format</span>
             <select id="aiMode">
               <option value="responses" ${setup.ai.mode === "responses" ? "selected" : ""}>OpenAI Responses API</option>
               <option value="chat" ${setup.ai.mode === "chat" ? "selected" : ""}>OpenAI-compatible Chat Completions</option>
@@ -2836,14 +2836,14 @@ function renderSetupView() {
             <span>Temperature</span>
             <input id="aiTemperature" type="number" step="0.1" min="0" max="1" value="${escapeHtml(String(setup.ai.temperature))}">
           </label>
-          <p class="compact-copy">AI 会按 TOEFL 口语维度补充内容、语法、结构和示范改写。没有配置时自动使用本地评分。</p>
+          <p class="compact-copy">Supplements local scoring with LLM-powered rubric critique and upgraded sample responses. Falls back to local scoring when unconfigured.</p>
         </section>
 
         <section class="feedback-section">
-          <h3>逐音素/发音评分</h3>
+          <h3>Optional Phoneme-Level Pronunciation API</h3>
           <label class="check-row">
             <input id="pronEnabled" type="checkbox" ${setup.pronunciation.enabled ? "checked" : ""}>
-            <span>启用外部发音评分增强</span>
+            <span>Enable external phoneme pronunciation assessment</span>
           </label>
           <label class="setup-field">
             <span>Provider</span>
@@ -2858,47 +2858,47 @@ function renderSetupView() {
           </label>
           <label class="setup-field">
             <span>Endpoint Override</span>
-            <input id="pronEndpoint" value="${escapeHtml(setup.pronunciation.endpoint)}" placeholder="留空则按 Azure region 自动生成">
+            <input id="pronEndpoint" value="${escapeHtml(setup.pronunciation.endpoint)}" placeholder="Leave blank to auto-generate from Azure region">
           </label>
           <label class="setup-field">
             <span>API Key</span>
-            <input id="pronKey" type="password" value="${escapeHtml(setup.pronunciation.apiKey)}" placeholder="Azure Speech key 或自定义 key">
+            <input id="pronKey" type="password" value="${escapeHtml(setup.pronunciation.apiKey)}" placeholder="Azure Speech key or custom endpoint key">
           </label>
-          <p class="compact-copy">Azure 模式会把录音转成 16kHz WAV 后请求 Pronunciation Assessment。Custom 模式会向你的 endpoint 发送 JSON。</p>
+          <p class="compact-copy">Azure mode converts audio to 16kHz mono WAV for Pronunciation Assessment. Custom mode posts JSON to your configured endpoint.</p>
         </section>
 
         <section class="feedback-section">
           <h3>Agentic Coach</h3>
           <label class="check-row">
             <input id="coachEnabled" type="checkbox" ${setup.coach.enabled ? "checked" : ""}>
-            <span>启用 Coach Capsule 深度复练入口</span>
+            <span>Enable Coach Capsule retake workflow</span>
           </label>
           <label class="check-row">
             <input id="coachUseAi" type="checkbox" ${setup.coach.useAi ? "checked" : ""}>
-            <span>使用 AI 生成 Coach 诊断和 micro-drill</span>
+            <span>Use AI to generate Coach diagnostics and micro-drills</span>
           </label>
           <label class="setup-field">
-            <span>Coach 输出风格</span>
+            <span>Coach Feedback Tone</span>
             <select id="coachTone">
-              <option value="strict" ${setup.coach.tone === "strict" ? "selected" : ""}>严格</option>
-              <option value="balanced" ${setup.coach.tone === "balanced" ? "selected" : ""}>平衡</option>
-              <option value="encouraging" ${setup.coach.tone === "encouraging" ? "selected" : ""}>鼓励</option>
+              <option value="strict" ${setup.coach.tone === "strict" ? "selected" : ""}>Strict Examiner</option>
+              <option value="balanced" ${setup.coach.tone === "balanced" ? "selected" : ""}>Balanced Coach</option>
+              <option value="encouraging" ${setup.coach.tone === "encouraging" ? "selected" : ""}>Encouraging Mentor</option>
             </select>
           </label>
           <label class="check-row">
             <input id="coachSingleWeaknessOnly" type="checkbox" ${setup.coach.singleWeaknessOnly ? "checked" : ""}>
-            <span>每次只显示一个主要问题</span>
+            <span>Focus on one primary bottleneck per retake</span>
           </label>
-          <p class="compact-copy">Coach AI 复用上面的 AI 内容评分 endpoint、API key 和 model。未配置或调用失败时，会自动回到 Basic 本地规则。</p>
+          <p class="compact-copy">Coach AI reuses the AI Content Evaluation endpoint, key, and model above, automatically falling back to local diagnostic rules if unconfigured.</p>
         </section>
       </div>
 
       <section class="feedback-section setup-note">
-        <h3>安全说明</h3>
+        <h3>Privacy & Security</h3>
         <ul>
-          <li>源码里没有任何个人 API key，提交到 GitHub 不会泄露你的密钥。</li>
-          <li>密钥只存在当前浏览器 localStorage；换浏览器或清缓存后需要重新填写。</li>
-          <li>如果部署成公开网站，用户填写的 key 仍会在自己的浏览器里发起请求，适合个人工具，不适合多人 SaaS 后台。</li>
+          <li>No personal API keys are stored in source code.</li>
+          <li>Keys exist only in your current browser localStorage and are redacted from data exports.</li>
+          <li>Requests are made directly from the client browser using your local configuration.</li>
         </ul>
       </section>
     </section>
@@ -2931,7 +2931,7 @@ function renderWeaknessPanel(history) {
 
   return `
     <section class="feedback-section wide-section weakness-panel">
-      <h3>弱项追踪</h3>
+      <h3>Weakness Telemetry</h3>
       <div class="weakness-grid">
         ${weakScores
           .map(
@@ -2952,14 +2952,14 @@ function renderWeaknessPanel(history) {
 }
 
 function classifyIssue(issue) {
-  if (/漏|完整|复述/.test(issue)) return "复述完整度";
-  if (/理由|例子|结果|展开/.test(issue)) return "内容展开";
-  if (/组织|顺序|结构/.test(issue)) return "组织逻辑";
-  if (/发音|词尾|可识别/.test(issue)) return "发音清晰度";
-  if (/语速|停顿|流利/.test(issue)) return "流利度";
-  if (/录音|噪音|音量/.test(issue)) return "录音质量";
-  if (/词汇|重复|语言/.test(issue)) return "语言使用";
-  return "综合问题";
+  if (/omit|missing|completeness|retention|repeat|verbatim/i.test(issue)) return "Repetition Completeness";
+  if (/reason|example|result|brief|expand|claim/i.test(issue)) return "Topic Development";
+  if (/organization|order|sequence|discourse|structure/i.test(issue)) return "Discourse Organization";
+  if (/pronunciation|intelligibility|consonant|stress|articulate/i.test(issue)) return "Pronunciation Clarity";
+  if (/rate|pace|pacing|pause|filler|fluency/i.test(issue)) return "Fluency & Pacing";
+  if (/audio|microphone|noise|signal/i.test(issue)) return "Audio Signal Quality";
+  if (/vocabulary|lexical|repetition|language/i.test(issue)) return "Language Use";
+  return "General Delivery";
 }
 
 function continueLadderDiagnostic() {
@@ -2991,7 +2991,7 @@ function continueLadderDiagnostic() {
 }
 
 function resetLadderWithConfirm() {
-  const ok = window.confirm("确定重置 Ladder 诊断和训练进度吗？历史记录不会删除。");
+  const ok = window.confirm("Reset your Ladder diagnostic placement and progression? Practice history will be preserved.");
   if (!ok) return;
   state.ladder = getDefaultLadderProfile();
   saveLadderProfile();
@@ -3135,10 +3135,10 @@ function buildLadderPlan(profile, date) {
   const fixType = drillPrefersRepeat(fixDrill) ? "repeat" : "interview";
   const checkpointType = step.type === "repeat" ? "repeat" : step.type === "interview" ? "interview" : "mixed";
   const tasks = [
-    createLadderTask("Warm-up", "chunk-repeat", "repeat", warmDifficulty, "先用一题复述热身，目标是清楚和完整。", step.id),
+    createLadderTask("Warm-up", "chunk-repeat", "repeat", warmDifficulty, "Warm up with one Listen & Repeat item focusing on clarity and full keyword retention.", step.id),
     createLadderTask("Core Step", step.drill, step.type, step.difficulty, step.goal, step.id),
     createLadderTask("Fix Drill", fixDrill, fixType, step.difficulty, DRILL_LIBRARY[fixDrill].tip, step.id),
-    createLadderTask("Checkpoint", "checkpoint", checkpointType, step.difficulty, "像小测一样完成一题，检查今天的稳定度。", step.id)
+    createLadderTask("Checkpoint", "checkpoint", checkpointType, step.difficulty, "Complete one unassisted checkpoint prompt to verify today's speaking stability.", step.id)
   ];
   return { date, tasks };
 }
@@ -3237,13 +3237,13 @@ function getWeakestDetailScore(detailScores) {
 }
 
 function drillForWeakness(label) {
-  if (/听辨|完整|语序|复述|Completeness|Listening/.test(label)) return "chunk-repeat";
-  if (/发音|清晰|Pronunciation|pacing|节奏/.test(label)) return "pronunciation-focus";
-  if (/流利|Fluency|语速|停顿/.test(label)) return "speed-control";
-  if (/任务|回应|Task/.test(label)) return "answer-skeleton";
-  if (/展开|Development|例子/.test(label)) return "example-builder";
-  if (/组织|Organization|逻辑/.test(label)) return "result-builder";
-  if (/语言|Language|词汇/.test(label)) return "language-upgrade";
+  if (/Accuracy|Completeness|Order|Listening|Repetition/i.test(label)) return "chunk-repeat";
+  if (/Pronunciation|Intelligibility|Clarity/i.test(label)) return "pronunciation-focus";
+  if (/Fluency|Pacing|Speed|Pause/i.test(label)) return "speed-control";
+  if (/Task|Direct/i.test(label)) return "answer-skeleton";
+  if (/Development|Example|Reason/i.test(label)) return "example-builder";
+  if (/Organization|Discourse|Result/i.test(label)) return "result-builder";
+  if (/Language|Vocabulary|Lexical/i.test(label)) return "language-upgrade";
   return "example-builder";
 }
 
@@ -3523,13 +3523,13 @@ function bindMistakeReviewSwipe() {
 
 async function startCoachFromCurrentAttempt(source = "practice") {
   if (!state.setup.coach?.enabled) {
-    showToast("Coach Capsule 已在 Setup 中关闭。");
+    showToast("Coach Capsule is currently disabled in Setup.");
     return;
   }
   const question = getActiveQuestion(state.tab === "full" && state.full.active);
   const transcript = cleanupSpacing(state.transcript);
   if (!state.feedback || !transcript) {
-    showToast("先完成一次练习评分，再让 Coach 拆解这题。");
+    showToast("Score a practice response first before launching Coach Capsule.");
     return;
   }
 
@@ -3548,7 +3548,7 @@ async function startCoachFromCurrentAttempt(source = "practice") {
 
 async function startCoachFromLadder() {
   if (!state.setup.coach?.enabled) {
-    showToast("Coach Capsule 已在 Setup 中关闭。");
+    showToast("Coach Capsule is currently disabled in Setup.");
     return;
   }
   if (state.feedback && cleanupSpacing(state.transcript)) {
@@ -3570,11 +3570,11 @@ async function startCoachFromLadder() {
   const diagnosis = normalizeCoachDiagnosis({
     primaryWeakness,
     secondaryWeakness: question.type === "repeat" ? "endingRetention" : "reasonDevelopment",
-    mainDiagnosis: `当前 Ladder 推荐你先处理：${getWeaknessLabel(primaryWeakness, question.type)}。`,
+    mainDiagnosis: `Ladder priority target: ${getWeaknessLabel(primaryWeakness, question.type)}.`,
     evidence: [
-      `Ladder 最近推荐的 fix 是 ${DRILL_LIBRARY[profile.recommendedDrill]?.label || "Example Builder"}。`,
-      "这次 Coach 会先给你一个可执行 micro-drill，再让你完成一次重答。",
-      "完成重答后，系统会把结果写入本地 Coach Profile。"
+      `Recommended Ladder drill: ${DRILL_LIBRARY[profile.recommendedDrill]?.label || "Example Builder"}.`,
+      "Coach provides an actionable micro-drill below before you record your targeted retake.",
+      "Once you complete the retake, your progress updates your local Coach Profile."
     ],
     coachGoal: copy.goal,
     recommendedDrill: profile.recommendedDrill,
@@ -3603,7 +3603,7 @@ async function startCoachFromLadder() {
 
 async function startCoachFromHistory(historyId) {
   if (!state.setup.coach?.enabled) {
-    showToast("Coach Capsule 已在 Setup 中关闭。");
+    showToast("Coach Capsule is currently disabled in Setup.");
     return;
   }
   const item = loadHistory().find((entry) => entry.id === historyId);
@@ -3662,7 +3662,7 @@ async function runCoachDiagnosis() {
       diagnosis = await runAiCoachDiagnosis(payload);
       usedAi = true;
     } catch (error) {
-      coach.error = `AI Coach 调用失败，已切换到 Basic 本地规则：${error.message}`;
+      coach.error = `AI Coach request failed; switched to local diagnostic rules: ${error.message}`;
     }
   }
   if (!diagnosis) diagnosis = buildLocalCoachDiagnosis(payload);
@@ -3717,7 +3717,7 @@ function buildLocalCoachDiagnosis(payload) {
 async function runAiCoachDiagnosis(payload) {
   const config = state.setup.ai;
   if (!config.endpoint || !config.apiKey || !config.model) {
-    throw new Error("请在 Setup 里填写 AI endpoint、API key 和 model。");
+    throw new Error("Please configure your AI endpoint, API key, and model in Setup.");
   }
   const systemPrompt = [
     "You are VoxPilot, an adaptive TOEFL-style speaking coach.",
@@ -3762,14 +3762,14 @@ function startCoachRetake() {
   if (!state.coach.active) return;
   clearCoachRetakeWork();
   state.coach.phase = "retaking";
-  state.status = "准备 Coach 重答";
+  state.status = "Ready for Coach Retake";
   render();
 }
 
 function startCoachRetakeRecording() {
   if (!state.coach.active) return;
   if (state.isRecording && state.recordingTarget !== "coach") {
-    showToast("请先停止当前练习录音。");
+    showToast("Please stop the active recording first.");
     return;
   }
   state.recordingTarget = "coach";
@@ -3782,7 +3782,7 @@ async function analyzeCoachRetake() {
   if (!coach.active || coach.phase === "reflecting") return;
   const transcript = cleanupSpacing(coach.retake.transcript);
   if (!transcript) {
-    showToast("还没有 Coach 重答转写。可以先录音，也可以手动输入。");
+    showToast("No Coach retake transcript yet. Record your retake or type it manually.");
     return;
   }
 
@@ -3838,7 +3838,7 @@ async function runCoachReflection() {
       reflection = await runAiCoachReflection(payload);
       coach.usedAi = true;
     } catch (error) {
-      coach.error = `AI Reflection 调用失败，已使用 Basic 本地对比：${error.message}`;
+      coach.error = `AI Reflection failed; using local before/after comparison: ${error.message}`;
     }
   }
   if (!reflection) reflection = buildLocalCoachReflection(payload);
@@ -3852,7 +3852,7 @@ async function runCoachReflection() {
 async function runAiCoachReflection(payload) {
   const config = state.setup.ai;
   if (!config.endpoint || !config.apiKey || !config.model) {
-    throw new Error("请在 Setup 里填写 AI endpoint、API key 和 model。");
+    throw new Error("Please configure your AI endpoint, API key, and model in Setup.");
   }
   const systemPrompt = [
     "You are VoxPilot's retake evaluator.",
@@ -3878,18 +3878,18 @@ function buildLocalCoachReflection(payload) {
   const wordDelta = normalizeWords(payload.afterTranscript).length - normalizeWords(payload.beforeTranscript).length;
   const improved = mission.passed || afterScore >= beforeScore + 0.5 || wordDelta >= 12;
   const visibleChanges = [];
-  if (wordDelta > 8) visibleChanges.push("第二遍信息量更足，不再只是短句回答。");
+  if (wordDelta > 8) visibleChanges.push("Your retake included substantially more detail and elaboration.");
   if (mission.notes.length) visibleChanges.push(...mission.notes.slice(0, 3));
-  if (afterScore > beforeScore) visibleChanges.push(`本地模拟分从 ${beforeScore || "-"} 提升到 ${afterScore}/6。`);
-  if (!visibleChanges.length) visibleChanges.push("第二遍已经完成，但主要任务还不够稳定，建议马上再来一遍。");
+  if (afterScore > beforeScore) visibleChanges.push(`Simulated band improved from ${beforeScore || "-"} to ${afterScore}/6.`);
+  if (!visibleChanges.length) visibleChanges.push("Retake completed, but the primary target needs one more focused pass.");
   return {
     improved,
-    improvementSummary: improved ? "这次重答有明显进步，回答更接近 Coach mission。" : "这次重答还没有稳定完成 mission，先不要换题。",
+    improvementSummary: improved ? "Noticeable improvement on this retake—your response fulfilled the Coach mission." : "The Coach mission is not yet stable; try one more retake before switching prompts.",
     visibleChanges,
     remainingIssue: mission.remainingIssue,
     nextAction: improved
-      ? `继续练 ${state.coach.drill?.title || "当前 drill"}，直到连续 3 次稳定做到。`
-      : "马上按同一个 mission 再重答一次，只改一个主要问题。",
+      ? `Keep practicing ${state.coach.drill?.title || "this drill"} until you pass it 3 times in a row.`
+      : "Do one more immediate retake with the same mission, focusing on that single bottleneck.",
     profileUpdate: {
       stablePassDelta: improved ? 1 : -1,
       patternResolved: improved
@@ -3998,66 +3998,66 @@ function getStarterSteps(question) {
       detail: "content word"
     }));
     const keywords = keywordItems.map((item) => item.label).join(" / ");
-    const repeatText = state.showSentence ? question.text : "播放句子后整句复述。需要时可以先显示原句。";
+    const repeatText = state.showSentence ? question.text : "Play the sentence and repeat it completely. Toggle Show Sentence if you need visual support.";
     return [
       {
-        title: "关键词热身",
-        microGoal: "只抓核心词",
+        title: "Keyword Catch",
+        microGoal: "Anchor Content Words",
         interactionLabel: "Target Words",
         displayText: keywords,
-        promptNote: "这一步不要说完整句，只读出你听到的核心词。",
-        mission: "只说关键词。你不是在复述句子，而是在训练耳朵抓内容词。",
-        templateLabel: "只需要说",
+        promptNote: "Do not repeat the whole sentence yet—just speak the core content words you hear.",
+        mission: "Speak only the key content words to train auditory anchoring.",
+        templateLabel: "Target Words Only",
         template: keywords,
-        scaffoldTitle: "关键词靶点",
+        scaffoldTitle: "Content Word Targets",
         scaffoldType: "target-words",
         scaffold: keywordItems
       },
       {
-        title: "分块跟读",
-        microGoal: "按意群说",
+        title: "Chunk Shadowing",
+        microGoal: "Speak in Thought Groups",
         interactionLabel: "Chunk Builder",
         displayText: chunks.join(" / "),
-        promptNote: "每个斜线是一小块，一块一口气说完。",
-        mission: "按分块顺序跟读，先稳住关键词，再连接成短语。",
-        templateLabel: "照这个顺序拼",
+        promptNote: "Each slash marks a thought group—deliver each chunk smoothly in one breath.",
+        mission: "Repeat chunk by chunk in order, linking content words into natural phrases.",
+        templateLabel: "Chunk Sequence",
         template: chunks.join(" / "),
-        scaffoldTitle: "句块拼装",
+        scaffoldTitle: "Thought Group Assembly",
         scaffoldType: "chunks",
         scaffold: chunks.map((chunk) => ({ label: chunk, detail: "one breath" }))
       },
       {
-        title: "看关键词复述",
-        microGoal: "用关键词还原句子",
+        title: "Keyword Reconstruction",
+        microGoal: "Rebuild from Cues",
         interactionLabel: "Keyword Recall",
         displayText: keywords,
-        promptNote: "现在完整句消失了，只用关键词把句子补回来。",
-        mission: "用关键词还原主要意思。可以改写一点，但要有主语、动词和句尾信息。",
-        templateLabel: "必须包含",
+        promptNote: "Reconstruct the complete sentence using only the keyword cues below.",
+        mission: "Rebuild the full sentence from the keywords, keeping the subject, main verb, and ending intact.",
+        templateLabel: "Required Cues",
         template: keywords,
-        scaffoldTitle: "只能看这些线索",
+        scaffoldTitle: "Reconstruction Cues",
         scaffoldType: "recall-cues",
         scaffold: [
-          { label: "Start with subject + verb", detail: "不要只报关键词列表" },
-          { label: keywords, detail: "关键词尽量都放进去" },
-          { label: "Finish the ending", detail: "句尾信息不能丢" }
+          { label: "Start with subject + verb", detail: "Form a complete clause, not a word list" },
+          { label: keywords, detail: "Include all core content words" },
+          { label: "Finish the ending", detail: "Retain the final modifier phrase" }
         ]
       },
       {
-        title: "完整复述",
-        microGoal: "回到原题",
+        title: "Full Verbatim Repeat",
+        microGoal: "Full Prompt Execution",
         interactionLabel: "Full Task",
         displayText: repeatText,
-        promptNote: "这一轮使用完整本地评分，但仍然不会调用 AI。",
-        mission: "播放后整句复述，尽量保留关键词、顺序和句尾。",
-        templateLabel: "考试化流程",
+        promptNote: "Evaluated with the full local 1–6 scoring rubric (no external AI required).",
+        mission: "Listen once and repeat the entire sentence verbatim with natural pacing.",
+        templateLabel: "Exam Workflow",
         template: "Listen -> pause -> repeat the whole sentence",
-        scaffoldTitle: "完整题检查",
+        scaffoldTitle: "Full Task Checklist",
         scaffoldType: "full-task",
         scaffold: [
-          { label: "Play once", detail: "先听完整句" },
-          { label: "No keyword card", detail: "尽量不依赖提示" },
-          { label: "Full local score", detail: "回到完整评分" }
+          { label: "Play once", detail: "Listen to the full prompt" },
+          { label: "No keyword card", detail: "Rely on auditory memory" },
+          { label: "Full local score", detail: "1–6 band rubric check" }
         ]
       }
     ];
@@ -4065,45 +4065,45 @@ function getStarterSteps(question) {
 
   return [
     {
-      title: "只说立场",
-      microGoal: "一句话开口",
+      title: "Direct Claim Only",
+      microGoal: "One-Sentence Opening",
       interactionLabel: "Choice Only",
       displayText: question.text,
-      promptNote: "这一步不要解释，不要举例，只选一个方向。",
-      mission: "只说一句观点。你的任务是先敢开口，而不是说完整答案。",
-      templateLabel: "只允许这种长度",
+      promptNote: "State your choice in one crisp sentence—no reasons or examples yet.",
+      mission: "Deliver one clear opening claim so you never hesitate at the start of an interview question.",
+      templateLabel: "Target Frame",
       template: "I prefer ___. / I think ___.",
-      scaffoldTitle: "二选一开口",
+      scaffoldTitle: "Opening Position Options",
       scaffoldType: "choice-only",
       scaffold: getStarterChoiceScaffold(question)
     },
     {
-      title: "加 because",
-      microGoal: "观点 + 理由",
+      title: "Add Reason (Because)",
+      microGoal: "Claim + Reason",
       interactionLabel: "Reason Builder",
       displayText: question.text,
-      promptNote: "这一步要把 Step 1 的观点接上一个原因。",
-      mission: "说一条完整 reason chain：观点 + because + 原因。还不要讲例子。",
-      templateLabel: "拼句骨架",
+      promptNote: "Connect your Step 1 claim to a concrete reason using because or since.",
+      mission: "Deliver a complete claim + reason chain (save your example for Step 3).",
+      templateLabel: "Reason Frame",
       template: "I prefer ___ because ___.",
-      scaffoldTitle: "理由零件",
+      scaffoldTitle: "Reason Building Blocks",
       scaffoldType: "reason-builder",
       scaffold: [
-        { label: "I prefer / I think", detail: "先重复你的立场" },
-        { label: "because", detail: "必须出现理由连接" },
-        { label: "it saves time / gives feedback / reduces stress", detail: "原因要比 good 更具体" }
+        { label: "I prefer / I think", detail: "State your opening claim" },
+        { label: "because", detail: "Explicit causal connector" },
+        { label: "it saves time / gives feedback / reduces stress", detail: "Use a specific benefit rather than 'good'" }
       ]
     },
     {
-      title: "加具体例子",
-      microGoal: "补一个场景",
+      title: "Concrete Example Card",
+      microGoal: "Add a Real Scenario",
       interactionLabel: "Example Card",
       displayText: question.text,
-      promptNote: "这一步像填一张小卡片：时间/场景 + 我做了什么。",
-      mission: "不要完整作答，只造一个具体例子。必须有场景和动作。",
-      templateLabel: "例子卡片",
+      promptNote: "Build a vivid example card: Time/Setting + Concrete Action.",
+      mission: "Speak just your supporting example with a specific time/place and concrete action verb.",
+      templateLabel: "Example Frame",
       template: "For example, last semester I ___.",
-      scaffoldTitle: "例子必须有两块",
+      scaffoldTitle: "Example Components",
       scaffoldType: "example-card",
       scaffold: [
         { label: "When / where", detail: "last semester / in my class / once" },
@@ -4112,15 +4112,15 @@ function getStarterSteps(question) {
       ]
     },
     {
-      title: "完整回答",
-      microGoal: "回到原题",
+      title: "Full Interview Response",
+      microGoal: "Full Prompt Execution",
       interactionLabel: "Full Task",
       displayText: question.text,
-      promptNote: "这一轮使用完整本地评分，但仍然不会调用 AI。",
-      mission: "说出观点、理由、例子和结果，完成一题基础答案。",
-      templateLabel: "完整答案路线",
+      promptNote: "Evaluated with the full local 1–6 scoring rubric (no external AI required).",
+      mission: "Combine your Claim, Reason, Example, and Result into a cohesive response.",
+      templateLabel: "Full Response Blueprint",
       template: "Opinion -> because -> example -> result",
-      scaffoldTitle: "四句结构",
+      scaffoldTitle: "4-Part Discourse Structure",
       scaffoldType: "full-task",
       scaffold: [
         { label: "Opinion", detail: "I prefer..." },
@@ -4180,7 +4180,7 @@ function setStarterMode(mode) {
   state.starter = getDefaultStarterState(mode);
   state.mode = mode;
   clearStarterAttemptWork(false);
-  state.status = "准备开始";
+  state.status = "Ready";
   render();
 }
 
@@ -4195,20 +4195,20 @@ function resetStarterQuestion() {
   state.mode = state.starter.mode;
   state.showSentence = false;
   clearStarterAttemptWork(false);
-  state.status = "已换一题，从 Step 1 开始";
+  state.status = "New prompt loaded, starting at Step 1";
   render();
 }
 
 function nextStarterStep() {
   if (!state.starter.feedback) {
-    showToast("先完成本步分析，再进入下一步。");
+    showToast("Check this step before moving to the next one.");
     return;
   }
   if (state.starter.step >= 4) return;
   state.starter.step += 1;
   state.showSentence = false;
   clearStarterAttemptWork(false);
-  state.status = `进入 Step ${state.starter.step}`;
+  state.status = `Entered Step ${state.starter.step}`;
   render();
 }
 
@@ -4241,18 +4241,18 @@ function analyzeStarterStep() {
   const transcript = cleanupSpacing(state.transcript);
   state.transcript = transcript;
   if (!transcript) {
-    showToast("先录音，或手动输入这一小步的回答。");
+    showToast("Record or type your response for this step first.");
     return;
   }
 
   state.isScoring = true;
-  state.status = "正在检查本步目标";
+  state.status = "Checking step goal";
   render();
 
   const feedback = createStarterFeedback(question, transcript);
   state.starter.feedback = feedback;
   state.isScoring = false;
-  state.status = feedback.result === "pass" ? "本步完成，可以进入下一步" : "本步反馈已生成，可以再来一次";
+  state.status = feedback.result === "pass" ? "Step complete. You can move on." : "Feedback ready. Try this step again.";
   state.starter.attempts.push({
     step: state.starter.step,
     transcript,
@@ -4284,14 +4284,14 @@ function createStarterInterviewFeedback(question, transcript) {
     return buildStarterResult({
       passed: direct && words.length >= 4 && !tooLong,
       almost: direct || words.length >= 4,
-      passSummary: "你已经直接说出立场。",
-      almostSummary: tooLong ? "你说得太完整了，这一步先练短立场。" : "接近了，但立场还可以更直接。",
-      retrySummary: "先只说一句明确观点。",
-      nextAction: "下一遍只说一句，不加 because，不加例子。",
+      passSummary: "You stated your position directly.",
+      almostSummary: tooLong ? "Your answer was too long; keep this step to one short claim." : "Close, but the claim could be more direct.",
+      retrySummary: "Say just one clear opinion.",
+      nextAction: "Next attempt: one sentence only, no because, no example.",
       checks: [
-        { label: "直接表态", passed: direct, detail: "开头有 I prefer / I think / I would / yes / no 这类信号。" },
-        { label: "完整短句", passed: words.length >= 4, detail: "至少说出 4 个词，形成一句能听懂的话。" },
-        { label: "保持很短", passed: !tooLong, detail: "这一步不要解释原因或举例。" }
+        { label: "Direct claim", passed: direct, detail: "Opens with a signal such as I prefer / I think / I would / yes / no." },
+        { label: "Complete sentence", passed: words.length >= 4, detail: "Say at least 4 words so the sentence is understandable." },
+        { label: "Stay brief", passed: !tooLong, detail: "Do not give reasons or examples in this step." }
       ]
     });
   }
@@ -4301,15 +4301,15 @@ function createStarterInterviewFeedback(question, transcript) {
     return buildStarterResult({
       passed: direct && reason && words.length >= 8 && !example && !hasGenericOnly,
       almost: (direct && reason) || reason || words.length >= 8,
-      passSummary: "你已经把观点和理由连起来。",
-      almostSummary: example ? "你已经开始举例了，但这一步先只练理由。" : "接近了，还需要更完整的 because 理由句。",
-      retrySummary: "这一轮只练观点 + because。",
-      nextAction: "下一遍用 I prefer ___ because ___，理由不要只说 good / helpful。",
+      passSummary: "You connected your claim to a reason.",
+      almostSummary: example ? "You started giving an example, but this step is only about the reason." : "Close; you need a fuller because-clause.",
+      retrySummary: "This round: claim + because only.",
+      nextAction: "Next attempt: use I prefer ___ because ___ and avoid vague reasons like good / helpful.",
       checks: [
-        { label: "有观点", passed: direct, detail: "先回答题目，再解释原因。" },
-        { label: "有 because 理由", passed: reason, detail: "出现 because / since / reason 这类理由连接。" },
-        { label: "原因不太泛", passed: !hasGenericOnly, detail: "不要只停在 good / helpful / interesting。" },
-        { label: "还不举例", passed: !example, detail: "Step 2 不需要 for example。" }
+        { label: "Has a claim", passed: direct, detail: "Answer the question first, then explain why." },
+        { label: "Has a because-reason", passed: reason, detail: "Uses a reason connector such as because / since / reason." },
+        { label: "Reason is specific", passed: !hasGenericOnly, detail: "Do not stop at good / helpful / interesting." },
+        { label: "No example yet", passed: !example, detail: "Step 2 does not need for example." }
       ]
     });
   }
@@ -4317,15 +4317,15 @@ function createStarterInterviewFeedback(question, transcript) {
   return buildStarterResult({
     passed: example && action && words.length >= 12 && !reason,
     almost: example || words.length >= 12,
-    passSummary: "你已经加入了一个具体例子。",
-    almostSummary: reason ? "你还在解释理由，这一步要像写一张例子卡。" : "接近了，例子还需要更像一个真实场景。",
-    retrySummary: "这一轮只练具体例子。",
-    nextAction: "下一遍加入 For example / last semester / once，并说清楚你做了什么。",
+    passSummary: "You added a concrete example.",
+    almostSummary: reason ? "You are still explaining the reason; this step is an example card." : "Close; the example should sound like a real scenario.",
+    retrySummary: "This round: concrete example only.",
+    nextAction: "Next attempt: add For example / last semester / once and say what you did.",
     checks: [
-      { label: "有例子信号", passed: example, detail: "出现 for example / once / last semester / when I 等场景信号。" },
-      { label: "有具体动作", passed: action, detail: "例子里有 prepared / joined / asked / created 等动作。" },
-      { label: "例子不是碎片", passed: words.length >= 12, detail: "至少 12 个词，让例子能独立听懂。" },
-      { label: "只做例子卡", passed: !reason, detail: "这一步不需要再解释 because。" }
+      { label: "Example signal", passed: example, detail: "Uses a scenario signal such as for example / once / last semester / when I." },
+      { label: "Concrete action", passed: action, detail: "The example includes an action like prepared / joined / asked / created." },
+      { label: "Example is complete", passed: words.length >= 12, detail: "Use at least 12 words so the example stands on its own." },
+      { label: "Example only", passed: !reason, detail: "No need to explain with because in this step." }
     ]
   });
 }
@@ -4344,14 +4344,14 @@ function createStarterRepeatFeedback(question, transcript) {
     return buildStarterResult({
       passed: hitRate >= 0.6 && words.length <= keywords.length + 2,
       almost: hitRate >= 0.4,
-      passSummary: "核心关键词抓得不错。",
-      almostSummary: words.length > keywords.length + 2 ? "你说得太像完整句了，这一步只报关键词。" : "已经抓到一些关键词，还可以再补几个。",
-      retrySummary: "先别急着整句复述，抓关键词。",
-      nextAction: "下一遍只盯内容词，尤其是名词、动词、时间和地点。",
+      passSummary: "You caught the core keywords.",
+      almostSummary: words.length > keywords.length + 2 ? "You spoke a full sentence; this step is keywords only." : "You caught some keywords; add a few more.",
+      retrySummary: "Do not repeat the whole sentence yet; catch the keywords.",
+      nextAction: "Next attempt: focus on content words, especially nouns, verbs, times, and places.",
       checks: [
-        { label: "关键词命中", passed: hitRate >= 0.6, detail: `${hitCount}/${keywords.length} 个关键词被说出。` },
-        { label: "不是空白输出", passed: words.length >= 2, detail: "至少说出两个有效词。" },
-        { label: "只说关键词", passed: words.length <= keywords.length + 2, detail: "Step 1 不需要完整句。" }
+        { label: "Keyword hits", passed: hitRate >= 0.6, detail: `${hitCount}/${keywords.length} keywords spoken.` },
+        { label: "Non-empty output", passed: words.length >= 2, detail: "Say at least two meaningful words." },
+        { label: "Keywords only", passed: words.length <= keywords.length + 2, detail: "Step 1 does not need a full sentence." }
       ]
     });
   }
@@ -4360,14 +4360,14 @@ function createStarterRepeatFeedback(question, transcript) {
     return buildStarterResult({
       passed: hitRate >= 0.7 && words.length >= keywords.length && lengthFit < 0.95,
       almost: hitRate >= 0.5,
-      passSummary: "分块跟读已经能保留主要信息。",
-      almostSummary: "分块里有核心词，但还不够稳定。",
-      retrySummary: "这一轮只按意群跟读。",
-      nextAction: "下一遍一块一口气说完，不要逐词停顿。",
+      passSummary: "Your chunked repetition keeps the main information.",
+      almostSummary: "Core words are present in the chunks, but not yet stable.",
+      retrySummary: "This round: repeat by thought group only.",
+      nextAction: "Next attempt: say each chunk in one breath without word-by-word pauses.",
       checks: [
-        { label: "关键词更完整", passed: hitRate >= 0.7, detail: `${hitCount}/${keywords.length} 个关键词被保留。` },
-        { label: "输出长度够用", passed: words.length >= keywords.length, detail: "说出的词数至少覆盖关键词数量。" },
-        { label: "还不是完整复述", passed: lengthFit < 0.95, detail: "Step 2 先练分块，不急着整句考试化。" }
+        { label: "More complete keywords", passed: hitRate >= 0.7, detail: `${hitCount}/${keywords.length} keywords retained.` },
+        { label: "Sufficient length", passed: words.length >= keywords.length, detail: "Your word count covers at least the number of keywords." },
+        { label: "Not yet a full repeat", passed: lengthFit < 0.95, detail: "Step 2 practices chunks; full-sentence exam mode comes later." }
       ]
     });
   }
@@ -4375,13 +4375,13 @@ function createStarterRepeatFeedback(question, transcript) {
   return buildStarterResult({
     passed: hitRate >= 0.75 && lengthFit >= 0.45,
     almost: hitRate >= 0.55,
-    passSummary: "你已经能用关键词还原主要意思。",
-    almostSummary: "关键词有了，句子还需要更完整。",
-    retrySummary: "这一轮只看关键词复述。",
-    nextAction: "下一遍先说主语和动词，再把剩余关键词接上。",
+    passSummary: "You rebuilt the main meaning from keywords.",
+    almostSummary: "Keywords are there; the sentence needs to be more complete.",
+    retrySummary: "This round: keyword-based reconstruction only.",
+    nextAction: "Next attempt: start with the subject and verb, then attach the remaining keywords.",
     checks: [
-      { label: "关键词稳定", passed: hitRate >= 0.75, detail: `${hitCount}/${keywords.length} 个关键词被保留。` },
-      { label: "长度接近原句", passed: lengthFit >= 0.45, detail: "回答长度不能只剩关键词列表。" }
+      { label: "Stable keywords", passed: hitRate >= 0.75, detail: `${hitCount}/${keywords.length} keywords retained.` },
+      { label: "Length close to original", passed: lengthFit >= 0.45, detail: "The answer cannot be just a keyword list." }
     ]
   });
 }
@@ -4398,18 +4398,18 @@ function createStarterFullFeedback(question, transcript) {
   return buildStarterResult({
     passed,
     almost,
-    passSummary: "你完成了一道完整题。",
-    almostSummary: "你已经能完成完整题，还需要补稳结构。",
-    retrySummary: "这次还没完成完整题的基本要求。",
+    passSummary: "You completed a full prompt.",
+    almostSummary: "You can complete a full prompt; tighten the structure.",
+    retrySummary: "This attempt did not meet the basic requirements of the full prompt.",
     nextAction: passed
-      ? "下一步可以去练习台做类似题，或继续下一道起步训练。"
-      : "先回到前面的台阶，把观点、理由、例子或关键词补稳。",
+      ? "Next: try a similar prompt in the Studio, or continue with another Start Easy prompt."
+      : "Go back to earlier steps and strengthen your claim, reason, example, or keywords.",
     score: fullFeedback.score,
     fullFeedback,
     checks: [
-      { label: "完成完整题", passed: fullFeedback.score >= 2.6, detail: "已经使用完整本地评分检查整题表现。" },
-      { label: "达到起步通过线", passed, detail: "Start Easy 通过线是 3.2/6，不等同高分线。" },
-      { label: "AI 未强制介入", passed: true, detail: "本模式 Step 4 只使用本地完整评分，不调用 AI 或外部发音 API。" }
+      { label: "Completed full prompt", passed: fullFeedback.score >= 2.6, detail: "Full local scoring was used to check overall performance." },
+      { label: "Reached the starter pass line", passed, detail: "The Start Easy pass line is 3.2/6, not a high-score threshold." },
+      { label: "No AI required", passed: true, detail: "Step 4 uses only full local scoring and does not call AI or external pronunciation APIs." }
     ]
   });
 }
@@ -4495,7 +4495,7 @@ function reviewStarterHistory(item) {
   state.audioUrl = "";
   state.feedback = null;
   state.recordingTarget = "starter";
-  state.status = "已载入 Start Easy 历史记录";
+  state.status = "Loaded Start Easy history entry";
   render();
 }
 
@@ -4551,7 +4551,7 @@ async function startRecording() {
     clearCurrentWork(false);
   }
   state.isRecording = true;
-  state.status = SpeechRecognitionApi ? "正在录音，自动转写中" : "正在录音，可稍后手动输入转写";
+  state.status = SpeechRecognitionApi ? "Recording, auto-transcribing" : "Recording; you can type the transcript afterward";
   state.elapsed = 0;
   state.duration = 0;
   render();
@@ -4612,7 +4612,7 @@ async function startRecording() {
       });
       state.mediaRecorder.start();
     } catch (error) {
-      showToast("麦克风权限没有打开。你仍然可以手动输入转写后分析。");
+      showToast("Microphone access is off. You can still type a transcript and analyze it.");
     }
   }
 
@@ -4634,7 +4634,7 @@ function stopRecording() {
     : target === "wordDrill"
       ? getWordDrillTranscript(drillTarget)
       : state.transcript;
-  state.status = cleanupSpacing(transcript) ? "录音完成，已生成转写" : "录音完成，请检查或手动输入转写";
+  state.status = cleanupSpacing(transcript) ? "Recording complete, transcript generated" : "Recording complete; check or type the transcript";
   stopTimer();
 
   if (state.mediaRecorder && state.mediaRecorder.state !== "inactive") {
@@ -4715,7 +4715,7 @@ function startRecognition() {
     });
     recognition.addEventListener("error", () => {
       if (state.isRecording) {
-        state.status = "识别暂时不可用，可手动输入转写";
+        state.status = "Recognition unavailable; type the transcript manually";
         render();
       }
     });
@@ -4724,7 +4724,7 @@ function startRecognition() {
         try {
           recognition.start();
         } catch (error) {
-          state.status = "识别已暂停，可继续录音后手动修改文本";
+          state.status = "Recognition paused; edit the text manually or keep recording";
           updateStatusDom();
         }
       }
@@ -4732,7 +4732,7 @@ function startRecognition() {
     state.recognition = recognition;
     recognition.start();
   } catch (error) {
-    state.status = "识别启动失败，可手动输入转写";
+    state.status = "Recognition failed to start; type the transcript manually";
     updateStatusDom();
   }
 }
@@ -4766,7 +4766,7 @@ function updateStatusDom() {
 function speakPrompt() {
   const question = getActiveQuestion(state.tab === "full" && state.full.active);
   if (!window.speechSynthesis) {
-    showToast("当前浏览器不支持语音播放。");
+    showToast("Speech synthesis is not supported in this browser.");
     return;
   }
 
@@ -4776,7 +4776,7 @@ function speakPrompt() {
   utterance.pitch = 1;
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utterance);
-  state.status = question.type === "repeat" ? "正在播放句子" : "正在朗读题目";
+  state.status = question.type === "repeat" ? "Playing sentence" : "Reading prompt aloud";
   render();
 }
 
@@ -4787,12 +4787,12 @@ async function analyzeCurrent() {
   state.transcript = transcript;
 
   if (!transcript) {
-    showToast("还没有转写文本。可以先录音，也可以手动输入你说的内容。");
+    showToast("No transcript yet. Record first or type what you said.");
     return;
   }
 
   state.isScoring = true;
-  state.status = "正在生成评分报告";
+  state.status = "Generating score report";
   render();
 
   const scoringContext = getScoringContext();
@@ -4805,7 +4805,7 @@ async function analyzeCurrent() {
 
   state.feedback = feedback;
   state.isScoring = false;
-  state.status = "反馈已生成，可以修改后重录";
+  state.status = "Feedback ready; edit and retake if you like";
 
   const signature = `${question.id}|${transcript}|${feedback.score}|${state.duration}`;
   if (state.lastSavedSignature !== signature) {
@@ -4865,7 +4865,7 @@ function startFullRun() {
 
 function nextFullItem() {
   if (!state.feedback) {
-    showToast("先完成本题分析，再进入下一题。");
+    showToast("Analyze this prompt before moving to the next one.");
     return;
   }
 
@@ -4956,7 +4956,7 @@ function reviewHistory(id) {
   state.feedback = question.type === "repeat"
     ? createRepeatFeedback(question, item.transcript, item.duration)
     : createInterviewFeedback(question, item.transcript, item.duration);
-  state.status = "已载入历史记录";
+  state.status = "Loaded history entry";
   render();
 }
 
@@ -4968,7 +4968,7 @@ function clearCurrentWork(keepQuestion) {
   }
   state.feedback = null;
   state.isScoring = false;
-  state.status = "准备开始";
+  state.status = "Ready";
   state.elapsed = 0;
   state.duration = 0;
   state.audioStats = null;
@@ -5140,7 +5140,7 @@ function createFeedbackFromHistoryItem(item, question) {
 
 function getWeaknessLabel(weakness, taskType) {
   const labels = taskType === "repeat" ? REPEAT_WEAKNESSES : INTERVIEW_WEAKNESSES;
-  return labels[weakness] || REPEAT_WEAKNESSES[weakness] || INTERVIEW_WEAKNESSES[weakness] || weakness || "综合问题";
+  return labels[weakness] || REPEAT_WEAKNESSES[weakness] || INTERVIEW_WEAKNESSES[weakness] || weakness || "General delivery";
 }
 
 function weaknessFromDrill(drill, taskType) {
@@ -5233,10 +5233,10 @@ function inferRepeatWeakness(feedback) {
   const lowest = [...details].sort((a, b) => Number(a.score) - Number(b.score))[0];
   if (!lowest) return "keywordRetention";
   const label = lowest.label || "";
-  if (/完整|遗漏|漏词|Completeness|Listening|处理/.test(label)) return "keywordRetention";
-  if (/语序|顺序|order|sequence/i.test(label)) return "wordOrderStability";
-  if (/发音|清晰|Pronunciation|intelligibility/i.test(label)) return "pronunciationClarity";
-  if (/节奏|停顿|pace|pacing|fluency/i.test(label)) return "paceControl";
+  if (/Completeness|Accuracy|Listening|Retention/i.test(label)) return "keywordRetention";
+  if (/Order|Sequence/i.test(label)) return "wordOrderStability";
+  if (/Pronunciation|Intelligibility/i.test(label)) return "pronunciationClarity";
+  if (/Pace|Pacing|Fluency/i.test(label)) return "paceControl";
   return "endingRetention";
 }
 
@@ -5251,110 +5251,110 @@ function buildCoachEvidence(weakness, payload) {
   const text = ` ${String(payload.transcript || "").toLowerCase()} `;
   const evidence = [];
   if (payload.localFeedback?.summary) evidence.push(payload.localFeedback.summary);
-  if (weakness === "exampleSpecificity") evidence.push("回答里没有稳定出现 for example / last semester / one time 这类具体场景信号。");
-  if (weakness === "reasonDevelopment") evidence.push("观点后缺少 because / since 这样的理由展开。");
-  if (weakness === "organization") evidence.push("例子后缺少 as a result / this helped me 这样的结果句。");
-  if (weakness === "directAnswer") evidence.push("开头没有足够直接地给出立场。");
-  if (weakness === "languageUse") evidence.push("基础结构已经有了，下一步应该升级表达和减少重复。");
-  if (weakness === "fluency") evidence.push("停顿、填充词或节奏稳定性是下一遍更值得优先处理的点。");
-  if (weakness === "keywordRetention") evidence.push("复述任务优先看关键词和核心内容是否保留下来。");
-  if (weakness === "wordOrderStability") evidence.push("复述时需要减少主动改写，先保留原句顺序。");
-  if (weakness === "endingRetention") evidence.push("句尾信息容易在复述时丢失，下一遍只盯最后 3-5 个关键词。");
-  if (weakness === "pronunciationClarity") evidence.push("系统识别稳定性或本地发音代理分偏低，下一遍先慢速说清内容词。");
-  if (weakness === "paceControl") evidence.push("下一遍需要按意群停顿，而不是逐词挤出来。");
-  if (/\b(helpful|interesting|good|important)\b/.test(text)) evidence.push("你用了较泛的评价词，可以换成具体行动和结果。");
+  if (weakness === "exampleSpecificity") evidence.push("The answer lacks a clear scenario signal such as for example / last semester / one time.");
+  if (weakness === "reasonDevelopment") evidence.push("The claim is not followed by a reason introduced with because / since.");
+  if (weakness === "organization") evidence.push("The example is not followed by a result sentence such as as a result / this helped me.");
+  if (weakness === "directAnswer") evidence.push("The opening does not state a position directly enough.");
+  if (weakness === "languageUse") evidence.push("The basic structure is there; next, upgrade the wording and reduce repetition.");
+  if (weakness === "fluency") evidence.push("Pauses, filler words, or rhythm stability are the best targets for the next attempt.");
+  if (weakness === "keywordRetention") evidence.push("For repeat tasks, check first whether keywords and core content were retained.");
+  if (weakness === "wordOrderStability") evidence.push("Paraphrase less and keep the original word order.");
+  if (weakness === "endingRetention") evidence.push("Sentence endings are easy to lose; next time focus on the last 3-5 keywords.");
+  if (weakness === "pronunciationClarity") evidence.push("Recognition stability or the local pronunciation proxy is low; speak content words slowly and clearly next time.");
+  if (weakness === "paceControl") evidence.push("Pause between thought groups instead of pushing out one word at a time.");
+  if (/\b(helpful|interesting|good|important)\b/.test(text)) evidence.push("You used vague evaluative words; replace them with concrete actions and results.");
   return evidence.slice(0, 4);
 }
 
 function getCoachCopy(weakness, taskType) {
   const copies = {
     keywordRetention: {
-      diagnosis: "你的复述主要问题是关键词保留不够稳定。",
-      goal: "先抓住主语、动词、时间地点和内容词。",
-      instruction: "把原句拆成 2-3 个意群，每块只保留关键词，再连起来复述。",
-      mission: "下一遍只做一件事：保留原句关键词，不主动换词。",
-      criteria: ["至少保留主要名词和动词", "不要加入原句没有的信息", "句子意思不能变"],
-      feedback: "先求准，再求快。"
+      diagnosis: "Your main repeat issue is unstable keyword retention.",
+      goal: "Catch the subject, verb, time, place, and content words first.",
+      instruction: "Split the sentence into 2-3 thought groups, keep only keywords in each, then link them.",
+      mission: "Next attempt, do one thing: keep the original keywords and do not swap words.",
+      criteria: ["Keep the main nouns and verbs", "Add no information that was not in the sentence", "Do not change the meaning"],
+      feedback: "Accuracy first, then speed."
     },
     wordOrderStability: {
-      diagnosis: "你的复述有内容，但语序和句子骨架不够稳定。",
-      goal: "按原句顺序复述，不急着改写。",
-      instruction: "听完后先默念句子骨架，再按原来的顺序说出来。",
-      mission: "下一遍必须尽量保持原句顺序。",
-      criteria: ["先说主语和动词", "中间信息按原顺序", "不主动 paraphrase"],
-      feedback: "这一题先练句子骨架。"
+      diagnosis: "Your repeat has content, but word order and sentence frame are unstable.",
+      goal: "Repeat in the original order; do not rush to paraphrase.",
+      instruction: "After listening, silently rehearse the sentence frame, then say it in the original order.",
+      mission: "Next attempt must keep the original word order.",
+      criteria: ["Start with the subject and verb", "Keep middle details in order", "Do not paraphrase"],
+      feedback: "Practice the sentence frame on this item."
     },
     endingRetention: {
-      diagnosis: "你的句尾信息容易丢失，导致复述不完整。",
-      goal: "把最后一个意群说完整。",
-      instruction: "听的时候特别标记最后 3-5 个内容词，复述时放慢句尾。",
-      mission: "下一遍必须把句尾关键词说出来。",
-      criteria: ["保留最后一个意群", "词尾音说完整", "不要越说越轻"],
-      feedback: "这次只盯句尾。"
+      diagnosis: "Sentence endings are getting lost, making your repeat incomplete.",
+      goal: "Finish the final thought group completely.",
+      instruction: "While listening, mark the last 3-5 content words and slow down at the end when repeating.",
+      mission: "Next attempt must include the ending keywords.",
+      criteria: ["Keep the final thought group", "Finish word-final sounds", "Do not trail off"],
+      feedback: "This time, focus only on the ending."
     },
     pronunciationClarity: {
-      diagnosis: "你的发音清晰度会影响系统识别和听感。",
-      goal: "慢速说清内容词和词尾音。",
-      instruction: "选出 3 个内容词，先慢读两遍，再整句复述。",
-      mission: "下一遍放慢 10%，把内容词和词尾音说完整。",
-      criteria: ["内容词重读", "词尾音不吞", "录音音量稳定"],
-      feedback: "先清楚，再自然。"
+      diagnosis: "Pronunciation clarity is affecting recognition and listener comprehension.",
+      goal: "Speak content words and final sounds slowly and clearly.",
+      instruction: "Pick 3 content words, read them slowly twice, then repeat the whole sentence.",
+      mission: "Next attempt: slow down about 10% and complete content words and final sounds.",
+      criteria: ["Stress content words", "Do not swallow final sounds", "Keep recording volume steady"],
+      feedback: "Clear first, natural second."
     },
     paceControl: {
-      diagnosis: "你的语速和停顿控制还不够稳。",
-      goal: "按意群连续说完，减少长停顿。",
-      instruction: "用斜线把句子分块，每块一口气说完，块与块之间短停顿。",
-      mission: "下一遍按 2-3 个意群说，不逐词停顿。",
-      criteria: ["长停顿少于 1.2 秒", "每个意群连续", "整体语速自然"],
-      feedback: "把句子当成块，不当成单词清单。"
+      diagnosis: "Your pace and pause control are not yet steady.",
+      goal: "Speak through each thought group and reduce long pauses.",
+      instruction: "Mark the sentence into chunks with slashes, say each chunk in one breath, and pause briefly between chunks.",
+      mission: "Next attempt: use 2-3 thought groups and do not pause between every word.",
+      criteria: ["Long pauses under 1.2 seconds", "Each thought group is continuous", "Overall pace sounds natural"],
+      feedback: "Treat the sentence as chunks, not a list of words."
     },
     directAnswer: {
-      diagnosis: "你的回答需要更直接地开头表态。",
-      goal: "第一句话直接回答题目。",
-      instruction: "使用模板：I prefer ___ because ___. 然后再解释。",
-      mission: "下一遍第一句必须直接给观点。",
-      criteria: ["开头出现 I prefer / I think / I would", "不要先铺垫", "第一句包含 because 或理由方向"],
-      feedback: "先回答，再展开。"
+      diagnosis: "Your answer needs a more direct opening position.",
+      goal: "Answer the question in your first sentence.",
+      instruction: "Use the template: I prefer ___ because ___. Then explain.",
+      mission: "Next attempt: the first sentence must state your opinion.",
+      criteria: ["Open with I prefer / I think / I would", "Do not build up first", "Include because or a reason in the first sentence"],
+      feedback: "Answer first, then expand."
     },
     reasonDevelopment: {
-      diagnosis: "你的观点有了，但理由展开不足。",
-      goal: "用 because 把观点和原因连起来。",
-      instruction: "用两句完成：I prefer ___. This is because ___.",
-      mission: "下一遍必须有一个清楚的 because 理由句。",
-      criteria: ["有 because / since", "理由解释为什么", "不要只说 helpful / good"],
-      feedback: "理由要解释作用。"
+      diagnosis: "You have a claim, but the reason is underdeveloped.",
+      goal: "Link your claim to the reason with because.",
+      instruction: "Use two sentences: I prefer ___. This is because ___.",
+      mission: "Next attempt must include a clear because-sentence.",
+      criteria: ["Uses because / since", "The reason explains why", "Not just helpful / good"],
+      feedback: "A reason should explain the effect."
     },
     exampleSpecificity: {
-      diagnosis: "你的回答有观点，但例子不够具体。",
-      goal: "加入一个具体经历和一个结果句。",
-      instruction: "使用结构：I prefer ___ because ___. For example, last semester I ___. This helped me ___.",
-      mission: "下一遍必须包含具体时间或场景、你做了什么、结果是什么。",
-      criteria: ["有具体时间或场景", "有一个具体行动", "有结果句"],
-      feedback: "从泛泛理由变成真实场景。"
+      diagnosis: "You have a claim, but the example is not specific enough.",
+      goal: "Add one concrete experience and one result sentence.",
+      instruction: "Use this structure: I prefer ___ because ___. For example, last semester I ___. This helped me ___.",
+      mission: "Next attempt must include a specific time or scene, what you did, and the result.",
+      criteria: ["Has a specific time or scene", "Has one concrete action", "Has a result sentence"],
+      feedback: "Turn a generic reason into a real scenario."
     },
     organization: {
-      diagnosis: "你的内容有材料，但结构收束不够清楚。",
-      goal: "用观点、理由、例子、结果把回答闭合。",
-      instruction: "按四句结构说：观点 → because 理由 → for example 例子 → so/result 结论。",
-      mission: "下一遍必须有清楚的结果句或总结句。",
-      criteria: ["观点在前", "例子后有结果", "结尾回到题目"],
-      feedback: "让听的人知道你说完了什么。"
+      diagnosis: "You have enough material, but the structure does not close clearly.",
+      goal: "Close the answer with claim, reason, example, and result.",
+      instruction: "Use four sentences: claim → because reason → for example → so/result conclusion.",
+      mission: "Next attempt must include a clear result or summary sentence.",
+      criteria: ["Claim comes first", "Result follows the example", "Ending returns to the question"],
+      feedback: "Let the listener know you have finished."
     },
     languageUse: {
-      diagnosis: "你的基础意思能表达，但词汇和句式还比较单一。",
-      goal: "把泛词换成具体表达。",
-      instruction: "把 good/helpful/interesting 换成 improve my efficiency / receive feedback / reduce stress 这类表达。",
-      mission: "下一遍至少升级两个泛泛表达。",
-      criteria: ["少用 good / helpful", "加入一个具体动词短语", "语法保持简单但准确"],
-      feedback: "升级表达，不堆复杂句。"
+      diagnosis: "You can express the basic meaning, but vocabulary and sentence patterns are repetitive.",
+      goal: "Replace vague words with specific expressions.",
+      instruction: "Replace good/helpful/interesting with phrases like improve my efficiency / receive feedback / reduce stress.",
+      mission: "Next attempt: upgrade at least two vague expressions.",
+      criteria: ["Use good / helpful less", "Add one specific verb phrase", "Keep grammar simple but accurate"],
+      feedback: "Upgrade wording without piling on complex sentences."
     },
     fluency: {
-      diagnosis: "你的回答需要更稳定的流利度。",
-      goal: "用短句连续说完，减少填充词和长停顿。",
-      instruction: "先写 4 个关键词，再用 4 个短句说完，不追求长难句。",
-      mission: "下一遍用短句连续说，避免长时间停住。",
-      criteria: ["少于 3 个填充词", "每句 8-14 个词", "中途不重启答案"],
-      feedback: "短句稳定比长句卡住更好。"
+      diagnosis: "Your answer needs steadier fluency.",
+      goal: "Finish with short, continuous sentences and fewer fillers and long pauses.",
+      instruction: "Write 4 keywords first, then speak 4 short sentences; do not aim for long, complex ones.",
+      mission: "Next attempt: speak in short sentences and avoid long stalls.",
+      criteria: ["Fewer than 3 filler words", "8-14 words per sentence", "Do not restart the answer midway"],
+      feedback: "Steady short sentences beat stalling on long ones."
     }
   };
   return copies[weakness] || copies[taskType === "repeat" ? "keywordRetention" : "exampleSpecificity"];
@@ -5365,42 +5365,42 @@ function evaluateCoachMission(transcript, weakness) {
   const lower = ` ${String(transcript || "").toLowerCase()} `;
   const notes = [];
   let passed = false;
-  let remainingIssue = "mission 还不够稳定。";
+  let remainingIssue = "The mission is not yet stable.";
   if (weakness === "exampleSpecificity") {
     const hasScene = /\b(for example|for instance|last semester|one time|once|when i|in my class|in one course)\b/.test(lower);
     const hasResult = /\b(as a result|this helped|therefore|because of this|so i|that is why)\b/.test(lower);
     passed = hasScene && hasResult;
-    if (hasScene) notes.push("第二遍加入了具体场景或经历。");
-    if (hasResult) notes.push("第二遍补上了结果句。");
-    remainingIssue = "还需要同时出现具体场景和结果句。";
+    if (hasScene) notes.push("Your retake added a specific scene or experience.");
+    if (hasResult) notes.push("Your retake added a result sentence.");
+    remainingIssue = "You still need both a specific scene and a result sentence.";
   } else if (weakness === "reasonDevelopment") {
     passed = /\b(because|since|the reason)\b/.test(lower) && words.length >= 24;
-    if (passed) notes.push("第二遍有更清楚的 because 理由句。");
-    remainingIssue = "理由还需要解释为什么，而不是只给评价词。";
+    if (passed) notes.push("Your retake has a clearer because-sentence.");
+    remainingIssue = "The reason must explain why, not just give an evaluative word.";
   } else if (weakness === "directAnswer") {
     passed = /\b(i think|i believe|i prefer|i would|yes|no)\b/.test(lower.slice(0, 120));
-    if (passed) notes.push("第二遍开头更直接地回答了题目。");
-    remainingIssue = "第一句话还需要更快给出立场。";
+    if (passed) notes.push("Your retake opens by answering the question more directly.");
+    remainingIssue = "The first sentence still needs to state your position sooner.";
   } else if (weakness === "organization") {
     passed = /\b(for example|for instance)\b/.test(lower) && /\b(as a result|therefore|that is why|so i)\b/.test(lower);
-    if (passed) notes.push("第二遍结构更完整，有例子也有结果。");
-    remainingIssue = "还需要在例子后补一句结果或总结。";
+    if (passed) notes.push("Your retake has a fuller structure with both an example and a result.");
+    remainingIssue = "Add a result or summary sentence after the example.";
   } else if (weakness === "languageUse") {
     const uniqueRatio = words.length ? new Set(words).size / words.length : 0;
     passed = words.length >= 30 && uniqueRatio >= 0.55;
-    if (passed) notes.push("第二遍表达更丰富，重复词比例更低。");
-    remainingIssue = "表达还可以更具体，减少 good/helpful/interesting。";
+    if (passed) notes.push("Your retake uses richer wording with less repetition.");
+    remainingIssue = "Be more specific and use good/helpful/interesting less.";
   } else if (weakness === "fluency") {
     const fillers = lower.match(/\b(um|uh|er|like|you know|sort of|kind of)\b/g) || [];
     passed = words.length >= 25 && fillers.length <= 2;
-    if (passed) notes.push("第二遍更连续，填充词控制更好。");
-    remainingIssue = "还需要减少填充词或长停顿。";
+    if (passed) notes.push("Your retake is more continuous with better filler control.");
+    remainingIssue = "Reduce filler words or long pauses.";
   } else {
     const refWords = normalizeWords(state.coach.original.questionText);
     const overlap = refWords.length ? countOverlap(refWords, new Set(words)) / Math.max(1, new Set(refWords).size) : 0;
     passed = overlap >= 0.62;
-    if (passed) notes.push("第二遍保留了更多原句关键词。");
-    remainingIssue = "复述关键词保留还不够，先抓内容词。";
+    if (passed) notes.push("Your retake kept more of the original keywords.");
+    remainingIssue = "Keyword retention is still low; catch the content words first.";
   }
   return { passed, notes, remainingIssue };
 }
@@ -5424,7 +5424,7 @@ function getDefaultCoachProfile() {
   return {
     version: "1.0",
     updatedAt: new Date().toISOString(),
-    levelHint: state.ladder?.diagnosed ? (LADDER_LEVELS[state.ladder.level] || LADDER_LEVELS[1]).name : "未诊断",
+    levelHint: state.ladder?.diagnosed ? (LADDER_LEVELS[state.ladder.level] || LADDER_LEVELS[1]).name : "Undiagnosed",
     primaryWeakness: "",
     secondaryWeakness: "",
     skillState: {
@@ -5445,7 +5445,7 @@ function getDefaultCoachProfile() {
       }
     },
     recentPatterns: [],
-    currentCoachGoal: "完成一次 Coach 重答，建立你的第一条复练目标。",
+    currentCoachGoal: "Complete one Coach retake to set your first practice goal.",
     currentDrill: "example-builder",
     stablePasses: 0
   };
@@ -5515,7 +5515,7 @@ function updateCoachProfile(session) {
   const pattern = patternForWeakness(primary);
   profile.recentPatterns = [pattern, ...(profile.recentPatterns || []).filter((item) => item !== pattern)].slice(0, 8);
   if (profile.stablePasses >= 3) {
-    profile.currentCoachGoal = "这个目标已经连续稳定完成。下一次 Coach 会根据新回答挑一个更高优先级问题。";
+    profile.currentCoachGoal = "You have hit this goal consistently. Next time Coach will pick a higher-priority issue from your new answer.";
     profile.stablePasses = 0;
   }
   saveCoachProfile(profile);
@@ -5670,7 +5670,7 @@ function clearCoachDataWithConfirm() {
   const hasCoachSessions = loadCoachSessions().length > 0;
   const hasCoachProfile = Boolean(localStorage.getItem(COACH_PROFILE_STORAGE_KEY));
   if (!hasCoachSessions && !hasCoachProfile) return;
-  const ok = window.confirm("确定只清空 Coach 复练记录和 Coach Profile 吗？普通练习历史和 Ladder 不会删除。");
+  const ok = window.confirm("Clear only Coach retake records and the Coach Profile? Regular practice history and Ladder are kept.");
   if (!ok) return;
   localStorage.removeItem(COACH_SESSIONS_STORAGE_KEY);
   localStorage.removeItem(COACH_PROFILE_STORAGE_KEY);
@@ -5683,7 +5683,7 @@ function clearHistoryWithConfirm() {
   const hasCoachSessions = loadCoachSessions().length > 0;
   const hasCoachProfile = Boolean(localStorage.getItem(COACH_PROFILE_STORAGE_KEY));
   if (!hasHistory && !hasCoachSessions && !hasCoachProfile) return;
-  const ok = window.confirm("确定清空本地练习历史、Coach 复练记录和 Coach Profile 吗？这个操作只影响当前浏览器。");
+  const ok = window.confirm("Clear local practice history, Coach retake records, and the Coach Profile? This only affects this browser.");
   if (!ok) return;
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(COACH_SESSIONS_STORAGE_KEY);
@@ -5761,11 +5761,11 @@ function saveSetupFromForm() {
   };
   state.setup = mergeSetupConfig(getDefaultSetupConfig(), setup);
   localStorage.setItem(SETUP_STORAGE_KEY, JSON.stringify(state.setup));
-  showToast("设置已保存到当前浏览器。");
+  showToast("Settings saved to this browser.");
 }
 
 function clearSetupWithConfirm() {
-  const ok = window.confirm("确定清空本地 API 设置吗？");
+  const ok = window.confirm("Clear local API settings?");
   if (!ok) return;
   localStorage.removeItem(SETUP_STORAGE_KEY);
   state.setup = getDefaultSetupConfig();

@@ -133,7 +133,7 @@ function assert(condition, message) {
 }
 
 assert(appElement.innerHTML.includes("VoxPilot Speaking Lab"), "initial render failed");
-assert(appElement.innerHTML.includes("Start Easy") || appElement.innerHTML.includes("起步训练"), "starter mode did not render");
+assert(appElement.innerHTML.includes("Start Easy"), "starter mode did not render");
 
 api.state.transcript = "I prefer studying with classmates.";
 api.analyzeStarterStep();

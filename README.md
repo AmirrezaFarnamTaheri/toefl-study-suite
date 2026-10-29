@@ -1,7 +1,5 @@
 # VoxPilot Speaking Lab
 
-**English** | [简体中文](README.zh-CN.md)
-
 **Live Demo:** [https://vox-pilot-speaking-lab.vercel.app/](https://vox-pilot-speaking-lab.vercel.app/)
 
 VoxPilot Speaking Lab is a no-login, no-database, ready-to-run local speaking practice app. It is designed for TOEFL-style speaking practice, including repetition drills, interview-style responses, simulated scoring, pronunciation diagnostics, retry comparison, and optional AI/API-enhanced feedback.
@@ -170,7 +168,6 @@ The build copies the deployable files into `dist/`, and Vercel serves that folde
 │   └── smoke-test.mjs
 ├── vercel.json
 ├── README.md
-├── README.zh-CN.md
 └── LICENSE
 ```
 

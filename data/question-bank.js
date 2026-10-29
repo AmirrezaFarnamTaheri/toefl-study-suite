@@ -6,7 +6,7 @@ const QUESTION_BANK = {
       category: "Campus",
       difficulty: "Easy",
       text: "The library will extend its hours during final exam week.",
-      focus: "清晰复述公告句"
+      focus: "Clear announcement delivery"
     },
     {
       id: "lr-02",
@@ -14,7 +14,7 @@ const QUESTION_BANK = {
       category: "Class",
       difficulty: "Easy",
       text: "Students should submit the research outline before Friday afternoon.",
-      focus: "时间信息和名词短语"
+      focus: "Time expressions & noun phrases"
     },
     {
       id: "lr-03",
@@ -22,7 +22,7 @@ const QUESTION_BANK = {
       category: "Project",
       difficulty: "Medium",
       text: "Our group decided to revise the introduction after receiving feedback.",
-      focus: "过去式和长名词结构"
+      focus: "Past tense & complex noun phrases"
     },
     {
       id: "lr-04",
@@ -30,7 +30,7 @@ const QUESTION_BANK = {
       category: "Campus",
       difficulty: "Medium",
       text: "The student center offers quiet study rooms and small meeting spaces.",
-      focus: "并列结构"
+      focus: "Parallel structure"
     },
     {
       id: "lr-05",
@@ -38,7 +38,7 @@ const QUESTION_BANK = {
       category: "Lecture",
       difficulty: "Hard",
       text: "The professor explained how environmental changes can influence animal behavior.",
-      focus: "学术表达"
+      focus: "Academic phrasing"
     },
     {
       id: "lr-06",
@@ -46,7 +46,7 @@ const QUESTION_BANK = {
       category: "Class",
       difficulty: "Medium",
       text: "I usually take notes by hand because it helps me remember details.",
-      focus: "原因从句"
+      focus: "Causal clauses"
     },
     {
       id: "lr-07",
@@ -54,7 +54,7 @@ const QUESTION_BANK = {
       category: "Campus",
       difficulty: "Easy",
       text: "The cafeteria added several healthy options to the lunch menu.",
-      focus: "日常校园词汇"
+      focus: "Everyday campus vocabulary"
     },
     {
       id: "lr-08",
@@ -62,7 +62,7 @@ const QUESTION_BANK = {
       category: "Technology",
       difficulty: "Medium",
       text: "Online discussion boards make it easier for shy students to participate.",
-      focus: "比较结构"
+      focus: "Comparative structure"
     },
     {
       id: "lr-09",
@@ -70,7 +70,7 @@ const QUESTION_BANK = {
       category: "Lecture",
       difficulty: "Hard",
       text: "Researchers collected data from several coastal communities over three years.",
-      focus: "多音节词和数字信息"
+      focus: "Polysyllabic words & numbers"
     },
     {
       id: "lr-10",
@@ -78,7 +78,7 @@ const QUESTION_BANK = {
       category: "Project",
       difficulty: "Easy",
       text: "We need to practice the presentation at least twice before class.",
-      focus: "情态动词和频率"
+      focus: "Modal verbs & frequency"
     },
     {
       id: "lr-11",
@@ -86,7 +86,7 @@ const QUESTION_BANK = {
       category: "Class",
       difficulty: "Medium",
       text: "The assignment asks us to compare two different theories of learning.",
-      focus: "任务要求"
+      focus: "Assignment requirements"
     },
     {
       id: "lr-12",
@@ -94,7 +94,7 @@ const QUESTION_BANK = {
       category: "Campus",
       difficulty: "Medium",
       text: "A new shuttle route connects the dormitories with the science building.",
-      focus: "地点连接"
+      focus: "Location connectors"
     },
     {
       id: "lr-13",
@@ -102,7 +102,7 @@ const QUESTION_BANK = {
       category: "Lecture",
       difficulty: "Hard",
       text: "Economic incentives can encourage companies to reduce energy consumption.",
-      focus: "抽象名词"
+      focus: "Abstract nouns"
     },
     {
       id: "lr-14",
@@ -110,7 +110,7 @@ const QUESTION_BANK = {
       category: "Project",
       difficulty: "Medium",
       text: "My partner suggested adding one more example to support our main argument.",
-      focus: "建议表达"
+      focus: "Making suggestions"
     },
     {
       id: "lr-15",
@@ -118,7 +118,7 @@ const QUESTION_BANK = {
       category: "Campus",
       difficulty: "Easy",
       text: "The writing center helps students improve essays and lab reports.",
-      focus: "服务介绍"
+      focus: "Campus service overview"
     },
     {
       id: "lr-16",
@@ -126,7 +126,7 @@ const QUESTION_BANK = {
       category: "Technology",
       difficulty: "Hard",
       text: "Digital textbooks can be updated quickly when new information becomes available.",
-      focus: "被动和时间状语"
+      focus: "Passive voice & time clauses"
     },
     {
       id: "lr-17",
@@ -134,7 +134,7 @@ const QUESTION_BANK = {
       category: "Class",
       difficulty: "Medium",
       text: "The instructor postponed the quiz because several students were absent.",
-      focus: "原因从句"
+      focus: "Causal clauses"
     },
     {
       id: "lr-18",
@@ -142,7 +142,7 @@ const QUESTION_BANK = {
       category: "Lecture",
       difficulty: "Hard",
       text: "Plants in dry regions often develop deep roots to reach underground water.",
-      focus: "学术因果"
+      focus: "Academic cause and effect"
     }
   ],
   interview: [
@@ -284,7 +284,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Campus",
     difficulty: "Easy",
     text: "The bookstore will offer discounts on used textbooks this week.",
-    focus: "校园服务和时间信息"
+    focus: "Campus services & time details"
   },
   {
     id: "lr-20",
@@ -292,7 +292,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Class",
     difficulty: "Easy",
     text: "Please bring your draft to the writing workshop tomorrow.",
-    focus: "课堂提醒"
+    focus: "Classroom reminders"
   },
   {
     id: "lr-21",
@@ -300,7 +300,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Campus",
     difficulty: "Medium",
     text: "The health center recommends making appointments through the online portal.",
-    focus: "校园机构和动名词"
+    focus: "Campus offices & gerund phrases"
   },
   {
     id: "lr-22",
@@ -308,7 +308,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Project",
     difficulty: "Medium",
     text: "Our team needs stronger evidence before we finalize the conclusion.",
-    focus: "项目讨论"
+    focus: "Project discussion"
   },
   {
     id: "lr-23",
@@ -316,7 +316,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Lecture",
     difficulty: "Hard",
     text: "The experiment showed that memory improves when information is organized into patterns.",
-    focus: "学术实验描述"
+    focus: "Academic experiment findings"
   },
   {
     id: "lr-24",
@@ -324,7 +324,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Technology",
     difficulty: "Medium",
     text: "Students can reserve computer labs for group projects after six o'clock.",
-    focus: "地点和时间"
+    focus: "Locations & scheduling"
   },
   {
     id: "lr-25",
@@ -332,7 +332,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Class",
     difficulty: "Easy",
     text: "The professor uploaded the lecture slides before the review session.",
-    focus: "过去式和课堂材料"
+    focus: "Past tense & course materials"
   },
   {
     id: "lr-26",
@@ -340,7 +340,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Campus",
     difficulty: "Medium",
     text: "The career office is hosting a resume clinic for international students.",
-    focus: "校园活动"
+    focus: "Campus events"
   },
   {
     id: "lr-27",
@@ -348,7 +348,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Lecture",
     difficulty: "Hard",
     text: "Urban planners often consider transportation access when designing public spaces.",
-    focus: "学术职业词汇"
+    focus: "Academic & professional terms"
   },
   {
     id: "lr-28",
@@ -356,7 +356,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Project",
     difficulty: "Easy",
     text: "We should divide the survey questions into three clear sections.",
-    focus: "小组安排"
+    focus: "Group task planning"
   },
   {
     id: "lr-29",
@@ -364,7 +364,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Technology",
     difficulty: "Medium",
     text: "The new app sends reminders when assignments are almost due.",
-    focus: "技术工具"
+    focus: "Educational technology tools"
   },
   {
     id: "lr-30",
@@ -372,7 +372,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Class",
     difficulty: "Medium",
     text: "Attendance is optional, but the review session will cover key exam topics.",
-    focus: "转折和考试信息"
+    focus: "Contrast clauses & exam details"
   },
   {
     id: "lr-31",
@@ -380,7 +380,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Campus",
     difficulty: "Easy",
     text: "The music department is moving its concert to the main auditorium.",
-    focus: "地点变化"
+    focus: "Venue & location changes"
   },
   {
     id: "lr-32",
@@ -388,7 +388,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Lecture",
     difficulty: "Hard",
     text: "Cultural traditions can shape how communities respond to environmental challenges.",
-    focus: "抽象学术表达"
+    focus: "Abstract academic phrasing"
   },
   {
     id: "lr-33",
@@ -396,7 +396,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Study",
     difficulty: "Easy",
     text: "I review vocabulary every morning before I start my homework.",
-    focus: "学习习惯"
+    focus: "Study habits & routines"
   },
   {
     id: "lr-34",
@@ -404,7 +404,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Project",
     difficulty: "Medium",
     text: "The data table is useful, but it needs a clearer explanation.",
-    focus: "评价和转折"
+    focus: "Evaluation & contrast"
   },
   {
     id: "lr-35",
@@ -412,7 +412,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Campus",
     difficulty: "Medium",
     text: "The dining hall will close early because of a staff training event.",
-    focus: "公告原因"
+    focus: "Announcement reasons"
   },
   {
     id: "lr-36",
@@ -420,7 +420,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Class",
     difficulty: "Hard",
     text: "Students are expected to analyze the author's argument rather than summarize the plot.",
-    focus: "学术任务要求"
+    focus: "Academic task expectations"
   },
   {
     id: "lr-37",
@@ -428,7 +428,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Technology",
     difficulty: "Easy",
     text: "The classroom projector stopped working during the first presentation.",
-    focus: "课堂设备"
+    focus: "Classroom equipment"
   },
   {
     id: "lr-38",
@@ -436,7 +436,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Lecture",
     difficulty: "Medium",
     text: "The speaker compared traditional farming methods with modern irrigation systems.",
-    focus: "比较结构"
+    focus: "Comparative structure"
   },
   {
     id: "lr-39",
@@ -444,7 +444,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Campus",
     difficulty: "Easy",
     text: "The gym offers free fitness classes on Saturday mornings.",
-    focus: "校园活动"
+    focus: "Campus events"
   },
   {
     id: "lr-40",
@@ -452,7 +452,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Class",
     difficulty: "Medium",
     text: "The syllabus explains how participation will affect the final grade.",
-    focus: "课程文件"
+    focus: "Course syllabus & grading"
   },
   {
     id: "lr-41",
@@ -460,7 +460,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Project",
     difficulty: "Hard",
     text: "We changed our research question after discovering that the original topic was too broad.",
-    focus: "项目调整"
+    focus: "Research project adjustments"
   },
   {
     id: "lr-42",
@@ -468,7 +468,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Study",
     difficulty: "Medium",
     text: "Taking short breaks helps me stay focused during long study sessions.",
-    focus: "学习方法"
+    focus: "Study strategies"
   },
   {
     id: "lr-43",
@@ -476,7 +476,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Campus",
     difficulty: "Hard",
     text: "The university plans to renovate the oldest residence hall over the summer break.",
-    focus: "校园建设公告"
+    focus: "Campus renovation announcement"
   },
   {
     id: "lr-44",
@@ -484,7 +484,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Lecture",
     difficulty: "Medium",
     text: "The article describes how social networks influence consumer decisions.",
-    focus: "学术概念"
+    focus: "Academic concepts"
   },
   {
     id: "lr-45",
@@ -492,7 +492,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Technology",
     difficulty: "Hard",
     text: "Video conferencing allows guest speakers to join seminars from different countries.",
-    focus: "技术和学术场景"
+    focus: "Technology in academic seminars"
   },
   {
     id: "lr-46",
@@ -500,7 +500,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Class",
     difficulty: "Easy",
     text: "The quiz will include material from chapters four and five.",
-    focus: "考试范围"
+    focus: "Quiz & exam coverage"
   },
   {
     id: "lr-47",
@@ -508,7 +508,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Campus",
     difficulty: "Medium",
     text: "Students complained that the new parking policy was difficult to understand.",
-    focus: "校园政策"
+    focus: "Campus policy feedback"
   },
   {
     id: "lr-48",
@@ -516,7 +516,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Lecture",
     difficulty: "Hard",
     text: "The historian argued that trade routes helped spread new ideas across regions.",
-    focus: "历史学术表达"
+    focus: "Historical academic arguments"
   },
   {
     id: "lr-49",
@@ -524,7 +524,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Project",
     difficulty: "Medium",
     text: "Our survey results support the main point of the presentation.",
-    focus: "项目证据"
+    focus: "Project evidence & findings"
   },
   {
     id: "lr-50",
@@ -532,7 +532,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Study",
     difficulty: "Easy",
     text: "I prefer studying in the morning when the campus is quiet.",
-    focus: "偏好表达"
+    focus: "Expressing preferences"
   },
   {
     id: "lr-51",
@@ -540,7 +540,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Campus",
     difficulty: "Hard",
     text: "The financial aid office requires additional documents before approving the application.",
-    focus: "行政流程"
+    focus: "Administrative procedures"
   },
   {
     id: "lr-52",
@@ -548,7 +548,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Technology",
     difficulty: "Medium",
     text: "The online platform stores recordings of lectures for students who miss class.",
-    focus: "线上学习"
+    focus: "Online learning platforms"
   },
   {
     id: "lr-53",
@@ -556,7 +556,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Class",
     difficulty: "Medium",
     text: "The discussion section gives students a chance to ask detailed questions.",
-    focus: "课堂活动"
+    focus: "Classroom discussion sections"
   },
   {
     id: "lr-54",
@@ -564,7 +564,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Lecture",
     difficulty: "Hard",
     text: "Researchers examined how sleep quality affects concentration and academic performance.",
-    focus: "研究句型"
+    focus: "Research study structures"
   },
   {
     id: "lr-55",
@@ -572,7 +572,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Campus",
     difficulty: "Easy",
     text: "The student newspaper is looking for volunteer photographers this semester.",
-    focus: "社团招募"
+    focus: "Student organization recruitment"
   },
   {
     id: "lr-56",
@@ -580,7 +580,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Project",
     difficulty: "Medium",
     text: "The final report should include an abstract, a method section, and references.",
-    focus: "报告结构"
+    focus: "Academic report structure"
   },
   {
     id: "lr-57",
@@ -588,7 +588,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Study",
     difficulty: "Hard",
     text: "Effective note-taking requires selecting important ideas instead of copying every sentence.",
-    focus: "学习策略"
+    focus: "Effective note-taking strategies"
   },
   {
     id: "lr-58",
@@ -596,7 +596,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Campus",
     difficulty: "Medium",
     text: "The international office organizes orientation sessions for newly admitted students.",
-    focus: "校园服务"
+    focus: "International student services"
   },
   {
     id: "lr-59",
@@ -604,7 +604,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Lecture",
     difficulty: "Hard",
     text: "The lecturer emphasized the connection between economic growth and public health.",
-    focus: "抽象关系"
+    focus: "Abstract conceptual relationships"
   },
   {
     id: "lr-60",
@@ -612,7 +612,7 @@ const EXTRA_REPEAT_QUESTIONS = [
     category: "Class",
     difficulty: "Easy",
     text: "The teacher asked everyone to post one question before class.",
-    focus: "课堂任务"
+    focus: "Pre-class tasks"
   }
 ];
 

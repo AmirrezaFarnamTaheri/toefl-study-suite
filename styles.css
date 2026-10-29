@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --bg: #f7f8fb;
   --surface: #ffffff;
   --surface-strong: #f0f4f8;
@@ -15,7 +15,7 @@
   --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
   --radius: 8px;
   --radius-sm: 6px;
-  font-family: Inter, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
   color: var(--ink);
   background: var(--bg);
 }
@@ -2231,3 +2231,47 @@ textarea {
     height: 118px;
   }
 }
+
+
+/* ===== VoxPilot Studio redesign: dark navy console theme ===== */
+:root {
+  --bg: #0b1220;
+  --surface: #131c2e;
+  --surface-strong: #1a2640;
+  --ink: #e6edf7;
+  --muted: #93a4bd;
+  --line: #243350;
+  --teal: #2dd4bf;
+  --teal-dark: #14b8a6;
+  --blue: #60a5fa;
+  --orange: #fbbf24;
+  --red: #f87171;
+  --green: #4ade80;
+  --violet: #a78bfa;
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  --radius: 14px;
+  --radius-sm: 10px;
+  font-family: Inter, "Segoe UI", system-ui, Arial, sans-serif;
+}
+body { background: radial-gradient(1200px 500px at 50% -100px, #134e4a55, transparent), var(--bg); color: var(--ink); }
+.topbar { background: rgba(11, 18, 32, 0.88); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.brand-title { letter-spacing: -0.02em; color: #fff; }
+.brand-subtitle { color: var(--teal); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.72rem; }
+.stat-pill { background: var(--surface-strong); border: 1px solid var(--line); color: var(--muted); border-radius: 999px; }
+.stat-pill strong { color: var(--teal); }
+.panel, .feedback-section, .summary-tile, .weakness-tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); color: var(--ink); }
+.nav-button { background: transparent; color: var(--muted); border-radius: 999px; }
+.nav-button:hover { color: #fff; background: var(--surface-strong); }
+.nav-button.active, .nav-button[aria-current="page"] { background: linear-gradient(135deg, #0f766e, #14b8a6); color: #04201d; font-weight: 700; }
+.primary-button { background: linear-gradient(135deg, #14b8a6, #2dd4bf); color: #04201d; font-weight: 700; border-radius: 999px; }
+.ghost-button, .tool-button, .small-button { background: var(--surface-strong); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; }
+.ghost-button:hover, .tool-button:hover, .small-button:hover { border-color: var(--teal); }
+.danger-button { background: #3b1219; color: var(--red); border: 1px solid #7f1d1d; border-radius: 999px; }
+.badge { background: var(--surface-strong); color: var(--teal); border: 1px solid var(--line); border-radius: 999px; }
+.compact-copy, .muted { color: var(--muted); }
+textarea, input, select { background: #0e1626; color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+textarea:focus, input:focus, select:focus { border-color: var(--teal); }
+.record-button { background: radial-gradient(circle at 30% 30%, #fb7185, #be123c); color: #fff; box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.55); }
+.record-button.recording { animation: vox-pulse 1.4s infinite; }
+@keyframes vox-pulse { 0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.55); } 70% { box-shadow: 0 0 0 22px rgba(244, 63, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); } }
+.empty-feedback { background: var(--surface-strong); border: 1px dashed var(--line); color: var(--muted); border-radius: var(--radius); }
