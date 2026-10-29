@@ -1175,7 +1175,7 @@ function renderBankView() {
       <div class="history-top">
         <div>
           <h2>Simulation Prompt Bank</h2>
-          <p class="compact-copy">Browse all ${QUESTION_BANK.repeat.length + QUESTION_BANK.interview.length} original prompts modeled on public ETS task descriptions. No leaked exam content is included.</p>
+          <p class="compact-copy">Browse all ${QUESTION_BANK.repeat.length + QUESTION_BANK.interview.length} prompts: originals modeled on public ETS task descriptions plus adapted Independent Speaking prompts. No leaked exam content is included.</p>
         </div>
         <button class="primary-button" data-random-bank="true"><span class="button-icon">↻</span>Practice Random Prompt</button>
       </div>

@@ -12,7 +12,7 @@ VoxPilot Speaking Lab is a no-login, no-database, ready-to-run local speaking pr
 - Take an Interview practice
 - Start Easy beginner mode with 4-step local-only scaffolding
 - 11-item full practice mode
-- 110 simulation questions: 60 repetition items and 50 interview items
+- 226 simulation questions: 60 repetition items and 166 interview items (50 original plus 116 adapted from the pytoefl prompt list)
 - Browser recording, playback, and speech recognition transcription
 - Local simulated 1-6 half-point scoring
 - Audio quality, pauses, pace, estimated SNR, local intelligibility proxy, and scoring confidence diagnostics

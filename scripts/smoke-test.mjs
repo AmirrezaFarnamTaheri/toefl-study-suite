@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dataPaths = [
   path.join(root, "data", "question-bank.js"),
+  path.join(root, "data", "pytoefl-interview-bank.js"),
   path.join(root, "data", "training-config.js"),
   path.join(root, "logic", "scoring-engine.js")
 ];
