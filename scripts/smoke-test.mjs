@@ -7,6 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dataPaths = [
   path.join(root, "data", "question-bank.js"),
   path.join(root, "data", "pytoefl-interview-bank.js"),
+  path.join(root, "data", "interview-sets.js"),
   path.join(root, "data", "training-config.js"),
   path.join(root, "logic", "scoring-engine.js")
 ];
@@ -116,7 +117,9 @@ globalThis.__voxpilot = {
   startMistakeReview,
   finishMistakeReviewCard,
   splitWordForPractice,
-  getWordStressHint
+  getWordStressHint,
+  INTERVIEW_SETS,
+  startFullRun
 };
 `;
 
@@ -251,5 +254,13 @@ api.state.wordDrill.sentenceTranscript = api.state.wordDrill.sentence;
 api.analyzeWordDrillPart("sentence");
 api.finishMistakeReviewCard("pass");
 assert(api.state.mistakeReview.results.length === 1, "mistake review did not record a completed card");
+
+assert(api.INTERVIEW_SETS.length >= 8 && api.INTERVIEW_SETS.every((s) => s.turns.length === 4 && s.scenario), "interview sets must have a scenario and four turns");
+api.startFullRun();
+const run = api.state.full.sequence;
+assert(run.length === 11, "full run should have 11 items");
+assert(run.slice(0, 7).every((q) => q.type === "repeat") && run.slice(7).every((q) => q.type === "interview"), "full run should be 7 repeat then 4 interview");
+assert(new Set(run.slice(7).map((q) => q.setId)).size === 1, "the four interview turns should come from one set");
+assert(run.slice(7).map((q) => q.turn).join() === "1,2,3,4", "interview turns should be in order");
 
 console.log("VoxPilot smoke test passed");

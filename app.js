@@ -536,6 +536,7 @@ function renderPracticeCard(isFullRun) {
           <h2 class="question-text ${isRepeat ? "sentence-text" : ""} ${isRepeat && !state.showSentence ? "blurred" : ""}">
             ${escapeHtml(text)}
           </h2>
+          ${question.scenario ? `<p class="prompt-note"><strong>${question.turn === 1 ? "Scenario" : `Interview ${question.turn}/4`}:</strong> ${escapeHtml(question.scenario)}</p>` : ""}
           <p class="prompt-note">
             ${isRepeat ? escapeHtml(question.focus) : "Target 35–60s: State your claim directly, give a clear reason, add a concrete example, and wrap up."}
           </p>
@@ -4770,7 +4771,8 @@ function speakPrompt() {
     return;
   }
 
-  const utterance = new SpeechSynthesisUtterance(question.text);
+  const spoken = question.scenario && question.turn === 1 ? `${question.scenario} ${question.text}` : question.text;
+  const utterance = new SpeechSynthesisUtterance(spoken);
   utterance.lang = "en-US";
   utterance.rate = question.type === "repeat" ? 0.88 : 0.94;
   utterance.pitch = 1;
@@ -4846,7 +4848,20 @@ async function analyzeCurrent() {
 function startFullRun() {
   stopIfRecording();
   const repeatSet = shuffle([...QUESTION_BANK.repeat]).slice(0, 7);
-  const interviewSet = shuffle([...QUESTION_BANK.interview]).slice(0, 4);
+  // One scenario with four linked turns, like the 2026 Take an Interview task.
+  const chosenSet = randomItem(INTERVIEW_SETS);
+  const turnDifficulty = ["Easy", "Medium", "Medium", "Hard"];
+  const interviewSet = chosenSet.turns.map((turnText, i) => ({
+    id: `${chosenSet.id}-t${i + 1}`,
+    type: "interview",
+    category: chosenSet.topic,
+    difficulty: turnDifficulty[i],
+    text: turnText,
+    scenario: chosenSet.scenario,
+    setId: chosenSet.id,
+    turn: i + 1,
+    sample: "Model frame: answer in your first sentence, give one specific reason with because, add a concrete personal example (For example, last semester I ...), and finish with a result sentence (As a result, ...). Aim for about 45 seconds."
+  }));
   state.full = {
     active: true,
     complete: false,
