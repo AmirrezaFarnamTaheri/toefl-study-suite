@@ -928,7 +928,159 @@ const PYTOEFL_INTERVIEW_QUESTIONS = [
     "difficulty": "Medium",
     "text": "Would you rather read a book or go to a movie when you have some spare time to enjoy yourself? Use specific reasons and examples to support your choice.",
     "sample": "Model frame: answer in your first sentence (I prefer / I think / My choice is ...), give one specific reason with because, add a concrete personal example (For example, last semester I ...), and finish with a result sentence (As a result, ...). Aim for 45-60 seconds."
+  },
+  {
+    "id": "pt-117",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Some people prefer to live in a big city, while others prefer to live in a small town or rural area. Which do you prefer and why? Use specific reasons and examples to support your answer.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-118",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Do you agree or disagree with the following statement: It is better to have one close friend than many casual acquaintances. Use specific reasons and examples to support your answer.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-119",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Some universities require first-year students to live in dormitories on campus, while others allow students to live anywhere they choose. Which policy do you think is better? Explain your position with specific reasons.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-120",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Do you agree or disagree with the following statement: The most important lessons cannot be learned in the classroom. Provide specific examples to explain your position.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-121",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "If you could change one thing about your hometown, what would it be? Describe the change and explain why you think it would improve your community.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-122",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Some people prefer to plan their activities carefully in advance, while others prefer to be spontaneous and make decisions as they go. Which approach do you prefer and why?",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-123",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Do you agree or disagree: It is better to work for a large organization than for a small company. Use specific reasons and examples to support your answer.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-124",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Describe a person who has had a significant positive influence on your life. Explain what they did and why their influence was important to you.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-125",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Do you agree or disagree with this statement: Technology has made modern life simpler. Use specific reasons and examples to support your position.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-126",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "If you had to choose between a high-paying job you disliked and a lower-paying job you loved, which would you choose? Explain your reasoning with specific examples.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-127",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Some people prefer to travel to unfamiliar destinations, while others prefer to return to places they have already visited. Which approach do you prefer? Explain why.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-128",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Do you agree or disagree: Parents are the most important influence on a child's development. Provide specific reasons and examples to support your position.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-129",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Some people prefer to study alone, while others prefer to study in groups. Which do you find more effective and why?",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-130",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Describe a skill you would like to learn and explain how having that skill would benefit you personally or professionally.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-131",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Some people believe that the arts — music, painting, drama — should be required subjects in schools. Do you agree or disagree? Provide specific reasons.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-132",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Do you agree or disagree: Governments should spend more money on environmental protection and less on space exploration. Provide specific reasons for your position.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-133",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Some people think that children should begin learning a foreign language as early as possible. Others believe children should first develop strong skills in their native language. Which view do you support?",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-134",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Some people believe that universities should focus primarily on preparing students for employment. Others think universities should focus on broader intellectual development. Which view do you support?",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
+  },
+  {
+    "id": "pt-135",
+    "type": "interview",
+    "category": "Independent",
+    "difficulty": "Medium",
+    "text": "Do you agree or disagree: People who live in countries with cold climates are more hardworking than people who live in countries with warm climates. Support your opinion with specific reasons and examples.",
+    "sample": "Model: State your preference in the first sentence, give 2 reasons with \"because\", one specific example, and wrap up with a result sentence. Aim for 45 seconds."
   }
 ];
 
-QUESTION_BANK.interview.push(...PYTOEFL_INTERVIEW_QUESTIONS);
+if (typeof module !== "undefined") module.exports = { PYTOEFL_INTERVIEW_QUESTIONS };
