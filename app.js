@@ -1098,7 +1098,7 @@ function renderFullRunView() {
         <div class="full-setup">
           <div>
             <h2>Full 11-Item Simulation</h2>
-            <p class="compact-copy">Complete a full 11-item speaking set: 6 Listen & Repeat items followed by 5 Interview prompts. Exam mode auto-plays audio and locks sentence reveals.</p>
+            <p class="compact-copy">Complete a full 11-item speaking set: 7 Listen & Repeat items followed by 4 Interview prompts, the same order as the 2026 test. Exam mode auto-plays audio and locks sentence reveals.</p>
           </div>
           <button class="primary-button" data-start-full="true"><span class="button-icon">▶</span>Start Full Simulation</button>
         </div>
@@ -1124,11 +1124,11 @@ function renderFullTips() {
       </div>
       <div class="summary-tile">
         <span>Repeat</span>
-        <strong>6</strong>
+        <strong>7</strong>
       </div>
       <div class="summary-tile">
         <span>Interview</span>
-        <strong>5</strong>
+        <strong>4</strong>
       </div>
       <div class="summary-tile">
         <span>Storage</span>
@@ -4845,13 +4845,14 @@ async function analyzeCurrent() {
 
 function startFullRun() {
   stopIfRecording();
-  const repeatSet = shuffle([...QUESTION_BANK.repeat]).slice(0, 6);
-  const interviewSet = shuffle([...QUESTION_BANK.interview]).slice(0, 5);
+  const repeatSet = shuffle([...QUESTION_BANK.repeat]).slice(0, 7);
+  const interviewSet = shuffle([...QUESTION_BANK.interview]).slice(0, 4);
   state.full = {
     active: true,
     complete: false,
     examMode: true,
-    sequence: shuffle([...repeatSet, ...interviewSet]),
+    // 2026 order: Listen & Repeat items first (shortest to longest, like the real set), then Take an Interview.
+    sequence: [...repeatSet.sort((a, b) => a.text.split(" ").length - b.text.split(" ").length), ...interviewSet],
     index: 0,
     results: []
   };
