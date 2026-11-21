@@ -9,7 +9,11 @@ const dataPaths = [
   path.join(root, "data", "pytoefl-interview-bank.js"),
   path.join(root, "data", "interview-sets.js"),
   path.join(root, "data", "training-config.js"),
-  path.join(root, "logic", "scoring-engine.js")
+  path.join(root, "data", "toefl-suite-bank.js"),
+  path.join(root, "data", "toefl-full-mocks.js"),
+  path.join(root, "logic", "scoring-engine.js"),
+  path.join(root, "modules", "toefl-suite-modules.js"),
+  path.join(root, "modules", "toefl-full-mock.js")
 ];
 const appPath = path.join(root, "app.js");
 const source = [
@@ -119,7 +123,10 @@ globalThis.__voxpilot = {
   splitWordForPractice,
   getWordStressHint,
   INTERVIEW_SETS,
-  startFullRun
+  QUESTION_BANK,
+  TOEFL_SUITE_BANK,
+  startFullRun,
+  render
 };
 `;
 
@@ -255,7 +262,29 @@ api.analyzeWordDrillPart("sentence");
 api.finishMistakeReviewCard("pass");
 assert(api.state.mistakeReview.results.length === 1, "mistake review did not record a completed card");
 
-assert(api.INTERVIEW_SETS.length >= 8 && api.INTERVIEW_SETS.every((s) => s.turns.length === 4 && s.scenario), "interview sets must have a scenario and four turns");
+assert(api.INTERVIEW_SETS.length >= 45 && api.INTERVIEW_SETS.every((s) => s.turns.length === 4 && s.scenario), "interview sets must have >=45 sets with a scenario and four turns");
+assert(api.QUESTION_BANK.repeat.length >= 300, "expanded repeat bank should have >=300 sentences");
+assert(api.TOEFL_SUITE_BANK.reading.completeTheWords.length >= 100, "CTW reading bank should have >=100 passages");
+assert(api.TOEFL_SUITE_BANK.reading.passages.length >= 8, "Reading Daily Life & Academic passages should have >=8 sets");
+assert(api.TOEFL_SUITE_BANK.writing.buildASentence.length >= 20, "Build-a-Sentence bank should have >=20 items");
+assert(api.TOEFL_SUITE_BANK.writing.emails.length >= 45, "Email bank should have >=45 model emails");
+assert(api.TOEFL_SUITE_BANK.writing.discussions.length >= 35, "Academic Discussion bank should have >=35 Pastel topics");
+assert(api.TOEFL_SUITE_BANK.listening.clips.length === 24, "Listening bank should have 24 audio clips");
+assert(api.TOEFL_SUITE_BANK.vocab.length >= 1000, "Vocab & collocations bank should have >=1000 items");
+
+for (const suiteTab of ["fullmock", "reading", "writing", "listening", "vocab", "guides"]) {
+  api.state.tab = suiteTab;
+  api.render();
+  assert(appElement.innerHTML.length > 500, `Suite tab ${suiteTab} failed to render`);
+}
+assert(context.window.TOEFL_FULL_MOCKS.mocks.length >= 3, "Full mocks bank should have >=3 complete 4-section tests");
+context.window.ToeflFullMock.startMock(context.window.TOEFL_FULL_MOCKS.mocks[0]);
+assert(context.window.ToeflFullMock.state.phase === "reading1", "Full mock did not start in reading1");
+context.window.ToeflFullMock.finishAndScore();
+assert(context.window.ToeflFullMock.state.phase === "results" && context.window.ToeflFullMock.state.lastReport.overallBand >= 1, "Full mock scoring failed");
+const ctwBuilt = context.window.ToeflSuiteModules.buildCtwBlanks(api.TOEFL_SUITE_BANK.reading.completeTheWords[0].text);
+assert(ctwBuilt.blanks.length === 10, "Complete the Words generator should create 10 blanks");
+
 api.startFullRun();
 const run = api.state.full.sequence;
 assert(run.length === 11, "full run should have 11 items");
@@ -263,4 +292,4 @@ assert(run.slice(0, 7).every((q) => q.type === "repeat") && run.slice(7).every((
 assert(new Set(run.slice(7).map((q) => q.setId)).size === 1, "the four interview turns should come from one set");
 assert(run.slice(7).map((q) => q.turn).join() === "1,2,3,4", "interview turns should be in order");
 
-console.log("VoxPilot smoke test passed");
+console.log("VoxPilot TOEFL 2026 Study Suite smoke test passed");

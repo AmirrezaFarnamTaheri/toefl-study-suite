@@ -38,6 +38,8 @@ const state = {
   bankDifficulty: "all",
   mistakeBookMode: "sounds",
   wordMistakeFilter: "all",
+  mobileNavOpen: false,
+  moreToolsOpen: false,
   toast: "",
   full: {
     active: false,
@@ -60,12 +62,13 @@ function init() {
 function render() {
   app.innerHTML = `
     <div class="app-shell">
+      <a href="#main-content" class="skip-link">Skip to main content</a>
       ${renderTopbar()}
       ${renderNav()}
-      <main class="content">
+      <main id="main-content" class="content">
         ${renderActiveTab()}
       </main>
-      ${state.toast ? `<div class="toast">${escapeHtml(state.toast)}</div>` : ""}
+      ${state.toast ? `<div class="toast" role="status" aria-live="polite">${escapeHtml(state.toast)}</div>` : ""}
     </div>
   `;
   bindEvents();
@@ -73,60 +76,95 @@ function render() {
 }
 
 function renderTopbar() {
-  const history = loadHistory();
-  const average = averageScore(history);
-  const todayCount = history.filter((item) => isToday(item.createdAt)).length;
-  const ladderLabel = state.ladder && state.ladder.diagnosed ? (LADDER_LEVELS[state.ladder.level] || LADDER_LEVELS[1]).name : "Undiagnosed";
   return `
     <header class="topbar">
       <div class="brand">
-        <div class="brand-mark">TS</div>
+        <div class="brand-mark" aria-hidden="true">TS</div>
         <div>
           <h1 class="brand-title">VoxPilot Speaking Lab</h1>
-          <p class="brand-subtitle">2026 Academic Speaking Studio · Local-First · Zero Login</p>
+          <p class="brand-subtitle">TOEFL 2026 Study Suite</p>
         </div>
       </div>
       <div class="top-actions">
-        <span class="stat-pill"><strong>${todayCount}</strong> Today</span>
-        <span class="stat-pill"><strong>${average || "-"}</strong> Recent Avg</span>
-        <span class="stat-pill"><strong>${history.length}</strong> Saved Runs</span>
-        <span class="stat-pill"><strong>${escapeHtml(ladderLabel)}</strong> Ladder</span>
-        <span class="stat-pill"><strong>${QUESTION_BANK.repeat.length + QUESTION_BANK.interview.length}</strong> Prompts</span>
+        ${window.ToeflSuiteModules ? window.ToeflSuiteModules.renderBabblePill() : ""}
+        ${window.ToeflSuiteModules ? window.ToeflSuiteModules.renderThemeToggle() : ""}
       </div>
     </header>
   `;
 }
 
 function renderNav() {
-  const tabs = [
+  const primaryTabs = [
     ["starter", "Start Easy"],
-    ["ladder", "Ladder"],
-    ["practice", "Studio"],
-    ["full", "Full Sim"],
-    ["bank", "Prompt Bank"],
-    ["mistakes", "Error Log"],
-    ["history", "History"],
-    ["setup", "Setup"]
+    ["fullmock", "Full Mock"],
+    ["practice", "Speaking"],
+    ["reading", "Reading"],
+    ["writing", "Writing"],
+    ["listening", "Listening"],
+    ["vocab", "Vocab"]
   ];
+  const secondaryTabs = [
+    ["ladder", "Guided Path"],
+    ["full", "Full Speaking Test"],
+    ["guides", "Scores & Plans"],
+    ["bank", "All Prompts"],
+    ["mistakes", "Mistakes"],
+    ["history", "History"],
+    ["setup", "Settings"]
+  ];
+  const inSecondary = secondaryTabs.some(([id]) => id === state.tab);
+  const showSecondary = state.moreToolsOpen || inSecondary;
+  const activeEntry = [...primaryTabs, ...secondaryTabs].find(([id]) => id === state.tab) || primaryTabs[0];
+
   return `
-    <nav class="main-nav" aria-label="Primary navigation">
-      ${tabs
-        .map(
-          ([id, label]) => `
-            <button class="nav-button ${state.tab === id ? "active" : ""}" data-tab="${id}">
-              ${label}
-            </button>
-          `
-        )
-        .join("")}
+    <nav class="main-nav-bar" aria-label="Primary navigation">
+      <div class="nav-mobile-bar">
+        <span class="nav-mobile-active"><strong>${escapeHtml(activeEntry[1])}</strong></span>
+        <button type="button" class="ghost-button nav-mobile-toggle" data-mobile-nav-toggle="true" aria-expanded="${state.mobileNavOpen ? "true" : "false"}" aria-controls="primaryNavGroups">
+          ${state.mobileNavOpen ? "Close" : "Menu"}
+        </button>
+      </div>
+      <div id="primaryNavGroups" class="nav-groups ${state.mobileNavOpen ? "open" : ""}">
+        <div class="nav-primary-row">
+          ${primaryTabs
+            .map(
+              ([id, label]) => `
+                <button type="button" class="nav-button ${state.tab === id ? "active" : ""}" data-tab="${id}" aria-current="${state.tab === id ? "page" : "false"}">
+                  ${label}
+                </button>
+              `
+            )
+            .join("")}
+          <button type="button" class="nav-button nav-more-btn ${showSecondary ? "expanded" : ""}" data-more-tools-toggle="true" aria-expanded="${showSecondary ? "true" : "false"}">
+            ${showSecondary ? "Less" : "More"}
+          </button>
+        </div>
+        ${showSecondary ? `
+          <div class="nav-secondary-row" aria-label="Additional tools">
+            ${secondaryTabs
+              .map(
+                ([id, label]) => `
+                  <button type="button" class="nav-button nav-sub-btn ${state.tab === id ? "active" : ""}" data-tab="${id}" aria-current="${state.tab === id ? "page" : "false"}">
+                    ${label}
+                  </button>
+                `
+              )
+              .join("")}
+          </div>
+        ` : ""}
+      </div>
     </nav>
   `;
 }
 
 function renderActiveTab() {
   if (state.tab === "starter") return renderStarterView();
+  if (state.tab === "fullmock" && window.ToeflFullMock) return window.ToeflFullMock.render();
   if (state.tab === "ladder") return renderLadderView();
   if (state.tab === "full") return renderFullRunView();
+  if (["reading", "writing", "listening", "vocab", "guides"].includes(state.tab) && window.ToeflSuiteModules) {
+    return window.ToeflSuiteModules.renderTab(state.tab);
+  }
   if (state.tab === "bank") return renderBankView();
   if (state.tab === "mistakes") return renderMistakeBookView();
   if (state.tab === "history") return renderHistoryView();
@@ -165,11 +203,11 @@ function renderStarterView() {
     <section class="workspace starter-workspace">
       <aside class="panel starter-panel">
         <span class="badge blue">Start Easy</span>
-        <h2>Start Easy · 4-Step Scaffold</h2>
-        <p class="compact-copy">Break each speaking prompt into 4 manageable micro-steps. Steps 1–3 evaluate only the immediate target; Step 4 returns to full local scoring.</p>
+        <h2>Start Easy (4 Short Steps)</h2>
+        <p class="compact-copy">Practice speaking one small step at a time. Steps 1-3 check one simple goal each; Step 4 scores your full answer.</p>
         <div class="segmented" role="group" aria-label="Starter mode">
-          <button class="${starter.mode === "interview" ? "active" : ""}" data-starter-mode="interview">Interview Scaffold</button>
-          <button class="${starter.mode === "repeat" ? "active" : ""}" data-starter-mode="repeat">Repeat Scaffold</button>
+          <button class="${starter.mode === "interview" ? "active" : ""}" data-starter-mode="interview">Interview</button>
+          <button class="${starter.mode === "repeat" ? "active" : ""}" data-starter-mode="repeat">Listen &amp; Repeat</button>
         </div>
         <div class="starter-step-list">
           ${steps.map((item, index) => `
@@ -601,7 +639,7 @@ function renderFeedback() {
   if (!state.feedback) {
     return `
       <section class="feedback-board">
-        <div class="empty-feedback">${state.isScoring ? "Generating diagnostic report (external APIs may take a few seconds)..." : "Record and analyze a response to view your band score, rubric breakdown, and targeted retake advice."}</div>
+        <div class="empty-feedback">${state.isScoring ? "Checking your answer..." : "Record an answer to see your score and tips for your next try."}</div>
       </section>
     `;
   }
@@ -610,7 +648,7 @@ function renderFeedback() {
   const meterWidth = Math.max(0, Math.min(100, Math.round((feedback.score / 6) * 100)));
   return `
     <section class="feedback-board">
-      <h2>Diagnostic Feedback</h2>
+      <h2>Your Feedback</h2>
       <p class="compact-copy">${escapeHtml(feedback.summary)}</p>
       ${feedback.confidence ? renderScoringConfidence(feedback.confidence) : ""}
       <div class="feedback-grid">
@@ -3277,9 +3315,30 @@ function averageNumeric(values) {
 }
 
 function bindEvents() {
+  if (window.ToeflSuiteModules) {
+    window.ToeflSuiteModules.bindEvents();
+  }
+  if (window.ToeflFullMock) {
+    window.ToeflFullMock.bindEvents();
+  }
+  const mobileNavBtn = document.querySelector("[data-mobile-nav-toggle]");
+  if (mobileNavBtn) {
+    mobileNavBtn.addEventListener("click", () => {
+      state.mobileNavOpen = !state.mobileNavOpen;
+      render();
+    });
+  }
+  const moreToolsBtn = document.querySelector("[data-more-tools-toggle]");
+  if (moreToolsBtn) {
+    moreToolsBtn.addEventListener("click", () => {
+      state.moreToolsOpen = !state.moreToolsOpen;
+      render();
+    });
+  }
   document.querySelectorAll("[data-tab]").forEach((button) => {
     button.addEventListener("click", () => {
       state.tab = button.dataset.tab;
+      state.mobileNavOpen = false;
       render();
     });
   });

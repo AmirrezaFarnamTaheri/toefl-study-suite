@@ -10,7 +10,9 @@ const entries = [
   "app.js",
   "styles.css",
   "data",
-  "logic"
+  "logic",
+  "modules",
+  "assets"
 ];
 
 fs.rmSync(dist, { recursive: true, force: true });
