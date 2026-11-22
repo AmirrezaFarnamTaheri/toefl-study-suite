@@ -243,6 +243,135 @@ const TOEFL_COURSES = [
     ]
   },
   {
+    id: "s-repeat-drills",
+    track: "Speaking",
+    title: "Listen & Repeat Drills: Working-Memory Ladder & Intelligibility",
+    duration: "9 min",
+    summary: "Train verbatim accuracy, zero-latency starts, and natural linking using ETS 2026 Listen & Repeat criteria.",
+    keyRules: [
+      "ETS 2026 scores Listen & Repeat (0-5) across three pillars: Repeat Accuracy (exact words + grammar endings), Fluency (steady pace, minimal pauses), and Intelligibility (clear pronunciation, rhythm, and syllable stress).",
+      "Know the Score 5 vs. Score 4 boundary: Score 5 is an exact, fully intelligible repeat; Score 4 captures full meaning with 1-2 minor function-word or tense slips; Score 3 drops meaning or multiple words.",
+      "Climb the Working-Memory Ladder: master 5-7 word prompts cleanly first, stretch to 12-15 words by chunking (Subject / Verb+Object / Time-or-Place), and overtrain with 1.1x-1.3x playback so normal 1.0x exam audio feels slow.",
+      "Zero-latency start + 7-point self-audit: begin speaking immediately after the beep with no 'uh/um', keep exact -s/-ed endings, avoid mid-sentence restarts, and check speech-to-text transcripts for misheard words."
+    ],
+    workedExample: {
+      prompt: "15-word prompt: 'Students who register for the workshop before Thursday will receive a complimentary lab manual.'",
+      solution: "Chunk 1: 'Students who register for the workshop' | Chunk 2: 'before Thursday' | Chunk 3: 'will receive a complimentary lab manual.' Watch final consonants in 'students', 'before', 'receive', and 'manual'.",
+      takeaway: "If speech-to-text misrecognizes a word twice, write 3 short sentences with that word and drill it aloud until ASR captures it cleanly."
+    },
+    practiceTarget: { tab: "practice", speakingMode: "repeat", label: "Drill Listen & Repeat Now" },
+    quiz: [
+      {
+        question: "What separates a Score 5 from a Score 4 on TOEFL 2026 Listen & Repeat?",
+        choices: [
+          "Score 5 adds extra personal opinions after the sentence",
+          "Score 5 is an exact, fully intelligible repeat, whereas Score 4 captures the meaning with 1-2 minor function-word or tense slips",
+          "Score 5 must be spoken twice as fast as the recording",
+          "Score 4 requires repeating only half the sentence"
+        ],
+        answer: 1,
+        explanation: "Keeping exact function words ('the', 'for', 'will') and grammar endings (-s, -ed) lifts a strong Score 4 repeat to Score 5."
+      },
+      {
+        question: "What should you do if you notice a small mistake halfway through a Listen & Repeat sentence?",
+        choices: [
+          "Stop completely and stay silent for the rest of the 10 seconds",
+          "Say 'sorry, let me start over' and repeat from word 1",
+          "Keep speaking smoothly to finish the sentence; avoid full restarts that break fluency",
+          "Whisper the remaining words"
+        ],
+        answer: 2,
+        explanation: "Full restarts waste your 8-12 second window and hurt Fluency more than one minor slip."
+      }
+    ]
+  },
+  {
+    id: "s-interview-frameworks",
+    track: "Speaking",
+    title: "Take an Interview: STAR & PREP Frameworks (45-Second Pacing)",
+    duration: "10 min",
+    summary: "Structure zero-prep interview answers effortlessly using STAR for experiences, PREP for opinions, and natural recovery chunks.",
+    keyRules: [
+      "The 4 interview turns progress from personal/factual questions (use STAR) to broader opinion/policy questions (use PREP), with 45 seconds each and zero prep time.",
+      "STAR timing for personal stories: Situation (6-8s) -> Task (10-12s) -> Action you took (14-16s) -> Result/Takeaway (5-6s).",
+      "PREP timing for opinion turns: Point (direct answer in sentence 1) -> Reason (one sharp 'why') -> Example (one concrete story or habit) -> Wrap-up when 3 seconds remain so you never get cut off mid-clause.",
+      "Clarity beats robotic perfection: use natural micro-pauses between ideas, fix small slips once calmly without apologizing, and keep flexible recovery chunks ready ('Another thing worth mentioning is...', 'Over time, I've realized that...')."
+    ],
+    workedExample: {
+      prompt: "Personal turn: 'Tell me about a time you solved a difficult problem with a team.' (STAR, 45s)",
+      solution: "S (7s): 'Last semester, my lab group had to present an engineering report in three days.' T (10s): 'Our data charts didn't match, and two members had conflicting schedules.' A (18s): 'I set up a shared spreadsheet, divided each section clearly, and ran a short 15-minute video check-in that night so everyone could verify their numbers.' R (7s): 'We finished a day early and earned full marks on the presentation.'",
+      takeaway: "Watching the timer at 38-42 seconds lets you land a calm 1-sentence result instead of getting cut off mid-sentence."
+    },
+    practiceTarget: { tab: "practice", speakingMode: "interview", label: "Practice 45s Interview Answers" },
+    quiz: [
+      {
+        question: "When should you start wrapping up your 45-second Take an Interview answer?",
+        choices: [
+          "At 15 seconds so you leave 30 seconds of silence",
+          "When about 3-5 seconds remain, landing a short closing takeaway cleanly",
+          "Never wrap up; keep adding new examples until the beep cuts you off mid-word",
+          "Wait 10 seconds silently before starting"
+        ],
+        answer: 1,
+        explanation: "Glancing at the timer with 3-5 seconds left lets you finish your final clause naturally."
+      },
+      {
+        question: "If you make a small grammar slip mid-sentence during an interview turn, what is the best move?",
+        choices: [
+          "Apologize ('Sorry, my English is bad') and restart the whole answer",
+          "Correct it once quickly or keep going smoothly without apologizing",
+          "Pause silently for 8 seconds to think of a rare synonym",
+          "Stop speaking immediately"
+        ],
+        answer: 1,
+        explanation: "ETS rewards clear, natural communication; apologizing and restarting hurts fluency far more than a minor slip."
+      }
+    ]
+  },
+  {
+    id: "s-interview-topics",
+    track: "Speaking",
+    title: "Speaking Topic Idea Bank: Tech, Health, Education & Culture",
+    duration: "10 min",
+    summary: "Stock your mind with flexible, natural idea angles and collocations across the four highest-frequency TOEFL Speaking themes.",
+    keyRules: [
+      "Technology & Daily Life: emphasize saving time on routine tasks (online banking, calendar reminders), staying connected across distances, balanced against screen fatigue and privacy trade-offs.",
+      "Health & Routines: anchor on 'consistency beats intensity' (daily evening walks, steady sleep schedule, hydration) and how fixed habits remove daily decision fatigue.",
+      "Education & Work: focus on actionable feedback vs. raw grades, active peer collaboration vs. passive lectures, and using digital/AI tools to spot blind spots without outsourcing real thinking.",
+      "Culture & Traditions: highlight how shared meals, festivals, and local customs build belonging across generations, while globalization spreads new perspectives alongside a need to preserve heritage."
+    ],
+    workedExample: {
+      prompt: "Question: 'How do you usually maintain a healthy balance when your schedule gets busy?'",
+      solution: "Core idea (Consistency > Intensity): 'I don't follow an extreme routine, because intense plans usually fail during exam week. Instead, I stick to small daily habits: I take a 20-minute walk every evening and keep a fixed bedtime. Making those habits automatic keeps my stress manageable and helps me focus better the next morning.'",
+      takeaway: "Memorizing 2 flexible idea angles per theme beats memorizing rigid full-paragraph scripts that sound unnatural."
+    },
+    practiceTarget: { tab: "starter", label: "Try 4-Step Speaking Warm-up" },
+    quiz: [
+      {
+        question: "Why do flexible 'idea angles' (like 'consistency beats intensity') outperform memorized full scripts in Take an Interview?",
+        choices: [
+          "Because memorized scripts cannot adapt smoothly to unexpected follow-up questions and sound robotic",
+          "Because ETS bans talking about personal habits",
+          "Because scripts are always shorter than 20 words",
+          "Because idea angles eliminate the need for clear pronunciation"
+        ],
+        answer: 0,
+        explanation: "Linked interview turns shift from factual to opinion follow-ups; flexible idea patterns let you answer naturally on the spot."
+      },
+      {
+        question: "Which collocation sounds most natural in a TOEFL Speaking answer about technology?",
+        choices: [
+          "Technology makes a big convenience to my routine.",
+          "Calendar apps help me organize my schedule and cut down on stress.",
+          "I do a communication with my colleagues by phone.",
+          "Digital tools give a feedback to my work very fast."
+        ],
+        answer: 1,
+        explanation: "'Organize my schedule' and 'cut down on stress' are natural, idiomatic spoken collocations."
+      }
+    ]
+  },
+  {
     id: "w-sentence",
     track: "Writing",
     title: "Build a Sentence: Word Order, Clauses, and Agreement",
@@ -363,6 +492,135 @@ const TOEFL_COURSES = [
         choices: ["40-60 words", "110-140 well-edited words", "350+ words", "Under 80 words"],
         answer: 1,
         explanation: "110-140 clear, specific words give you full idea development while leaving time to proofread grammar and spelling."
+      }
+    ]
+  },
+  {
+    id: "w-email-register",
+    track: "Writing",
+    title: "Write an Email: Tone, Politeness & Functional Phrase Bank",
+    duration: "9 min",
+    summary: "Master the official ETS Social Conventions dimension: register matching, polite modals, and idiomatic collocations.",
+    keyRules: [
+      "ETS explicitly evaluates Social Conventions on Write an Email: greeting/closing, register (formal for professors/managers vs. friendly-clear for peers), polite requests, and professional phrasing of complaints or apologies.",
+      "Replace blunt commands ('Fix the heater now') with polite modal frames ('Could you please arrange for the heating system to be inspected as soon as possible?' or 'I would be grateful if you could...').",
+      "Use clean functional openers & sign-offs: 'I am writing regarding...', 'I am afraid I cannot make Friday; would Tuesday work instead?', 'I sincerely apologize for any inconvenience caused.', and 'Best regards,' + name.",
+      "Fix high-frequency collocation traps flagged in the ETS Technical Manual: write 'provide feedback' (not 'give a feedback'), 'suggest that you repair' (not 'suggest you to repair'), 'strike a balance' (not 'make a balance'), and 'request an extension'."
+    ],
+    workedExample: {
+      prompt: "Too direct (Score 3 tone): 'Hello, the heater in Room 204 is broken. Fix it today and tell me when you come. Thanks.'",
+      solution: "Band 5 tone: 'Dear Building Manager, I am writing to report that the heating unit in Room 204 stopped working this morning. Because temperatures are dropping sharply this week, could you please arrange for a technician to inspect it as soon as possible? Please let me know what time works best so I can ensure access to the room. Thank you for your prompt assistance. Best regards, Sam'",
+      takeaway: "Polite modals ('could you please arrange...'), concrete context, and a clear next step lift an email from Score 3 to Score 5."
+    },
+    practiceTarget: { tab: "writing", subKey: "writingMode", subVal: "email", label: "Practice Writing Polite Emails" },
+    quiz: [
+      {
+        question: "Which sentence uses the most natural collocation and appropriate tone for an email to a campus director?",
+        choices: [
+          "I suggest you to repair the lab projector immediately.",
+          "Could you please arrange for the lab projector to be repaired before Thursday's seminar?",
+          "Give me a feedback about when you fix the projector.",
+          "Hey Director, fix the projector ASAP!"
+        ],
+        answer: 1,
+        explanation: "'Could you please arrange for ... to be repaired' matches formal register and uses accurate grammar and collocation."
+      },
+      {
+        question: "Which sign-off works reliably across almost every academic and professional TOEFL email?",
+        choices: [
+          "Best regards, [Your Name]",
+          "Later bro,",
+          "Submitted respectfully without further ado,",
+          "No closing or name at all"
+        ],
+        answer: 0,
+        explanation: "'Best regards,' (or 'Kind regards,') followed by your name is polite, natural, and fits both professors and managers."
+      }
+    ]
+  },
+  {
+    id: "w-discussion-examples",
+    track: "Writing",
+    title: "Academic Discussion: Concrete Examples & Avoiding Circular Filler",
+    duration: "10 min",
+    summary: "Turn thin opinions into Band 5 contributions using the Position -> Reason -> Concrete Example -> Relevance chain.",
+    keyRules: [
+      "Zero circular restatement: do not repeat your opinion three times in synonyms. Follow Position -> Reason (why/how) -> Concrete Example -> Relevance (what the example proves).",
+      "Keep vocabulary proportional to your syntax (register balance): clear, precise verbs ('experienced', 'demonstrated', 'reduced') beat awkward rare words dropped into broken grammar or wordy 'have + noun' ('had some experiences').",
+      "Use natural classmate engagement when helpful: 'While [Name] raises a valid point about..., it is easy to overlook...' or 'Building on [Name]'s point, I would add that...' (note: ETS does NOT require naming a student, only making a meaningful contribution).",
+      "Prepare adaptable personal-anecdote frames across recurring themes (AI/tech tools, remote work, environmental rules vs. cost, written feedback vs. grades, social media, privacy): 'For instance, during my..., I noticed that [specific outcome].'"
+    ],
+    workedExample: {
+      prompt: "Weak circular draft: 'I think written feedback is better than grades. Grades are not helpful and feedback helps students learn much more effectively.'",
+      solution: "Concrete Band 5 upgrade: 'I strongly favor detailed written feedback over bare letter grades. While numerical scores show where a student stands, they rarely explain how to improve. For instance, when one of my professors returned a major essay with specific comments on my argument structure instead of a letter grade, I immediately saw where my evidence was thin and raised my next paper's clarity dramatically.'",
+      takeaway: "One specific 2-sentence example immediately replaces vague repetition and proves your reasoning."
+    },
+    practiceTarget: { tab: "writing", subKey: "writingMode", subVal: "discussion", label: "Practice Academic Discussion" },
+    quiz: [
+      {
+        question: "Which sentence best replaces wordy 'have + noun' phrasing with a strong active verb?",
+        choices: [
+          "I had some experiences with remote work during my internship.",
+          "I did an observation of a big increase in focus.",
+          "During my remote internship, I experienced far fewer interruptions and finished reports faster.",
+          "Remote work gave a benefit to my productivity."
+        ],
+        answer: 2,
+        explanation: "Direct active verbs ('experienced', 'finished') make 100-140 word responses tighter, clearer, and more idiomatic."
+      },
+      {
+        question: "According to the official 2026 ETS Writing Scoring Guide, must you always name another student in Academic Discussion?",
+        choices: [
+          "Yes, omitting a classmate's name automatically gives Score 0",
+          "No; naming a student is optional, though briefly engaging or contrasting with an existing idea is a great way to show a meaningful contribution",
+          "Yes, you must quote both students word for word",
+          "No, you should ignore the discussion topic completely"
+        ],
+        answer: 1,
+        explanation: "ETS requires a relevant, original contribution in your own words; engaging a classmate's point helps naturally, but rigid templates are never required."
+      }
+    ]
+  },
+  {
+    id: "w-rubric-traps",
+    track: "Writing",
+    title: "Inside the Official 2026 Writing Rubric: Score 4 vs. 5 & Myths",
+    duration: "8 min",
+    summary: "Understand how ETS scores the 20-point Writing section, local vs. global errors, and what actually separates Score 4 from Score 5.",
+    keyRules: [
+      "2026 Writing raw score is out of 20: Build a Sentence (10 items x 1 pt = 10 pts) + Write an Email (0-5 holistic) + Academic Discussion (0-5 holistic), linked statistically to the 1.0-6.0 Band scale.",
+      "Local vs. global errors: one minor typo or missing article (local) rarely caps a strong response, whereas omitting a required email bullet, unclear meaning, wrong tone, or circular filler (global) pulls you down to Score 3.",
+      "The 4-vs-3 Decision Test: For Email, can the recipient understand the full situation, details, and requested action easily? For Discussion, is the position backed by a relevant, clearly explained reason/example?",
+      "Myths busted by ETS Technical Manual RR-25-12: ETS does NOT award separate bonus points for memorized templates, forced rare C2 words, or inflated length padded with repetition. Clarity, complete task coverage, and natural control win Score 5."
+    ],
+    workedExample: {
+      prompt: "Comparison: Response A (185 words, memorized intro template, misses bullet #3, two unclear sentences) vs. Response B (112 words, addresses all 3 bullets cleanly, natural tone, 1 tiny typo).",
+      solution: "Response B scores higher (4-5) because it accomplishes the communicative purpose completely and reads clearly on the first pass; Response A drops to 3 due to a missing requirement and unclear filler.",
+      takeaway: "Every extra word only helps if it adds relevant detail; protect 60 seconds to verify all prompt points and clean up unclear sentences."
+    },
+    practiceTarget: { tab: "writing", subKey: "writingMode", subVal: "rubric", label: "Open Official Writing Guide" },
+    quiz: [
+      {
+        question: "How is the TOEFL 2026 Writing section raw score structured across its three tasks?",
+        choices: [
+          "Build a Sentence (10 pts) + Write an Email (0-5) + Academic Discussion (0-5) = 20 raw points",
+          "One 30-minute essay worth 100 points",
+          "Only Academic Discussion is graded",
+          "Build a Sentence (5 pts) + Integrated Essay (15 pts)"
+        ],
+        answer: 0,
+        explanation: "Because Build a Sentence makes up half of the 20 raw points, drilling sentence word order and embedded clauses yields huge Writing Band gains."
+      },
+      {
+        question: "Which mistake is a 'global' (score-damaging) error rather than a minor local slip?",
+        choices: [
+          "One small spelling slip in an otherwise clear sentence",
+          "Omitting one of the three requested points in Write an Email or using a rude tone with a professor",
+          "Using 'Best regards,' instead of 'Yours faithfully,'",
+          "Writing 115 words instead of 150 words"
+        ],
+        answer: 1,
+        explanation: "Global errors undermine task completion, clarity, or social appropriateness, directly lowering the holistic band."
       }
     ]
   },

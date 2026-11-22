@@ -641,6 +641,35 @@
             <label><input type="checkbox"><span>Checked verb tenses, articles (a/an/the), and clear sentence punctuation.</span></label>
           </div>
         </details>
+        <details class="revision-checklist">
+          <summary>Useful Email Phrases, Register &amp; Collocation Fixes</summary>
+          <div class="coach-drawer-grid">
+            <div class="coach-mini-card">
+              <h4>Salutation &amp; Opening</h4>
+              <ul>
+                <li><strong>Formal:</strong> <em>Dear Professor [Last Name],</em> / <em>Dear Director,</em></li>
+                <li><strong>Peer:</strong> <em>Hi [First Name],</em></li>
+                <li><strong>Purpose:</strong> <em>I am writing regarding...</em> / <em>I am writing to follow up on...</em></li>
+              </ul>
+            </div>
+            <div class="coach-mini-card">
+              <h4>Polite Requests, Rescheduling &amp; Apologies</h4>
+              <ul>
+                <li><strong>Request:</strong> <em>Could you please let me know...?</em> / <em>I would be grateful if you could...</em></li>
+                <li><strong>Reschedule:</strong> <em>I am afraid I cannot make Friday; would Tuesday work instead?</em></li>
+                <li><strong>Apology &amp; Close:</strong> <em>I sincerely apologize for any inconvenience.</em> / <em>Best regards, [Name]</em></li>
+              </ul>
+            </div>
+            <div class="coach-mini-card">
+              <h4>ETS Collocation Upgrades</h4>
+              <ul>
+                <li>Write <strong>provide feedback</strong> (not <em>give a feedback</em>).</li>
+                <li>Write <strong>suggest that you repair</strong> (not <em>suggest you to repair</em>).</li>
+                <li>Write <strong>request an extension</strong> / <strong>arrange a repair</strong> / <strong>strike a balance</strong>.</li>
+              </ul>
+            </div>
+          </div>
+        </details>
         <div class="control-actions suite-mt">
           <button type="button" class="primary-button" data-suite-email-ai="true" ${suiteState.emailAiLoading ? "disabled" : ""}>${suiteState.emailAiLoading ? "Checking..." : "Get AI Feedback"}</button>
           <button type="button" class="tool-button" data-suite-copy-email-prompt="true">Copy Prompt for AI</button>
@@ -687,6 +716,28 @@
             <label><input type="checkbox"><span>Checked subject-verb agreement, comma splices, and clear transitions.</span></label>
           </div>
         </details>
+        <details class="revision-checklist">
+          <summary>Discussion Starters &amp; Adaptable Personal Example Bank</summary>
+          <div class="coach-drawer-grid">
+            <div class="coach-mini-card">
+              <h4>Engage &amp; Build (No Circular Filler)</h4>
+              <ul>
+                <li><strong>Extend:</strong> <em>I strongly agree with [Name], and I would add that...</em></li>
+                <li><strong>Concede + Pivot:</strong> <em>While [Name] raises a valid concern about..., it is easy to overlook...</em></li>
+                <li><strong>Chain:</strong> Position -&gt; Causal Reason (how/why) -&gt; Concrete Example -&gt; Relevance.</li>
+              </ul>
+            </div>
+            <div class="coach-mini-card">
+              <h4>Concrete Personal Example Frames</h4>
+              <ul>
+                <li><strong>Tech / AI:</strong> Using an AI study helper during a project revealed gaps in my own reasoning rather than replacing thinking.</li>
+                <li><strong>Remote Work / Study:</strong> A remote internship cut open-office distractions and produced sharper weekly reports.</li>
+                <li><strong>Policy / Environment:</strong> A city plastic-bag rule initially felt inconvenient, yet pushed local shops into durable reusable packaging.</li>
+                <li><strong>Education / Feedback:</strong> Written comments on a draft essay showed exactly where evidence was weak, unlike a bare letter grade.</li>
+              </ul>
+            </div>
+          </div>
+        </details>
         <div class="control-actions suite-mt">
           <button type="button" class="primary-button" data-suite-disc-ai="true" ${suiteState.discAiLoading ? "disabled" : ""}>${suiteState.discAiLoading ? "Checking..." : "Get AI Feedback"}</button>
           <button type="button" class="tool-button" data-suite-copy-disc-prompt="true">Copy Prompt for AI</button>
@@ -697,10 +748,28 @@
       `;
     } else {
       bodyHtml = `
-        <h2>Writing guide and useful phrases</h2>
+        <h2>TOEFL 2026 Writing Scoring Guide &amp; Toolkit</h2>
+        <p class="prompt-note">Based on the official ETS 2026 Technical Manual (RR-25-12): 20 raw points total = Build a Sentence (10 pts) + Write an Email (0-5 holistic) + Academic Discussion (0-5 holistic).</p>
+        <div class="coach-drawer-grid suite-mt">
+          <div class="coach-mini-card">
+            <h4>Score 4 vs. Score 3 Decision Test</h4>
+            <ul>
+              <li><strong>Write an Email:</strong> Can the recipient easily understand the full situation, key details, and requested action with appropriate tone? Yes = 4-5; missing bullet, blunt tone, or unclear sentences = 3.</li>
+              <li><strong>Academic Discussion:</strong> Is the position supported by a relevant, clearly explained reason/example that advances the thread? Yes = 4-5; circular repetition or weak support = 3.</li>
+            </ul>
+          </div>
+          <div class="coach-mini-card">
+            <h4>Local vs. Global Errors &amp; Myths</h4>
+            <ul>
+              <li><strong>Local (low impact):</strong> One minor typo or missing article in an otherwise clear sentence.</li>
+              <li><strong>Global (high penalty):</strong> Skipping a required prompt point, wrong register for recipient, unclear logic, or comma-splice pileups.</li>
+              <li><strong>No bonus for:</strong> Memorized scripts, forced C2 words that clash with syntax, or inflated repetitive word counts.</li>
+            </ul>
+          </div>
+        </div>
         <div class="suite-stack-sm suite-mt">
-          <details open class="suite-details"><summary><strong>Writing scoring guide</strong></summary><pre class="suite-pre">${esc(w.scoringGuideMd)}</pre></details>
-          <details class="suite-details"><summary><strong>Email Writing Guide &amp; Phrases</strong></summary><pre class="suite-pre">${esc(w.emailGuideMd)}</pre></details>
+          <details class="suite-details"><summary><strong>Full Writing Scoring Rubric Reference</strong></summary><pre class="suite-pre">${esc(w.scoringGuideMd)}</pre></details>
+          <details class="suite-details"><summary><strong>Email Writing Guide &amp; Phrase Bank</strong></summary><pre class="suite-pre">${esc(w.emailGuideMd)}</pre></details>
           <details class="suite-details"><summary><strong>Academic Discussion Guide</strong></summary><pre class="suite-pre">${esc(w.discussionGuideMd)}</pre></details>
         </div>
       `;
@@ -1005,12 +1074,42 @@
               <dd>Choose two recurring mistakes from the results. Practice those skills on fresh prompts before you take another timed set.</dd>
             </dl>
           </div>
+          <div>
+            <h2>Speaking &amp; Writing 2026 Quick Reference</h2>
+            <div class="coach-drawer-grid">
+              <div class="coach-mini-card">
+                <h4>Speaking Task 1: Listen &amp; Repeat (7 items)</h4>
+                <ul>
+                  <li>Chunk long sentences into 2-3 meaning phrases; start immediately after the beep.</li>
+                  <li>Protect exact function words and <code>-s</code>/<code>-ed</code> endings to move from Score 4 to Score 5.</li>
+                  <li>Overtrain with 1.1x-1.3x playback and enable mild room babble noise during drills.</li>
+                </ul>
+              </div>
+              <div class="coach-mini-card">
+                <h4>Speaking Task 2: Take an Interview (4 x 45s, 0s prep)</h4>
+                <ul>
+                  <li>Use <strong>STAR</strong> (Situation, Task, Action, Result) on personal/factual turns and <strong>PREP</strong> (Point, Reason, Example, Point) on opinion turns.</li>
+                  <li>Begin wrapping up at 40-42s; if you slip, fix once calmly without apologizing.</li>
+                </ul>
+              </div>
+              <div class="coach-mini-card">
+                <h4>Writing Tasks 1-3 (23 min total, 20 raw pts)</h4>
+                <ul>
+                  <li><strong>Build a Sentence (10 pts):</strong> Lock Subject + Verb first; keep statement order inside embedded questions (<em>where she lives</em>).</li>
+                  <li><strong>Email (7m, 90-130w):</strong> Hit all 3 prompt points with recipient-appropriate politeness and natural collocations.</li>
+                  <li><strong>Discussion (10m, 100-140w):</strong> Engage briefly, avoid circular restatement, and anchor with one concrete example.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
           <details class="suite-details">
-            <summary>Optional writing feedback</summary>
-            <p>Copy a feedback prompt for use in your preferred tool. You can also request feedback from your draft if you configure a provider in Settings.</p>
+            <summary>Optional AI diagnostic feedback prompts (Writing &amp; Speaking)</summary>
+            <p>Copy a rubric-aligned diagnostic prompt to paste into your preferred AI tool along with your draft, transcript, or audio.</p>
             <div class="control-actions">
-              <button type="button" class="tool-button" data-suite-copy-prompt="writeAnEmail">Copy email feedback prompt</button>
-              <button type="button" class="tool-button" data-suite-copy-prompt="academicDiscussion">Copy discussion feedback prompt</button>
+              <button type="button" class="tool-button" data-suite-copy-prompt="writeAnEmail">Copy Email prompt</button>
+              <button type="button" class="tool-button" data-suite-copy-prompt="academicDiscussion">Copy Discussion prompt</button>
+              <button type="button" class="tool-button" data-suite-copy-prompt="listenAndRepeat">Copy Listen &amp; Repeat prompt</button>
+              <button type="button" class="tool-button" data-suite-copy-prompt="takeAnInterview">Copy Interview prompt</button>
             </div>
           </details>
         </div>
@@ -1019,8 +1118,10 @@
   }
 
   const WRITING_FEEDBACK_PROMPTS = {
-    writeAnEmail: "Review this TOEFL practice email. Check whether it addresses all the requests, makes the purpose clear, and uses an appropriate tone. Quote one effective sentence and one sentence to revise. Explain the revision. Give feedback without assigning a test score.",
-    academicDiscussion: "Review this TOEFL practice discussion post. Check that it answers the question, develops a point with a specific reason or example, and is clear to other students. Quote one effective sentence and one sentence to revise. Explain the revision. Give feedback without assigning a test score."
+    writeAnEmail: "Evaluate this TOEFL 2026 Write an Email response on the official 0-5 ETS holistic scale (Content & task completion of all 3 requests, Syntactic/Lexical variety & collocations, Social Conventions/register politeness, and Local vs. Global errors). Quote one effective sentence and two concrete line-level rewrites.",
+    academicDiscussion: "Evaluate this TOEFL 2026 Academic Discussion post on the official 0-5 ETS holistic scale (Relevant original contribution, Position -> Reason -> Concrete Example elaboration, Syntactic/Lexical variety, and Local vs. Global errors). Flag any circular filler and provide two concrete sentence upgrades.",
+    listenAndRepeat: "Evaluate this TOEFL 2026 Listen and Repeat attempt against the original prompt on the official 0-5 rubric (Repeat Accuracy: exact words & -s/-ed forms, Fluency, and Intelligibility). List exact dropped, added, or substituted words and give 2 targeted drill sentences.",
+    takeAnInterview: "Evaluate this 45-second TOEFL 2026 Take an Interview response on the official 0-5 rubric (Content & Relevance, STAR/PREP Organization, Delivery/Fluency, and Language Use). Point out fillers or vague claims and give 2 sharper, natural spoken upgrades."
   };
 
   async function copyWritingFeedback(prompt) {

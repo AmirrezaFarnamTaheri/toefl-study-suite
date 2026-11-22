@@ -242,10 +242,70 @@ function renderPracticeView() {
             ? "Repeat the spoken sentence accurately at a calm, steady pace with clear word endings."
             : "Answer right away with a direct point, one clear reason, and one concrete example."}</p>
         </div>
+        ${renderSpeakingCoachDrawer(isRepeat)}
         ${renderPracticeCard(false)}
         ${renderFeedback()}
       </div>
     </section>
+  `;
+}
+
+function renderSpeakingCoachDrawer(isRepeat) {
+  if (isRepeat) {
+    return `
+      <details class="revision-checklist speaking-coach-drawer">
+        <summary>Listen &amp; Repeat Coach: Chunking, Pacing &amp; 7-Point Self-Audit</summary>
+        <div class="coach-drawer-grid">
+          <div class="coach-mini-card">
+            <h4>3-Step Memory Routine</h4>
+            <ul>
+              <li><strong>Group in 2-3 chunks:</strong> Subject / Action / Where-or-When instead of memorizing 14 single words.</li>
+              <li><strong>Zero-latency start:</strong> Begin immediately after the beep with no <em>uh</em> or <em>um</em>.</li>
+              <li><strong>Keep moving:</strong> Never restart from word 1 after a tiny slip; steady rhythm protects Fluency.</li>
+            </ul>
+          </div>
+          <div class="coach-mini-card">
+            <h4>7-Point Playback Audit (Score 4 -&gt; 5)</h4>
+            <ul>
+              <li>Exact words kept (no added/dropped words) and exact <code>-s</code>/<code>-ed</code> grammar endings.</li>
+              <li>Clean final consonants, natural word linking, and falling intonation at statement ends.</li>
+              <li>Overtrain at 1.1x-1.3x playback speed; fix any word misread by Speech-to-Text in 3 drill sentences.</li>
+            </ul>
+          </div>
+        </div>
+      </details>
+    `;
+  }
+  return `
+    <details class="revision-checklist speaking-coach-drawer">
+      <summary>Interview Coach: STAR / PREP Pacing, Natural Phrases &amp; Topic Ideas</summary>
+      <div class="coach-drawer-grid">
+        <div class="coach-mini-card">
+          <h4>45-Second Structures (0s Prep)</h4>
+          <ul>
+            <li><strong>Personal / Experience (STAR):</strong> Situation (6-8s) -&gt; Task (10-12s) -&gt; Action (14-16s) -&gt; Result (5-6s).</li>
+            <li><strong>Opinion / Preference (PREP):</strong> Direct Point (first 3s) -&gt; One clear Reason -&gt; Concrete Example -&gt; Wrap-up at 40-42s.</li>
+            <li><strong>Calm repair:</strong> Natural micro-pauses are fine; never apologize for a small slip.</li>
+          </ul>
+        </div>
+        <div class="coach-mini-card">
+          <h4>Natural Connectors &amp; Recovery Chunks</h4>
+          <ul>
+            <li><strong>Open:</strong> <em>Personally, I tend to prefer...</em> / <em>One thing I really value is...</em></li>
+            <li><strong>Develop:</strong> <em>The main reason is that...</em> / <em>A good example of this would be...</em></li>
+            <li><strong>Recover if stuck:</strong> <em>Another thing worth mentioning is...</em> / <em>Over time, I've realized that...</em></li>
+          </ul>
+        </div>
+        <div class="coach-mini-card">
+          <h4>Quick Topic Angles (Tech · Health · Education · Culture)</h4>
+          <ul>
+            <li><strong>Tech:</strong> Saves time on small tasks (mobile banking, calendar reminders) vs. screen fatigue &amp; privacy.</li>
+            <li><strong>Health:</strong> Consistency beats intensity (daily evening walk, fixed bedtime removes decision fatigue).</li>
+            <li><strong>Education &amp; Culture:</strong> Specific feedback beats bare grades; shared customs build belonging across generations.</li>
+          </ul>
+        </div>
+      </div>
+    </details>
   `;
 }
 
