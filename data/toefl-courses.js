@@ -9,7 +9,7 @@ const TOEFL_COURSES = [
       "Read the first sentence completely; it has no blanks and gives you the main topic right away.",
       "Check the word before the blank to see what part of speech fits (noun, verb, adjective, or adverb).",
       "Watch endings carefully: third-person singular -s, past tense -ed, plural -s, and noun endings like -tion or -ment.",
-      "Count letters only after you pick the meaning; do not guess random letters that break the sentence grammar."
+      "Use the exact per-letter blanks (_ _ _ _) together with grammar clues: e.g., 'dan_ _ _ _' (4 letters) rules out 'dance' (2) and 'dances' (3) and locks in 'dancing'."
     ],
     workedExample: {
       prompt: "Sentence: Solar panels have become much more affo_____ over the past decade, allowing homeowners to red___ their electricity bills.",

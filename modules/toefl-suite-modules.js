@@ -480,7 +480,7 @@
                   <span class="badge blue">${built.blanks.length} Blanks</span>
                 </div>
                 <h2 class="question-text">${esc(passage.title)}</h2>
-                <p class="prompt-note">Fill in the second half of each highlighted word. Press Enter or Space to jump to the next blank.</p>
+                <p class="prompt-note">Fill in the missing letters (one underline per missing letter, matching the official TOEFL 2026 interface). Press Enter or Space to jump to the next blank.</p>
               </div>
               <div class="question-actions">
                 <button type="button" class="ghost-button" data-suite-ctw-prev="true">Prev</button>
@@ -496,7 +496,8 @@
                 const isRight = suiteState.ctwChecked && val.trim().toLowerCase() === pt.missing.toLowerCase();
                 const isWrong = suiteState.ctwChecked && !isRight;
                 const cls = isRight ? "ctw-ok" : isWrong ? "ctw-bad" : "";
-                return `${esc(pt.lead)}<span class="ctw-token"><strong class="ctw-prefix">${esc(pt.prefix)}</strong><input class="ctw-input ${cls}" type="text" aria-label="Blank ${pt.idx + 1} starting with ${esc(pt.prefix)}" data-suite-ctw-blank="${pt.idx}" value="${esc(val)}" maxlength="${pt.missing.length + 2}" style="width:${Math.max(4, pt.missing.length + 1.5)}ch" autocomplete="off" spellcheck="false" />${suiteState.ctwShowAnswers && !isRight ? `<em class="ctw-ans">(${esc(pt.missing)})</em>` : ""}</span>${esc(pt.trail)}`;
+                const len = pt.missing.length;
+                return `${esc(pt.lead)}<span class="ctw-token"><strong class="ctw-prefix">${esc(pt.prefix)}</strong><input class="ctw-input ${cls}" type="text" aria-label="Blank ${pt.idx + 1}: ${esc(pt.prefix)} plus ${len} missing ${len === 1 ? "letter" : "letters"}" data-suite-ctw-blank="${pt.idx}" data-ctw-len="${len}" value="${esc(val)}" maxlength="${len}" style="--ctw-slots:${len}" autocomplete="off" spellcheck="false" />${suiteState.ctwShowAnswers && !isRight ? `<em class="ctw-ans">(${esc(pt.missing)})</em>` : ""}</span>${esc(pt.trail)}`;
               }).join("")}
             </div>
             <div class="control-actions suite-mt">

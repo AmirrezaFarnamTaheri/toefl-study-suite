@@ -666,12 +666,13 @@
         <div class="practice-board suite-stack-lg">
           <div>
             <h2>${esc(mod.title)} - Task 1: Complete the Words</h2>
-            <p class="prompt-note">Type the missing letters for each highlighted word. Press Enter or Space to move to the next blank.</p>
+            <p class="prompt-note">Fill in the missing letters (one underline per missing letter, matching the official TOEFL 2026 interface). Press Enter or Space to move to the next blank.</p>
             <div class="suite-ctw-passage">
               <span>${esc(built.intro)}</span>${built.parts.map((pt) => {
                 if (pt.type === "space" || pt.type === "word") return esc(pt.raw);
                 const val = userCtw[pt.idx] || "";
-                return `${esc(pt.lead)}<span class="ctw-token"><strong class="ctw-prefix">${esc(pt.prefix)}</strong><input class="ctw-input" type="text" aria-label="Blank ${pt.idx + 1}" data-mock-ctw="${pt.idx}" value="${esc(val)}" maxlength="${pt.missing.length + 2}" style="width:${Math.max(4, pt.missing.length + 1.5)}ch" autocomplete="off" spellcheck="false" /></span>${esc(pt.trail)}`;
+                const len = pt.missing.length;
+                return `${esc(pt.lead)}<span class="ctw-token"><strong class="ctw-prefix">${esc(pt.prefix)}</strong><input class="ctw-input" type="text" aria-label="Blank ${pt.idx + 1}: ${esc(pt.prefix)} plus ${len} missing ${len === 1 ? "letter" : "letters"}" data-mock-ctw="${pt.idx}" data-ctw-len="${len}" value="${esc(val)}" maxlength="${len}" style="--ctw-slots:${len}" autocomplete="off" spellcheck="false" /></span>${esc(pt.trail)}`;
               }).join("")}
             </div>
           </div>

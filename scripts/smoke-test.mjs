@@ -330,6 +330,13 @@ for (const it of [...diagMock.listening.module1.items, ...diagMock.listening.mod
 }
 const ctwBuilt = context.window.ToeflSuiteModules.buildCtwBlanks(api.TOEFL_SUITE_BANK.reading.completeTheWords[0].text);
 assert(ctwBuilt.blanks.length === 10, "Complete the Words generator should create 10 blanks");
+api.state.tab = "reading";
+api.render();
+assert(
+  appElement.innerHTML.includes(`--ctw-slots:${ctwBuilt.blanks[0].missing.length}`) &&
+  appElement.innerHTML.includes(`maxlength="${ctwBuilt.blanks[0].missing.length}"`),
+  "Complete the Words must render exact per-letter slots matching missing letter count"
+);
 
 assert(api.TOEFL_LISTENING_PRACTICE.length >= 24, "Listening practice should have >=24 exercises across all 4 tasks");
 assert(api.TOEFL_SUITE_BANK.reading.passages.length >= 50, "Merged Reading passages should have >=50 sets");

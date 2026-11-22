@@ -2829,27 +2829,50 @@ select,
   color: var(--ink);
 }
 
-.ctw-input {
-  margin-left: 1px;
-  padding: 2px 5px;
-  border: 1px solid var(--line);
-  border-bottom: 2px solid var(--teal);
-  background: var(--surface);
+input.ctw-input[type="text"] {
+  --ctw-slots: 4;
+  --ctw-dash: var(--teal);
+  box-sizing: content-box;
+  margin-left: 2px;
+  padding: 2px 0.1ch 4px 0.2ch;
+  border: 0;
   border-radius: 3px 3px 0 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 15px;
+  width: calc(var(--ctw-slots) * 1.5ch);
+  min-height: 0;
+  background-color: var(--surface);
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--ctw-dash) 0,
+    var(--ctw-dash) 1ch,
+    transparent 1ch,
+    transparent 1.5ch
+  );
+  background-size: calc(var(--ctw-slots) * 1.5ch - 0.5ch) 2px;
+  background-position: 0.2ch calc(100% - 2px);
+  background-repeat: no-repeat;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.5ch;
   color: var(--ink);
+  caret-color: var(--teal);
 }
 
-.ctw-input.ctw-ok {
-  border-bottom-color: var(--ok-border);
-  background: var(--ok-bg);
+input.ctw-input[type="text"]:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+input.ctw-input[type="text"].ctw-ok {
+  --ctw-dash: var(--ok-border);
+  background-color: var(--ok-bg);
   color: var(--ok-fg);
 }
 
-.ctw-input.ctw-bad {
-  border-bottom-color: var(--bad-border);
-  background: var(--bad-bg);
+input.ctw-input[type="text"].ctw-bad {
+  --ctw-dash: var(--bad-border);
+  background-color: var(--bad-bg);
   color: var(--bad-fg);
 }
 
