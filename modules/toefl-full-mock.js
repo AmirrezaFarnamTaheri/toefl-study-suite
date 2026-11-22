@@ -76,6 +76,65 @@
     }
   }
 
+  function buildDiagnosticMock() {
+    const data = getMocksData();
+    const suiteBank = typeof TOEFL_SUITE_BANK !== "undefined" ? TOEFL_SUITE_BANK : null;
+    const extra = typeof TOEFL_EXTRA_PRACTICE !== "undefined" ? TOEFL_EXTRA_PRACTICE : null;
+    const lp = typeof TOEFL_LISTENING_PRACTICE !== "undefined" ? TOEFL_LISTENING_PRACTICE : [];
+    const base = (data.mocks || [])[0];
+    if (!base) return null;
+
+    const ctw1 = (suiteBank?.reading?.completeTheWords || [])[0] || base.reading.module1.ctw;
+    const ctw2 = (suiteBank?.reading?.completeTheWords || [])[1] || base.reading.module2.ctw;
+    const dlPassage = (extra?.readingPassages || []).find((p) => p.kind === "Read in Daily Life") || base.reading.module1.passages[0];
+    const acadPassage = (extra?.readingPassages || []).find((p) => p.kind === "Academic Passage") || base.reading.module2.passages[0];
+
+    const pickLp = (id) => lp.find((x) => x.id === id);
+    const toListenItem = (entry) => ({
+      id: entry.id,
+      audioFile: entry.id,
+      kind: entry.kind,
+      title: entry.title,
+      script: entry.script,
+      questions: entry.questions.map((q) => ({
+        q: q.prompt,
+        choices: q.choices,
+        answer: q.choices[q.answer],
+        explanation: q.reason || ""
+      }))
+    });
+
+    const m1Listen = [pickLp("reply-3"), pickLp("conversation-3")].filter(Boolean).map(toListenItem);
+    const m2Listen = [pickLp("announcement-3"), pickLp("talk-3")].filter(Boolean).map(toListenItem);
+    const basItems = (extra?.buildASentence || base.writing.buildASentence || []).slice(0, 4);
+    const emailItem = (suiteBank?.writing?.emails || [])[1] || base.writing.email;
+    const discItem = (suiteBank?.writing?.discussions || [])[1] || base.writing.discussion;
+
+    return {
+      id: "mock-diagnostic-1",
+      isDiagnostic: true,
+      title: "TOEFL 2026 Evaluation Diagnostic",
+      subtitle: "Short calibrated check across all 4 sections and task formats (~25-30 min)",
+      reading: {
+        module1: { title: "Reading Check 1 (CTW + Daily Life)", minutes: 7, ctw: ctw1, passages: [dlPassage].filter(Boolean) },
+        module2: { title: "Reading Check 2 (CTW + Academic)", minutes: 8, ctw: ctw2, passages: [acadPassage].filter(Boolean) }
+      },
+      listening: {
+        module1: { title: "Listening Check 1 (Response + Conversation)", minutes: 6, items: m1Listen.length ? m1Listen : base.listening.module1.items.slice(0, 2) },
+        module2: { title: "Listening Check 2 (Announcement + Academic Talk)", minutes: 7, items: m2Listen.length ? m2Listen : base.listening.module2.items.slice(0, 2) }
+      },
+      writing: {
+        buildASentence: basItems,
+        email: emailItem,
+        discussion: discItem
+      },
+      speaking: {
+        repeat: (resolveSpeakingItems(base).repeat || []).slice(0, 3),
+        interview: (resolveSpeakingItems(base).interview || []).slice(0, 2)
+      }
+    };
+  }
+
   function pickRandomMock() {
     const data = getMocksData();
     const suiteBank = typeof TOEFL_SUITE_BANK !== "undefined" ? TOEFL_SUITE_BANK : null;
@@ -545,7 +604,10 @@
               <h1 class="study-page-title">Four-section tests</h1>
               <p class="prompt-note">These sets vary in length. Listening uses prerecorded device voices. Record your speaking answers or type them if a microphone is unavailable.</p>
             </div>
-            <button type="button" class="primary-button" data-mock-random="true">Choose a test for me</button>
+            <div class="question-actions">
+              <button type="button" class="primary-button" data-mock-diagnostic="true">Start Evaluation Diagnostic (~25m)</button>
+              <button type="button" class="ghost-button" data-mock-random="true">Choose a test for me</button>
+            </div>
           </div>
 
           <div class="mock-cards-grid suite-mt">
@@ -657,7 +719,9 @@
     const safeIdx = Math.min(mockState.listenIdx, Math.max(0, items.length - 1));
     const item = items[safeIdx];
     const audioMockId = mockState.mock.listeningMockId || mockState.mock.id;
-    const audio = `./assets/audio/prompts/${audioMockId}-${modKey}-${safeIdx}.wav`;
+    const audio = item.audioFile
+      ? `./assets/audio/prompts/${item.audioFile}.wav`
+      : `./assets/audio/prompts/${audioMockId}-${modKey}-${safeIdx}.wav`;
 
     return `
       <section class="suite-focus">
@@ -882,11 +946,34 @@
           </div>
 
           <div class="mock-score-grid">
-            <div class="mini-stat"><span>Reading</span><strong>${rep.reading.correct}/${rep.reading.total}</strong><small>correct</small></div>
-            <div class="mini-stat"><span>Listening</span><strong>${rep.listening.correct}/${rep.listening.total}</strong><small>correct</small></div>
+            <div class="mini-stat"><span>Reading</span><strong>${rep.reading.correct}/${rep.reading.total}</strong><small>${Math.round((rep.reading.correct / Math.max(1, rep.reading.total)) * 100)}% correct</small></div>
+            <div class="mini-stat"><span>Listening</span><strong>${rep.listening.correct}/${rep.listening.total}</strong><small>${Math.round((rep.listening.correct / Math.max(1, rep.listening.total)) * 100)}% correct</small></div>
             <div class="mini-stat"><span>Writing</span><strong>${rep.writing.basCorrect}/${rep.writing.basTotal}</strong><small>sentences correct · ${rep.writing.emailWc} email words · ${rep.writing.discWc} discussion words</small></div>
             <div class="mini-stat"><span>Speaking</span><strong>${rep.speaking.skipped ? "Skipped" : rep.speaking.recorded}</strong><small>${rep.speaking.skipped ? "" : `${rep.speaking.recorded === 1 ? "recording" : "recordings"} · ${rep.speaking.answered} typed ${rep.speaking.answered === 1 ? "answer" : "answers"}`}</small></div>
           </div>
+
+          ${(() => {
+            const ctwItems = rep.rReview.filter((x) => x.q.startsWith("Complete word:"));
+            const ctwOk = ctwItems.filter((x) => x.ok).length;
+            const rpItems = rep.rReview.filter((x) => !x.q.startsWith("Complete word:"));
+            const rpOk = rpItems.filter((x) => x.ok).length;
+            const recs = [
+              { label: "Reading: Complete the Words", pct: Math.round((ctwOk / Math.max(1, ctwItems.length)) * 100), note: `${ctwOk}/${ctwItems.length}`, tab: "reading" },
+              { label: "Reading: Passages", pct: Math.round((rpOk / Math.max(1, rpItems.length)) * 100), note: `${rpOk}/${rpItems.length}`, tab: "reading" },
+              { label: "Listening (All Tasks)", pct: Math.round((rep.listening.correct / Math.max(1, rep.listening.total)) * 100), note: `${rep.listening.correct}/${rep.listening.total}`, tab: "listening" },
+              { label: "Writing: Build a Sentence", pct: Math.round((rep.writing.basCorrect / Math.max(1, rep.writing.basTotal)) * 100), note: `${rep.writing.basCorrect}/${rep.writing.basTotal}`, tab: "writing" }
+            ].sort((a, b) => a.pct - b.pct);
+            return `
+              <div class="suite-idea-card">
+                <h3>Diagnostic Priority Breakdown</h3>
+                <ul class="course-rules">
+                  ${recs.map((r) => `<li><strong>${esc(r.label)}</strong>: ${esc(r.note)} (${r.pct}%)</li>`).join("")}
+                  <li><strong>Writing Output</strong>: Email ${rep.writing.emailWc} words (target 90-130) · Discussion ${rep.writing.discWc} words (target 100-140)</li>
+                  <li><strong>Speaking Output</strong>: ${rep.speaking.skipped ? "Skipped (practice Listen & Repeat + Interview with mic)" : `${rep.speaking.recorded} recorded, ${rep.speaking.answered} typed`}</li>
+                </ul>
+              </div>
+            `;
+          })()}
 
           <div class="control-actions">
             <button type="button" class="tool-button" data-mock-copy-writing="true">Copy writing for feedback</button>
@@ -965,6 +1052,13 @@
       });
     });
 
+    const diagBtn = doc.querySelector("[data-mock-diagnostic]");
+    if (diagBtn) {
+      diagBtn.addEventListener("click", () => {
+        const d = buildDiagnosticMock();
+        if (d) startMock(d);
+      });
+    }
     const randBtn = doc.querySelector("[data-mock-random]");
     if (randBtn) randBtn.addEventListener("click", () => startMock(pickRandomMock()));
 
@@ -1129,6 +1223,7 @@
 
   global.ToeflFullMock = {
     state: mockState,
+    buildDiagnosticMock,
     pickRandomMock,
     startMock,
     leaveResults() {

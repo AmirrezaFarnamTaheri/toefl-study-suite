@@ -322,6 +322,12 @@ const randomMock = context.window.ToeflFullMock.pickRandomMock();
 assert(randomMock && randomMock.listeningMockId, "Random full mock must carry listeningMockId for audio assets");
 const randomAudio = fs.readFileSync(path.join(root, "assets", "audio", "prompts", `${randomMock.listeningMockId}-listening1-0.wav`));
 assert(randomAudio.length > 44 && randomAudio.toString("ascii", 0, 4) === "RIFF", "Random full mock listening audio missing");
+const diagMock = context.window.ToeflFullMock.buildDiagnosticMock();
+assert(diagMock && diagMock.isDiagnostic && diagMock.listening.module1.items.length === 2 && diagMock.listening.module2.items.length === 2, "Evaluation diagnostic mock build failed");
+for (const it of [...diagMock.listening.module1.items, ...diagMock.listening.module2.items]) {
+  const wav = fs.readFileSync(path.join(root, "assets", "audio", "prompts", `${it.audioFile}.wav`));
+  assert(wav.length > 44 && wav.toString("ascii", 0, 4) === "RIFF", `Diagnostic listening audio missing: ${it.audioFile}`);
+}
 const ctwBuilt = context.window.ToeflSuiteModules.buildCtwBlanks(api.TOEFL_SUITE_BANK.reading.completeTheWords[0].text);
 assert(ctwBuilt.blanks.length === 10, "Complete the Words generator should create 10 blanks");
 
