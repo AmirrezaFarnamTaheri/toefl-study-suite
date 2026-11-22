@@ -78,7 +78,6 @@
       state.mode = target.speakingMode;
     }
     state.tab = target.tab || "starter";
-    state.mobileNavOpen = false;
     if (typeof render === "function") render();
   }
 
@@ -99,7 +98,7 @@
         <div class="suite-card">
           <div class="suite-header-row">
             <div>
-              <h2>TOEFL 2026 Courses and Guided Sessions</h2>
+              <h2>Choose a lesson</h2>
               <p class="compact-copy">Short, practical lessons for every skill, each paired with a quick check and a one-click practice session.</p>
             </div>
             <div class="course-progress-box">
@@ -170,7 +169,7 @@
                   </div>
 
                   <div class="course-block">
-                    <h3>Key Rules</h3>
+                    <h3>What to remember</h3>
                     <ul class="course-rules">
                       ${active.keyRules.map((rule) => `<li>${esc(rule)}</li>`).join("")}
                     </ul>
@@ -184,7 +183,7 @@
                   </div>
 
                   <div class="course-block">
-                    <h3>Quick Check</h3>
+                    <h3>Check your understanding</h3>
                     <div class="course-quiz-list">
                       ${active.quiz
                         .map((q, qIdx) => {

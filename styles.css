@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --bg: #f7f8fb;
   --surface: #ffffff;
   --surface-strong: #f0f4f8;
@@ -2575,92 +2575,100 @@ select,
   color: #ffffff;
 }
 
-/* ---------------- Slim Topbar & 1-Row Primary Navigation ---------------- */
-.topbar {
-  padding: 12px clamp(16px, 3vw, 32px);
-}
-
-.main-nav-bar {
+/* Study navigation */
+.study-header { background: var(--surface); border-bottom: 1px solid var(--line); }
+.study-header-inner {
+  max-width: 1210px;
+  margin: auto;
   padding: 8px clamp(16px, 3vw, 32px);
-  border-bottom: 1px solid var(--line);
-  background: var(--surface);
-}
-
-.nav-mobile-bar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 4px 20px;
 }
-
-.nav-mobile-active {
-  font-size: 14px;
-  color: var(--ink);
-}
-
-.nav-groups {
-  display: none;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 10px;
-}
-
-.nav-groups.open {
-  display: flex;
-}
-
-.nav-primary-row,
-.nav-secondary-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-}
-
-.nav-secondary-row {
-  padding-top: 8px;
-  border-top: 1px solid var(--line);
-}
-
-.nav-button {
-  border: 1px solid transparent;
+.study-brand, .study-nav-button {
   background: transparent;
-  color: var(--muted);
+  color: var(--ink);
+  cursor: pointer;
+  min-height: 44px;
+}
+.study-brand {
+  justify-self: start;
+  padding: 0;
+  font: 700 1.35rem Georgia, serif;
   white-space: nowrap;
 }
-
-.nav-button:hover {
+.study-primary, .study-secondary, .study-header-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.study-header-actions { justify-self: end; justify-content: end; }
+.study-nav-button {
+  border-bottom: 2px solid transparent;
+  padding: 6px 12px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+.study-nav-button:hover, .study-nav-button[aria-current] {
   background: var(--surface-strong);
   color: var(--ink);
 }
-
-.nav-button.active,
-.nav-button[aria-current="page"] {
-  background: var(--teal);
-  border-color: var(--teal);
-  color: var(--teal-fg);
-  font-weight: 700;
+.study-nav-button[aria-current] { border-bottom-color: var(--teal); }
+.study-header-actions .ghost-button { font-size: 0.85rem; }
+.study-section-bar {
+  max-width: 1210px;
+  margin: auto;
+  padding: 8px clamp(16px, 3vw, 32px) 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+.study-secondary .study-nav-button { background: transparent; }
+.study-secondary .study-nav-button:hover { background: var(--surface-strong); }
+.app-shell > .content { max-width: 1210px; margin: 0 auto; }
+.study-home { padding-block: 6px 34px; }
+.study-home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(18px, 6vw, 62px);
+  padding: clamp(22px, 5vw, 58px);
+  margin-bottom: clamp(24px, 5vw, 48px);
+  background: var(--surface-strong);
+  border-top: 4px solid var(--teal);
+}
+.study-home h1 {
+  margin: 0;
+  font: 500 clamp(2.4rem, 5.6vw, 4.75rem)/1.04 Georgia, Cambria, serif;
+  letter-spacing: -0.045em;
+}
+.study-home-hero p { color: var(--muted); font-size: 1rem; margin: 12px 0 0; }
+.study-home h2 { font: 500 clamp(1.35rem, 2.5vw, 1.85rem)/1.15 Georgia, serif; margin: 0 0 12px; }
+.study-home-start { border-left: 1px solid var(--line); padding-left: clamp(16px, 3vw, 36px); }
+.study-home-start .primary-button { margin-top: 18px; }
+.study-home-columns { display: grid; grid-template-columns: 1.3fr 1fr; gap: clamp(20px, 5vw, 48px); align-items: start; }
+.study-home-side { background: var(--surface); border: 1px solid var(--line); padding: clamp(16px, 2.5vw, 24px); }
+.study-home-list { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+.study-home-list li { border-bottom: 1px solid var(--line); }
+.study-home-link { text-align: left; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 8px; min-height: 54px; width: 100%; background: transparent; color: var(--ink); cursor: pointer; }
+.study-home-link:hover { background: var(--surface-strong); }
+.study-home-link small { display: block; font-size: 0.875rem; line-height: 1.4; color: var(--muted); margin-top: 3px; }
+.study-home-arrow { color: var(--teal); font-size: 1.2rem; }
+.study-page-title { max-width: 880px; margin: 0 auto 14px; font: 500 clamp(1.85rem, 3.2vw, 2.65rem)/1.1 Georgia, serif; }
+.study-page-title.wide { max-width: none; }
+@media (max-width: 710px) {
+  .study-header-inner { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 8px; }
+  .study-primary { grid-column: 1 / -1; grid-row: 2; justify-content: space-between; }
+  .study-nav-button { padding-inline: 8px; }
+  .study-home-hero, .study-home-columns { grid-template-columns: 1fr; }
+  .study-home-start { border-left: 0; border-top: 1px solid var(--line); padding: 16px 0 0; }
 }
 
-.nav-more-btn {
-  margin-left: auto;
-  border: 1px solid var(--line);
-  color: var(--ink);
-}
-
-.nav-sub-btn {
-  font-size: 13.5px;
-}
-
-@media (min-width: 768px) {
-  .nav-mobile-bar {
-    display: none;
-  }
-  .nav-groups {
-    display: flex;
-    padding-top: 0;
-  }
-}
 
 /* Centered Single-Column Focus Layout for TOEFL 2026 Skills */
 .suite-focus {
@@ -3467,3 +3475,20 @@ select,
     grid-template-columns: 1fr;
   }
 }
+
+.listening-filter { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.listening-filter label, .listening-question legend { font-weight: 650; }
+.listening-question { margin: 0; padding: 14px; min-width: 0; border: 1px solid var(--line); }
+.listening-question legend { padding-inline: 6px; }
+.study-secondary .study-nav-button[aria-current] { color: var(--teal); }
+.practice-board .question-text { font-family: Georgia, Cambria, serif; font-weight: 500; }
+
+.study-reference { padding-inline: 10px; text-decoration: none; }
+.study-plan-list { display: grid; gap: 8px; margin: 0; }
+.study-plan-list dt { font-weight: 700; }
+.study-plan-list dd { margin: 0 0 10px; color: var(--muted); }
+
+.study-settings { max-width: 880px; margin-inline: auto; }
+.study-settings-panels { display: grid; gap: 10px; }
+.study-settings-panels details summary { cursor: pointer; padding-block: 8px; }
+.study-settings-panels details[open] summary { margin-bottom: 12px; }

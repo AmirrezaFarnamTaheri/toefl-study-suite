@@ -16,7 +16,8 @@
   function loadHistory() {
     try {
       const raw = global.localStorage && global.localStorage.getItem(MOCK_HISTORY_KEY);
-      return raw ? JSON.parse(raw) : [];
+      const list = raw ? JSON.parse(raw) : [];
+      return Array.isArray(list) ? list : [];
     } catch {
       return [];
     }
@@ -49,54 +50,6 @@
   function fmtSec(sec) {
     const s = Math.max(0, Number(sec) || 0);
     return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
-  }
-
-  function pctToBand(pct) {
-    // Map 0..1 accuracy cleanly to TOEFL 2026 1.0 - 6.0 half-point Band scale
-    const raw = 1 + Math.max(0, Math.min(1, pct)) * 5;
-    return Math.round(raw * 2) / 2;
-  }
-
-  function bandToClassic(band) {
-    const table = [
-      [6.0, "114-120"],
-      [5.5, "107-113"],
-      [5.0, "95-106"],
-      [4.5, "86-94"],
-      [4.0, "72-85"],
-      [3.5, "58-71"],
-      [3.0, "42-57"],
-      [2.5, "30-41"],
-      [2.0, "18-29"],
-      [1.0, "0-17"]
-    ];
-    for (const [b, rng] of table) {
-      if (band >= b) return rng;
-    }
-    return "0-17";
-  }
-
-  function scoreWordOverlap(refText, hypText) {
-    const norm = (s) =>
-      String(s || "")
-        .toLowerCase()
-        .replace(/[^a-z0-9'\s]/g, " ")
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean);
-    const ref = norm(refText);
-    const hyp = norm(hypText);
-    if (!ref.length || !hyp.length) return 0;
-    const hypCounts = {};
-    hyp.forEach((w) => { hypCounts[w] = (hypCounts[w] || 0) + 1; });
-    let hits = 0;
-    ref.forEach((w) => {
-      if (hypCounts[w] > 0) {
-        hits += 1;
-        hypCounts[w] -= 1;
-      }
-    });
-    return hits / ref.length;
   }
 
   function speakText(text) {
@@ -141,17 +94,18 @@
     const ac = shuffled(acad);
     const ct = shuffled(ctws);
     const bs = shuffled(basAll).slice(0, 10);
-    const listenBase = randPick(baseMocks).listening;
+    const listenSource = randPick(baseMocks);
 
     return {
       id: `mock-random-${Date.now()}`,
+      listeningMockId: listenSource.id,
       title: "Random Full Practice Test",
       subtitle: "Freshly assembled 4-section 2026 practice test",
       reading: {
         module1: { title: "Reading Part 1", minutes: 18, ctw: ct[0], passages: [dl[0], dl[1], ac[0]].filter(Boolean) },
         module2: { title: "Reading Part 2", minutes: 18, ctw: ct[1] || ct[0], passages: [dl[2] || dl[0], dl[3] || dl[1], ac[1] || ac[0]].filter(Boolean) }
       },
-      listening: listenBase,
+      listening: listenSource.listening,
       writing: {
         buildASentence: bs,
         email: randPick(suiteBank.writing.emails || []),
@@ -204,8 +158,6 @@
 
     // Listening state
     listenIdx: 0,
-    listenPlays: {},
-    listenShowScript: false,
     listenMcq: {}, // key: `${phase}:${itemId}:${qi}` -> choice string
 
     // Writing state
@@ -226,6 +178,116 @@
     lastReport: null
   };
 
+  let activeCapture = null;
+  const recordings = new Map();
+  let recordingStatus = "";
+  let finishing = false;
+
+  function clearRecordings() {
+    const capture = activeCapture;
+    activeCapture = null;
+    capture?.stop();
+    for (const url of recordings.values()) global.URL.revokeObjectURL(url);
+    recordings.clear();
+    recordingStatus = "";
+  }
+
+  function renderSpeakingControl(selector) {
+    render();
+    global.document.querySelector(selector)?.focus();
+  }
+
+  async function toggleRecording() {
+    if (activeCapture) {
+      activeCapture.stop();
+      return;
+    }
+    if (!global.navigator?.mediaDevices?.getUserMedia || !global.MediaRecorder) {
+      recordingStatus = "Recording is unavailable in this browser. You can type a response below.";
+      renderSpeakingControl("[data-mock-speak-input]");
+      return;
+    }
+    stopSpeech();
+    const key = `${mockState.speakSub}:${mockState.speakIdx}`;
+    const capture = { recorder: null, stream: null, stop() {} };
+    activeCapture = capture;
+    recordingStatus = "Waiting for microphone permission…";
+    renderSpeakingControl("[data-mock-speak-status]");
+    try {
+      capture.stream = await global.navigator.mediaDevices.getUserMedia({ audio: true });
+      if (activeCapture !== capture) {
+        capture.stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      const recorder = new global.MediaRecorder(capture.stream);
+      const chunks = [];
+      capture.recorder = recorder;
+      let recordingLimit;
+      capture.stop = () => {
+        clearTimeout(recordingLimit);
+        if (recorder.state !== "inactive") recorder.stop();
+        capture.stream.getTracks().forEach((track) => track.stop());
+      };
+      capture.done = new Promise((resolve) => {
+        recorder.addEventListener("dataavailable", (event) => {
+          if (event.data.size) chunks.push(event.data);
+        });
+        function complete(error) {
+          clearTimeout(recordingLimit);
+          if (activeCapture === capture) {
+            activeCapture = null;
+            if (!error && chunks.length) {
+              const previous = recordings.get(key);
+              if (previous) global.URL.revokeObjectURL(previous);
+              recordings.set(key, global.URL.createObjectURL(new Blob(chunks, { type: recorder.mimeType })));
+              recordingStatus = "Recording ready to play.";
+            } else {
+              recordingStatus = "No audio was saved. Try recording again or type your response.";
+            }
+            if (!finishing) renderSpeakingControl("[data-mock-record]");
+          }
+          capture.stream.getTracks().forEach((track) => track.stop());
+          resolve();
+        }
+        recorder.addEventListener("stop", () => complete(false), { once: true });
+        recorder.addEventListener("error", () => complete(true), { once: true });
+      });
+      recorder.start();
+      const limitSeconds = mockState.speakSub === "repeat" ? 10 : 45;
+      recordingLimit = setTimeout(capture.stop, limitSeconds * 1000);
+      recordingStatus = `Recording for up to ${limitSeconds} seconds…`;
+      renderSpeakingControl("[data-mock-record]");
+    } catch (error) {
+      capture.stream?.getTracks().forEach((track) => track.stop());
+      if (activeCapture !== capture) return;
+      activeCapture = null;
+      recordingStatus = error?.name === "NotAllowedError"
+        ? "Microphone access was denied. Allow it in your browser and try again, or type your response."
+        : "Could not start the microphone. Check your device or type your response.";
+      renderSpeakingControl("[data-mock-record]");
+    }
+  }
+
+  async function finishSpeaking(skipped = false) {
+    if (finishing) return;
+    finishing = true;
+    const capture = activeCapture;
+    try {
+      if (capture?.recorder) {
+        capture.stop();
+        await capture.done;
+      } else {
+        activeCapture = null;
+      }
+      if (mockState.phase !== "speaking") return;
+      mockState.speakSkipped = skipped && !recordings.size &&
+        ![...Object.values(mockState.repeatResponses), ...Object.values(mockState.interviewResponses)].some((value) => value.trim());
+      finishAndScore();
+    } finally {
+      finishing = false;
+    }
+  }
+
   function stopTimer() {
     if (mockState.timerId && typeof clearInterval === "function") {
       clearInterval(mockState.timerId);
@@ -236,29 +298,29 @@
   function startPhaseTimer(minutes) {
     stopTimer();
     mockState.secondsLeft = Math.max(60, Math.round(minutes * 60));
+    const deadline = Date.now() + mockState.secondsLeft * 1000;
     if (typeof setInterval !== "function") return;
     mockState.timerId = setInterval(() => {
-      if (mockState.secondsLeft > 0) {
-        mockState.secondsLeft -= 1;
-        const el = global.document && global.document.querySelector("#mockTimerDisplay");
-        if (el) el.textContent = fmtSec(mockState.secondsLeft);
-      } else {
+      mockState.secondsLeft = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      const el = global.document?.querySelector("#mockTimerDisplay");
+      if (el) el.textContent = fmtSec(mockState.secondsLeft);
+      if (mockState.secondsLeft === 0) {
         stopTimer();
+        advancePhase();
       }
-    }, 1000);
+    }, 250);
   }
 
   function startMock(mockObj) {
     if (!mockObj) return;
     stopSpeech();
+    clearRecordings();
     mockState.mock = mockObj;
     mockState.speakingItems = resolveSpeakingItems(mockObj);
     mockState.phase = "reading1";
     mockState.ctwInputs = { reading1: {}, reading2: {} };
     mockState.readingMcq = {};
     mockState.listenIdx = 0;
-    mockState.listenPlays = {};
-    mockState.listenShowScript = false;
     mockState.listenMcq = {};
     mockState.writingSub = "bas";
     mockState.basIdx = 0;
@@ -285,12 +347,10 @@
     } else if (mockState.phase === "reading2") {
       mockState.phase = "listening1";
       mockState.listenIdx = 0;
-      mockState.listenShowScript = false;
       startPhaseTimer(m.listening.module1.minutes || 15);
     } else if (mockState.phase === "listening1") {
       mockState.phase = "listening2";
       mockState.listenIdx = 0;
-      mockState.listenShowScript = false;
       startPhaseTimer(m.listening.module2.minutes || 14);
     } else if (mockState.phase === "listening2") {
       mockState.phase = "writing";
@@ -311,7 +371,7 @@
         startPhaseTimer(8);
       }
     } else if (mockState.phase === "speaking") {
-      finishAndScore();
+      void finishSpeaking();
       return;
     }
     if (typeof render === "function") render();
@@ -321,8 +381,6 @@
     stopTimer();
     stopSpeech();
     const m = mockState.mock;
-    const sp = mockState.speakingItems;
-
     // 1. Score Reading (Mod 1 + Mod 2: CTW blanks + MCQs)
     let rCorrect = 0;
     let rTotal = 0;
@@ -363,7 +421,6 @@
         });
       });
     }
-    const readingBand = pctToBand(rCorrect / Math.max(1, rTotal));
 
     // 2. Score Listening (Mod 1 + Mod 2)
     let lCorrect = 0;
@@ -389,9 +446,6 @@
         });
       });
     }
-    const listeningBand = pctToBand(lCorrect / Math.max(1, lTotal));
-
-    // 3. Score Writing (Build a Sentence exact + Email & Discussion local structural/length rubric)
     const basList = m.writing.buildASentence || [];
     let basOk = 0;
     const basReview = basList.map((item, idx) => {
@@ -409,49 +463,19 @@
     });
     const emailWc = countWords(mockState.emailText);
     const discWc = countWords(mockState.discText);
-    const emailRatio = emailWc === 0 ? 0 : Math.min(1, emailWc / 105);
-    const discRatio = discWc === 0 ? 0 : Math.min(1, discWc / 115);
-    const basRatio = basList.length ? basOk / basList.length : 0.5;
-    const writingBand = pctToBand(basRatio * 0.4 + emailRatio * 0.3 + discRatio * 0.3);
-
-    // 4. Score Speaking (7 Listen & Repeat overlap + 4 Interview length/structure or local engine)
-    let speakingBand = 0;
-    if (!mockState.speakSkipped && sp) {
-      const lrScores = sp.repeat.map((it, i) => scoreWordOverlap(it.text, mockState.repeatResponses[i] || ""));
-      const lrAvg = lrScores.reduce((a, b) => a + b, 0) / Math.max(1, lrScores.length);
-      const intScores = sp.interview.map((it, i) => {
-        const resp = mockState.interviewResponses[i] || "";
-        const wc = countWords(resp);
-        if (!wc) return 0;
-        if (typeof createInterviewFeedback === "function") {
-          try {
-            const fb = createInterviewFeedback({ text: it.text, category: "General" }, resp, 45, { audioStats: null, recognitionStats: { confidenceSamples: [], finalSegments: 0, interimSegments: 0 } });
-            return Math.max(0, Math.min(1, (fb.score - 1) / 5));
-          } catch {
-            // fallback
-          }
-        }
-        return Math.min(1, wc / 75);
-      });
-      const intAvg = intScores.reduce((a, b) => a + b, 0) / Math.max(1, intScores.length);
-      speakingBand = pctToBand(lrAvg * 0.5 + intAvg * 0.5);
-    }
-
-    const activeBands = mockState.speakSkipped
-      ? [readingBand, listeningBand, writingBand]
-      : [readingBand, listeningBand, writingBand, speakingBand];
-    const overallBand = Math.round((activeBands.reduce((a, b) => a + b, 0) / activeBands.length) * 2) / 2;
-
     const report = {
       id: `run-${Date.now()}`,
       date: new Date().toISOString().slice(0, 10),
       mockTitle: m.title,
-      reading: { correct: rCorrect, total: rTotal, band: readingBand },
-      listening: { correct: lCorrect, total: lTotal, band: listeningBand },
-      writing: { basCorrect: basOk, basTotal: basList.length, emailWc, discWc, band: writingBand },
-      speaking: { skipped: mockState.speakSkipped, band: speakingBand },
-      overallBand,
-      classicRange: bandToClassic(overallBand),
+      reading: { correct: rCorrect, total: rTotal },
+      listening: { correct: lCorrect, total: lTotal },
+      writing: { basCorrect: basOk, basTotal: basList.length, emailWc, discWc },
+      speaking: {
+        skipped: mockState.speakSkipped,
+        recorded: recordings.size,
+        answered: [...Object.values(mockState.repeatResponses), ...Object.values(mockState.interviewResponses)]
+          .filter((response) => String(response || "").trim()).length
+      },
       rReview,
       lReview,
       basReview
@@ -465,11 +489,8 @@
       id: report.id,
       date: report.date,
       title: report.mockTitle,
-      reading: readingBand,
-      listening: listeningBand,
-      writing: writingBand,
-      speaking: mockState.speakSkipped ? null : speakingBand,
-      overall: overallBand
+      reading: report.reading,
+      listening: report.listening
     });
     saveHistory(hist);
     if (typeof render === "function") render();
@@ -501,6 +522,16 @@
     `;
   }
 
+  function displayMockTitle(title) {
+    return title.replace(/ \(Official 2026 Format\)$/, "");
+  }
+
+  function formatCorrect(result) {
+    return result && Number.isInteger(result.correct) && Number.isInteger(result.total)
+      ? `${result.correct}/${result.total} correct`
+      : "-";
+  }
+
   function renderSelectScreen() {
     const data = getMocksData();
     const mocks = data.mocks || [];
@@ -511,21 +542,21 @@
         <div class="practice-board">
           <div class="practice-header">
             <div>
-              <h2 class="question-text">Full TOEFL 2026 Practice Tests</h2>
-              <p class="prompt-note">Take a complete 4-section timed test (Reading, Listening, Writing, and Speaking) with a 1.0-6.0 Band score report.</p>
+              <h1 class="study-page-title">Four-section tests</h1>
+              <p class="prompt-note">These sets vary in length. Listening uses prerecorded device voices. Record your speaking answers or type them if a microphone is unavailable.</p>
             </div>
-            <button type="button" class="primary-button" data-mock-random="true">Start Random Full Test</button>
+            <button type="button" class="primary-button" data-mock-random="true">Choose a test for me</button>
           </div>
 
           <div class="mock-cards-grid suite-mt">
             ${mocks.map((mk, i) => {
-              const rCount = 20 + mk.reading.module1.passages.reduce((s, p) => s + p.questions.length, 0) + mk.reading.module2.passages.reduce((s, p) => s + p.questions.length, 0);
+              const rCount = [mk.reading.module1, mk.reading.module2].reduce((sum, part) =>
+                sum + buildBlanks(part.ctw.text).blanks.length + part.passages.reduce((total, passage) => total + passage.questions.length, 0), 0);
               const lCount = mk.listening.module1.items.reduce((s, it) => s + it.questions.length, 0) + mk.listening.module2.items.reduce((s, it) => s + it.questions.length, 0);
               return `
                 <article class="suite-idea-card mock-select-card">
                   <div>
-                    <h3>${esc(mk.title)}</h3>
-                    <p class="prompt-note">${esc(mk.subtitle)}</p>
+                    <h3>${esc(displayMockTitle(mk.title))}</h3>
                     <p class="suite-meta-inline">Reading: ${rCount} Q · Listening: ${lCount} Q · Writing: 12 tasks · Speaking: 11 tasks</p>
                   </div>
                   <button type="button" class="primary-button" data-mock-start="${i}">Start Test ${i + 1}</button>
@@ -536,22 +567,19 @@
 
           ${hist.length ? `
             <div class="suite-mt">
-              <h3>Past Full Test Scores</h3>
+              <h3>Recent tests</h3>
               <div class="mock-table-wrap">
                 <table class="mock-table">
                   <thead>
-                    <tr><th>Date</th><th>Test</th><th>Reading</th><th>Listening</th><th>Writing</th><th>Speaking</th><th>Overall</th></tr>
+                    <tr><th scope="col">Date</th><th scope="col">Test</th><th scope="col">Reading</th><th scope="col">Listening</th></tr>
                   </thead>
                   <tbody>
                     ${hist.slice(0, 8).map((h) => `
                       <tr>
                         <td>${esc(h.date)}</td>
-                        <td>${esc(h.title)}</td>
-                        <td>${h.reading.toFixed(1)}</td>
-                        <td>${h.listening.toFixed(1)}</td>
-                        <td>${h.writing.toFixed(1)}</td>
-                        <td>${h.speaking !== null ? h.speaking.toFixed(1) : "Skipped"}</td>
-                        <td><strong>${h.overall.toFixed(1)}</strong></td>
+                        <td>${esc(displayMockTitle(h.title || "Practice test"))}</td>
+                        <td>${formatCorrect(h.reading)}</td>
+                        <td>${formatCorrect(h.listening)}</td>
                       </tr>
                     `).join("")}
                   </tbody>
@@ -628,7 +656,8 @@
     const items = mod.items || [];
     const safeIdx = Math.min(mockState.listenIdx, Math.max(0, items.length - 1));
     const item = items[safeIdx];
-    const playCount = mockState.listenPlays[`${modKey}:${safeIdx}`] || 0;
+    const audioMockId = mockState.mock.listeningMockId || mockState.mock.id;
+    const audio = `./assets/audio/prompts/${audioMockId}-${modKey}-${safeIdx}.wav`;
 
     return `
       <section class="suite-focus">
@@ -639,17 +668,10 @@
               <span class="badge">${esc(mod.title)} · ${esc(item.kind)} · ${safeIdx + 1} / ${items.length}</span>
               <h2 class="question-text">${esc(item.title)}</h2>
             </div>
-            <div class="question-actions">
-              <button type="button" class="primary-button" data-mock-play-listen="true">
-                ${playCount > 0 ? `Replay Audio (${playCount})` : "Play Audio"}
-              </button>
-              <button type="button" class="ghost-button" data-mock-toggle-script="true">
-                ${mockState.listenShowScript ? "Hide Script" : "Show Script"}
-              </button>
-            </div>
           </div>
 
-          ${mockState.listenShowScript ? `<div class="suite-model-box suite-passage-preline">${esc(item.script)}</div>` : `<p class="prompt-note">Click Play Audio to hear the prompt, then answer below. (Use Show Script if you are in a quiet room without speakers.)</p>`}
+          <audio controls class="suite-audio-player" aria-label="Listening prompt" preload="metadata" src="${esc(audio)}"></audio>
+          <details class="suite-details"><summary>Read transcript</summary><p class="suite-passage-preline">${esc(item.script)}</p></details>
 
           <div class="suite-stack-md">
             ${item.questions.map((qq, qi) => {
@@ -660,7 +682,7 @@
                   <p class="suite-mcq-prompt">${esc(qq.q)}</p>
                   <div class="suite-stack-sm">
                     ${qq.choices.map((ch) => `
-                      <button type="button" class="suite-clip-btn ${picked === ch ? "active" : ""}" data-mock-lmcq="${esc(key)}::${esc(ch)}">
+                      <button type="button" class="suite-clip-btn ${picked === ch ? "active" : ""}" aria-pressed="${picked === ch}" data-mock-lmcq="${esc(key)}::${esc(ch)}">
                         <span>${esc(ch)}</span>
                       </button>
                     `).join("")}
@@ -674,7 +696,7 @@
             ${safeIdx > 0 ? `<button type="button" class="ghost-button" data-mock-listen-prev="true">Previous</button>` : ""}
             ${safeIdx < items.length - 1
               ? `<button type="button" class="primary-button" data-mock-listen-next="true">Next Listening Item</button>`
-              : `<button type="button" class="primary-button" data-mock-next-phase="true">${modKey === "listening1" ? "Finish Listening Part 1 -> Start Part 2" : "Finish Listening -> Start Writing"}</button>`
+              : `<button type="button" class="primary-button" data-mock-next-phase="true">${modKey === "listening1" ? "Continue to listening part 2" : "Continue to writing"}</button>`
             }
           </div>
         </div>
@@ -776,7 +798,7 @@
           <div class="suite-word-meter"><div class="suite-word-fill ${wc >= 100 && wc <= 140 ? "in-range" : ""}" id="mockDiscFill" style="width:${pct}%"></div></div>
         </div>
         <div class="control-actions suite-mt">
-          <button type="button" class="primary-button" data-mock-next-phase="true">Finish Writing -> Start Speaking</button>
+          <button type="button" class="primary-button" data-mock-next-phase="true">Continue to speaking</button>
         </div>
       `;
     }
@@ -795,6 +817,8 @@
     const list = isRepeat ? sp.repeat : sp.interview;
     const safeIdx = Math.min(mockState.speakIdx, Math.max(0, list.length - 1));
     const item = list[safeIdx];
+    const recording = recordings.get(`${mockState.speakSub}:${safeIdx}`);
+    const pending = activeCapture && !activeCapture.recorder;
     const currentResp = isRepeat ? (mockState.repeatResponses[safeIdx] || "") : (mockState.interviewResponses[safeIdx] || "");
 
     return `
@@ -809,23 +833,31 @@
               ${item.context ? `<p class="prompt-note">Setting: ${esc(item.context)}</p>` : ""}
             </div>
             <div class="question-actions">
-              <button type="button" class="primary-button" data-mock-speak-play="true">Play Audio</button>
-              <button type="button" class="ghost-button" data-mock-skip-speaking="true">Skip Speaking &amp; Finish</button>
+              <button type="button" class="ghost-button" data-mock-speak-play="true" ${activeCapture ? "disabled" : ""}>Play Audio</button>
+              <button type="button" class="ghost-button" data-mock-skip-speaking="true">Skip speaking</button>
             </div>
           </div>
 
-          <div class="transcript-area">
-            <label for="mockSpeakInput">${isRepeat ? "Type what you repeated" : "Type or paste your spoken answer (aim for 45 seconds)"}</label>
-            <textarea id="mockSpeakInput" class="suite-textarea" data-mock-speak-input="true" rows="${isRepeat ? 3 : 7}" placeholder="${isRepeat ? "Type the exact sentence you heard..." : "State your answer clearly, give one reason, and add a short example..."}">${esc(currentResp)}</textarea>
+          <div class="control-actions">
+            <button type="button" class="primary-button" data-mock-record ${pending ? "disabled" : ""}>${pending ? "Waiting for microphone" : activeCapture ? "Stop recording" : recording ? "Record again" : "Record answer"}</button>
+            <span tabindex="-1" role="status" data-mock-speak-status>${esc(recordingStatus)}</span>
           </div>
+          ${recording ? `<audio controls class="suite-audio-player" aria-label="Play your recording" src="${esc(recording)}"></audio>` : ""}
+          <details class="suite-details" ${currentResp ? "open" : ""}>
+            <summary>Type an answer instead</summary>
+            <div class="transcript-area">
+            <label for="mockSpeakInput">${isRepeat ? "Type the sentence you heard" : "Type a practice answer"}</label>
+            <textarea id="mockSpeakInput" class="suite-textarea" data-mock-speak-input="true" rows="${isRepeat ? 3 : 7}" placeholder="${isRepeat ? "Type the exact sentence you heard..." : "State your answer clearly, give one reason, and add a short example..."}">${esc(currentResp)}</textarea>
+            </div>
+          </details>
 
           <div class="control-actions">
-            ${safeIdx > 0 ? `<button type="button" class="ghost-button" data-mock-speak-prev="true">Previous</button>` : ""}
+            ${safeIdx > 0 ? `<button type="button" class="ghost-button" data-mock-speak-prev="true" ${activeCapture ? "disabled" : ""}>Previous</button>` : ""}
             ${safeIdx < list.length - 1
-              ? `<button type="button" class="primary-button" data-mock-speak-next="true">Next Speaking Item</button>`
+              ? `<button type="button" class="primary-button" data-mock-speak-next="true" ${activeCapture ? "disabled" : ""}>Next Speaking Item</button>`
               : isRepeat
-              ? `<button type="button" class="primary-button" data-mock-speak-to-int="true">Start Interview (4 Questions)</button>`
-              : `<button type="button" class="primary-button" data-mock-finish="true">Finish Test &amp; See Scores</button>`
+              ? `<button type="button" class="primary-button" data-mock-speak-to-int="true" ${activeCapture ? "disabled" : ""}>Start Interview (4 Questions)</button>`
+              : `<button type="button" class="primary-button" data-mock-finish="true">See results</button>`
             }
           </div>
         </div>
@@ -843,23 +875,30 @@
         <div class="practice-board suite-stack-lg">
           <div class="practice-header">
             <div>
-              <span class="badge green">Test Complete</span>
-              <h2 class="question-text">${esc(rep.mockTitle)}</h2>
-              <p class="prompt-note">Overall Score: <strong>Band ${rep.overallBand.toFixed(1)} / 6.0</strong> (roughly ${esc(rep.classicRange)} / 120)</p>
+              <h1 class="study-page-title">Practice test results</h1>
+              <p class="prompt-note">${esc(displayMockTitle(rep.mockTitle))} · Review your answers and compare them with the examples below.</p>
             </div>
-            <button type="button" class="primary-button" data-mock-back-list="true">All Full Tests</button>
+            <button type="button" class="primary-button" data-mock-back-list="true">See all tests</button>
           </div>
 
           <div class="mock-score-grid">
-            <div class="mini-stat"><span>Reading</span><strong>${rep.reading.band.toFixed(1)}</strong><small>${rep.reading.correct}/${rep.reading.total} correct</small></div>
-            <div class="mini-stat"><span>Listening</span><strong>${rep.listening.band.toFixed(1)}</strong><small>${rep.listening.correct}/${rep.listening.total} correct</small></div>
-            <div class="mini-stat"><span>Writing</span><strong>${rep.writing.band.toFixed(1)}</strong><small>Sentences ${rep.writing.basCorrect}/${rep.writing.basTotal} · ${rep.writing.emailWc}w / ${rep.writing.discWc}w</small></div>
-            <div class="mini-stat"><span>Speaking</span><strong>${rep.speaking.skipped ? "Skipped" : rep.speaking.band.toFixed(1)}</strong><small>${rep.speaking.skipped ? "Text-only run" : "Local score"}</small></div>
+            <div class="mini-stat"><span>Reading</span><strong>${rep.reading.correct}/${rep.reading.total}</strong><small>correct</small></div>
+            <div class="mini-stat"><span>Listening</span><strong>${rep.listening.correct}/${rep.listening.total}</strong><small>correct</small></div>
+            <div class="mini-stat"><span>Writing</span><strong>${rep.writing.basCorrect}/${rep.writing.basTotal}</strong><small>sentences correct · ${rep.writing.emailWc} email words · ${rep.writing.discWc} discussion words</small></div>
+            <div class="mini-stat"><span>Speaking</span><strong>${rep.speaking.skipped ? "Skipped" : rep.speaking.recorded}</strong><small>${rep.speaking.skipped ? "" : `${rep.speaking.recorded === 1 ? "recording" : "recordings"} · ${rep.speaking.answered} typed ${rep.speaking.answered === 1 ? "answer" : "answers"}`}</small></div>
           </div>
 
           <div class="control-actions">
-            <button type="button" class="tool-button" data-mock-copy-writing="true">Copy My Essays for AI Feedback</button>
+            <button type="button" class="tool-button" data-mock-copy-writing="true">Copy writing for feedback</button>
           </div>
+
+          ${recordings.size ? `<details class="suite-details"><summary>Review speaking recordings</summary>
+            <p>Listen for wording, clarity, and whether each answer addresses the question. Recordings stay in this test view until you leave it.</p>
+            ${[...recordings].map(([key, url]) => {
+              const [kind, index] = key.split(":");
+              const prompt = mockState.speakingItems[kind][Number(index)]?.text;
+              return `<div><p>${kind === "repeat" ? "Listen and Repeat" : "Interview"} ${Number(index) + 1} · ${esc(prompt)}</p><audio controls class="suite-audio-player" src="${esc(url)}"></audio></div>`;
+            }).join("")}</details>` : ""}
 
           <details open class="suite-details">
             <summary><strong>Reading Review (${rep.reading.correct}/${rep.reading.total})</strong></summary>
@@ -932,8 +971,10 @@
     const quitBtn = doc.querySelector("[data-mock-quit]");
     if (quitBtn) {
       quitBtn.addEventListener("click", () => {
+        if (!global.confirm("Exit this test? This attempt will not be saved.")) return;
         stopTimer();
         stopSpeech();
+        clearRecordings();
         mockState.phase = "select";
         render();
       });
@@ -942,6 +983,7 @@
     const backList = doc.querySelector("[data-mock-back-list]");
     if (backList) {
       backList.addEventListener("click", () => {
+        clearRecordings();
         mockState.phase = "select";
         render();
       });
@@ -976,32 +1018,20 @@
     });
 
     // Listening controls
-    const playListen = doc.querySelector("[data-mock-play-listen]");
-    if (playListen) {
-      playListen.addEventListener("click", () => {
-        const mod = mockState.phase === "listening1" ? mockState.mock.listening.module1 : mockState.mock.listening.module2;
-        const item = mod.items[mockState.listenIdx];
-        if (item) {
-          const k = `${mockState.phase}:${mockState.listenIdx}`;
-          mockState.listenPlays[k] = (mockState.listenPlays[k] || 0) + 1;
-          speakText(item.script);
-          render();
-        }
-      });
-    }
-    const togScript = doc.querySelector("[data-mock-toggle-script]");
-    if (togScript) togScript.addEventListener("click", () => { mockState.listenShowScript = !mockState.listenShowScript; render(); });
     doc.querySelectorAll("[data-mock-lmcq]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const parts = btn.dataset.mockLmcq.split("::");
         mockState.listenMcq[parts[0]] = parts.slice(1).join("::");
-        render();
+        btn.parentElement.querySelectorAll("[data-mock-lmcq]").forEach((option) => {
+          option.classList.toggle("active", option === btn);
+          option.setAttribute("aria-pressed", String(option === btn));
+        });
       });
     });
     const lPrev = doc.querySelector("[data-mock-listen-prev]");
-    if (lPrev) lPrev.addEventListener("click", () => { stopSpeech(); mockState.listenIdx = Math.max(0, mockState.listenIdx - 1); mockState.listenShowScript = false; render(); });
+    if (lPrev) lPrev.addEventListener("click", () => { stopSpeech(); mockState.listenIdx = Math.max(0, mockState.listenIdx - 1); render(); });
     const lNext = doc.querySelector("[data-mock-listen-next]");
-    if (lNext) lNext.addEventListener("click", () => { stopSpeech(); mockState.listenIdx += 1; mockState.listenShowScript = false; render(); });
+    if (lNext) lNext.addEventListener("click", () => { stopSpeech(); mockState.listenIdx += 1; render(); });
 
     // Writing controls
     doc.querySelectorAll("[data-mock-bas-chip]").forEach((btn) => {
@@ -1025,8 +1055,9 @@
     if (basClear) basClear.addEventListener("click", () => { mockState.basSlots[mockState.basIdx] = (mockState.basSlots[mockState.basIdx] || []).map(() => null); render(); });
     const basPrev = doc.querySelector("[data-mock-bas-prev]");
     if (basPrev) basPrev.addEventListener("click", () => { mockState.basIdx = Math.max(0, mockState.basIdx - 1); render(); });
-    const basNext = doc.querySelector("[data-mock-bas-next]");
-    if (basNext) basNext.addEventListener("click", () => { mockState.basIdx += 1; render(); });
+    doc.querySelectorAll("[data-mock-bas-next]").forEach((button) => {
+      button.addEventListener("click", () => { mockState.basIdx += 1; render(); });
+    });
 
     const emIn = doc.querySelector("[data-mock-email]");
     if (emIn) {
@@ -1066,6 +1097,7 @@
         if (item) speakText(item.text);
       });
     }
+    doc.querySelector("[data-mock-record]")?.addEventListener("click", toggleRecording);
     const spIn = doc.querySelector("[data-mock-speak-input]");
     if (spIn) {
       spIn.addEventListener("input", (e) => {
@@ -1074,21 +1106,21 @@
       });
     }
     const spPrev = doc.querySelector("[data-mock-speak-prev]");
-    if (spPrev) spPrev.addEventListener("click", () => { stopSpeech(); mockState.speakIdx = Math.max(0, mockState.speakIdx - 1); render(); });
+    if (spPrev) spPrev.addEventListener("click", () => { if (activeCapture) return; stopSpeech(); recordingStatus = ""; mockState.speakIdx = Math.max(0, mockState.speakIdx - 1); render(); });
     const spNext = doc.querySelector("[data-mock-speak-next]");
-    if (spNext) spNext.addEventListener("click", () => { stopSpeech(); mockState.speakIdx += 1; render(); });
+    if (spNext) spNext.addEventListener("click", () => { if (activeCapture) return; stopSpeech(); recordingStatus = ""; mockState.speakIdx += 1; render(); });
     const spToInt = doc.querySelector("[data-mock-speak-to-int]");
-    if (spToInt) spToInt.addEventListener("click", () => { stopSpeech(); mockState.speakSub = "interview"; mockState.speakIdx = 0; render(); });
+    if (spToInt) spToInt.addEventListener("click", () => { if (activeCapture) return; stopSpeech(); recordingStatus = ""; mockState.speakSub = "interview"; mockState.speakIdx = 0; render(); });
     const spSkip = doc.querySelector("[data-mock-skip-speaking]");
-    if (spSkip) spSkip.addEventListener("click", () => { mockState.speakSkipped = true; finishAndScore(); });
+    if (spSkip) spSkip.addEventListener("click", () => finishSpeaking(true));
     const spFinish = doc.querySelector("[data-mock-finish]");
-    if (spFinish) spFinish.addEventListener("click", () => finishAndScore());
+    if (spFinish) spFinish.addEventListener("click", () => finishSpeaking());
 
     const copyEssays = doc.querySelector("[data-mock-copy-writing]");
     if (copyEssays) {
       copyEssays.addEventListener("click", () => {
         const m = mockState.mock;
-        const txt = `Please grade my TOEFL 2026 Writing responses on the 1.0-6.0 Band scale.\n\nEMAIL TASK:\n${m.writing.email.scenario}\n\nMY EMAIL:\n${mockState.emailText}\n\nDISCUSSION TASK:\n${m.writing.discussion.professorPrompt}\n\nMY RESPONSE:\n${mockState.discText}`;
+        const txt = `Give feedback on my TOEFL practice writing. For each task, identify one strength and one improvement, and explain why.\n\nEMAIL TASK:\n${m.writing.email.scenario}\n\nMY EMAIL:\n${mockState.emailText}\n\nDISCUSSION TASK:\n${m.writing.discussion.professorPrompt}\n\nMY RESPONSE:\n${mockState.discText}`;
         global.navigator?.clipboard?.writeText(txt);
         if (typeof showToast === "function") showToast("Copied both essays for AI feedback.");
       });
@@ -1097,7 +1129,13 @@
 
   global.ToeflFullMock = {
     state: mockState,
+    pickRandomMock,
     startMock,
+    leaveResults() {
+      if (mockState.phase !== "results") return;
+      clearRecordings();
+      mockState.phase = "select";
+    },
     advancePhase,
     finishAndScore,
     render: renderView,

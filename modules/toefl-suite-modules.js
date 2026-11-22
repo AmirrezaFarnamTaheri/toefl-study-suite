@@ -4,7 +4,7 @@
 // - Reading 2026: Complete the Words interactive cloze drill (115 passages, 15 topics) + 8 passage sets
 // - Writing 2026: Build a Sentence + Write an Email (7m) + Academic Discussion (10m) + BYOK AI Diagnostic Grader
 // - Listening 2026: Audio Micro-Quiz & Shadowing Player (24 MP3 clips with speed control, A-B loop & dictation)
-// - Vocab & Ideas: SM-2 Spaced Repetition (1,448 words & CTW collocations, keyboard shortcuts) + Topic Idea Bank
+// - Vocab & Ideas: SM-2 Spaced Repetition (1,448 words & CTW collocations, keyboard shortcuts) + Topics to write or talk about
 // - Band & Plans: 1-6 <-> 0-120 <-> CEFR Score Converter + B1/B2/C1 Roadmaps + 2026 AI Prompts
 
 (function initToeflSuiteModules(global) {
@@ -103,7 +103,7 @@
         aria-pressed="${isDark ? "true" : "false"}"
         aria-label="Switch to ${isDark ? "light" : "dark"} theme"
       >
-        ${isDark ? "Light Mode" : "Dark Mode"}
+        ${isDark ? "Light mode" : "Dark mode"}
       </button>
     `;
   }
@@ -111,6 +111,23 @@
   // Deterministic ETS-2026 Complete the Words generator:
   // Keeps sentence 1 intact, then blanks the second half of every 2nd qualifying word (len >= 4) up to 10 blanks.
   function buildCtwBlanks(text) {
+    const marked = [...text.matchAll(/\{([A-Za-z]+)\|([A-Za-z]+)\}/g)];
+    if (marked.length) {
+      const blanks = [];
+      const parts = [];
+      let offset = 0;
+      for (const [token, prefix, missing] of marked) {
+        const start = text.indexOf(token, offset);
+        const idx = blanks.length;
+        const word = prefix + missing;
+        parts.push({ type: "word", raw: text.slice(offset, start) });
+        blanks.push({ idx, word, prefix, missing });
+        parts.push({ type: "blank", idx, lead: "", prefix, missing, trail: "", word });
+        offset = start + token.length;
+      }
+      parts.push({ type: "word", raw: text.slice(offset) });
+      return { intro: "", parts, blanks };
+    }
     const firstEnd = text.search(/[.!?]\s+/);
     const splitAt = firstEnd > 20 ? firstEnd + 2 : 0;
     const intro = splitAt ? text.slice(0, splitAt) : "";
@@ -186,6 +203,10 @@
 
     // Listening 2026
     listeningFilter: "All",
+    listeningMode: "questions",
+    listeningKind: "",
+    listeningExercise: 0,
+    listeningAnswers: {},
     listeningIndex: 0,
     listeningRate: 1.0,
     listeningNotes: "",
@@ -200,7 +221,6 @@
     vocabSrs: loadJson(SUITE_VOCAB_KEY, {}),
 
     // Band Converter
-    convBand: 5.0
   };
 
   // Initialize theme once on load
@@ -242,7 +262,7 @@
     return `
       <div class="suite-babble-pill" title="Simulate noisy TOEFL test-center speaking room">
         <button class="ghost-button ${suiteState.babblePlaying ? "tool-button active" : ""}" data-suite-babble-toggle="true" type="button" aria-pressed="${suiteState.babblePlaying ? "true" : "false"}">
-          ${suiteState.babblePlaying ? "Room Noise: On" : "Room Noise"}
+          ${suiteState.babblePlaying ? "Room noise on" : "Room noise"}
         </button>
         ${suiteState.babblePlaying ? `<input type="range" min="0" max="1" step="0.05" value="${suiteState.babbleVolume}" data-suite-babble-vol="true" aria-label="Exam room noise volume" class="suite-range" />` : ""}
       </div>
@@ -522,7 +542,7 @@
             <div class="badge-row">
               <span class="badge blue">Writing Task 2 · Write an Email (7 Min)</span>
               <span class="badge">${(suiteState.emailIndex % list.length) + 1} / ${list.length}</span>
-              <span class="badge ${suiteState.emailTimerSec < 60 ? "orange" : "violet"}">Time: ${fmtSec(suiteState.emailTimerSec)}</span>
+              <span data-writing-time="email" class="badge ${suiteState.emailTimerSec < 60 ? "orange" : "violet"}">Time: ${fmtSec(suiteState.emailTimerSec)}</span>
             </div>
             <h2 class="question-text">${esc(item.title)}</h2>
             <p class="prompt-note">${esc(item.scenario)}</p>
@@ -535,7 +555,7 @@
         </div>
         <div class="transcript-area">
           <label for="suiteEmailEditor">Your Email Draft</label>
-          <textarea id="suiteEmailEditor" class="suite-textarea" data-suite-email-input="true" rows="10" placeholder="Subject: ...&#10;&#10;Dear ...,&#10;&#10;Write your concise, well-structured TOEFL 2026 email (90-130 words)...">${esc(suiteState.emailText)}</textarea>
+          <textarea id="suiteEmailEditor" class="suite-textarea" data-suite-email-input="true" rows="10" placeholder="Subject: ...&#10;&#10;Dear ...,&#10;&#10;Write your email here.">${esc(suiteState.emailText)}</textarea>
         </div>
         ${buildWordMeterHtml(wc, 90, 130, "suite-email-wc")}
         <div class="control-actions suite-mt">
@@ -544,7 +564,7 @@
           <button type="button" class="tool-button" data-suite-email-model="true">${suiteState.emailShowModel ? "Hide Sample" : "Show Sample"}</button>
         </div>
         ${suiteState.emailAiFeedback ? `<pre class="suite-pre">${esc(suiteState.emailAiFeedback)}</pre>` : ""}
-        ${suiteState.emailShowModel ? `<div class="suite-model-box"><strong>Sample High-Scoring Email:</strong><pre class="suite-pre">${esc(item.modelEmail)}</pre></div>` : ""}
+        ${suiteState.emailShowModel ? `<div class="suite-model-box"><strong>Example email</strong><pre class="suite-pre">${esc(item.modelEmail)}</pre></div>` : ""}
       `;
     } else if (mode === "discussion") {
       const list = w.discussions || [];
@@ -556,7 +576,7 @@
             <div class="badge-row">
               <span class="badge violet">Writing Task 3 · Academic Discussion (10 Min)</span>
               <span class="badge">${(suiteState.discIndex % list.length) + 1} / ${list.length}</span>
-              <span class="badge ${suiteState.discTimerSec < 90 ? "orange" : "blue"}">Time: ${fmtSec(suiteState.discTimerSec)}</span>
+              <span data-writing-time="discussion" class="badge ${suiteState.discTimerSec < 90 ? "orange" : "blue"}">Time: ${fmtSec(suiteState.discTimerSec)}</span>
             </div>
             <h2 class="question-text">${esc(item.title)}</h2>
             <p class="prompt-note">${esc(item.professorPrompt)}</p>
@@ -582,9 +602,9 @@
       `;
     } else {
       bodyHtml = `
-        <h2>Writing Scoring Guide &amp; Phrase Sheets</h2>
+        <h2>Writing guide and useful phrases</h2>
         <div class="suite-stack-sm suite-mt">
-          <details open class="suite-details"><summary><strong>Official Writing Scoring Guide</strong></summary><pre class="suite-pre">${esc(w.scoringGuideMd)}</pre></details>
+          <details open class="suite-details"><summary><strong>Writing scoring guide</strong></summary><pre class="suite-pre">${esc(w.scoringGuideMd)}</pre></details>
           <details class="suite-details"><summary><strong>Email Writing Guide &amp; Phrases</strong></summary><pre class="suite-pre">${esc(w.emailGuideMd)}</pre></details>
           <details class="suite-details"><summary><strong>Academic Discussion Guide</strong></summary><pre class="suite-pre">${esc(w.discussionGuideMd)}</pre></details>
         </div>
@@ -608,6 +628,107 @@
 
   // ---------------- TAB 3: LISTENING 2026 (24 MP3 Micro-Quizzes + Shadowing) ----------------
   function renderListeningTab() {
+    return `
+      <section class="suite-focus">
+        <div class="control-actions" role="group" aria-label="Listening practice type">
+          <button type="button" class="tool-button ${suiteState.listeningMode === "questions" ? "active" : ""}" aria-pressed="${suiteState.listeningMode === "questions"}" data-listening-mode="questions">Questions</button>
+          <button type="button" class="tool-button ${suiteState.listeningMode === "clips" ? "active" : ""}" aria-pressed="${suiteState.listeningMode === "clips"}" data-listening-mode="clips">Audio and notes</button>
+        </div>
+        ${suiteState.listeningMode === "questions" ? renderListeningQuestions() : renderListeningClips()}
+      </section>
+    `;
+  }
+
+  function getListeningExercises() {
+    const kind = suiteState.listeningKind;
+    return TOEFL_LISTENING_PRACTICE.filter((item) => !kind || item.kind === kind);
+  }
+
+  function renderListeningQuestions() {
+    const items = getListeningExercises();
+    const item = items[suiteState.listeningExercise];
+    const kinds = [...new Set(TOEFL_LISTENING_PRACTICE.map(({ kind }) => kind))];
+    const answers = suiteState.listeningAnswers[item.id] || {};
+    return `
+      <div class="practice-board suite-stack-md">
+        <div class="suite-toolbar">
+          <div class="listening-filter">
+            <label for="listening-task">Task type</label>
+            <select class="suite-select" id="listening-task" data-listening-kind>
+              <option value="">All task types</option>
+              ${kinds.map((kind) => `<option value="${esc(kind)}" ${suiteState.listeningKind === kind ? "selected" : ""}>${esc(kind)}</option>`).join("")}
+            </select>
+          </div>
+          <div class="question-actions">
+            <button type="button" class="ghost-button" data-listening-move="-1" ${suiteState.listeningExercise === 0 ? "disabled" : ""}>Previous</button>
+            <span class="suite-meta-inline">${suiteState.listeningExercise + 1} of ${items.length}</span>
+            <button type="button" class="ghost-button" data-listening-move="1" ${suiteState.listeningExercise === items.length - 1 ? "disabled" : ""}>Next</button>
+          </div>
+        </div>
+        <div>
+          <h2 class="question-text" tabindex="-1" id="listening-exercise-title">${esc(item.title)}</h2>
+          <p class="prompt-note">${esc(item.kind)} · Prerecorded device voices</p>
+          <audio controls class="suite-audio-player" aria-label="Listening prompt" preload="metadata" src="./assets/audio/prompts/${esc(item.id)}.wav"></audio>
+        </div>
+        ${item.questions.map((question, index) => `
+          <fieldset class="listening-question">
+            <legend>${item.questions.length > 1 ? `${index + 1}. ` : ""}${esc(question.prompt)}</legend>
+            <div class="suite-stack-sm">
+              ${question.choices.map((choice, choiceIndex) => {
+                const selected = answers[index] === choiceIndex;
+                const outcome = selected ? (choiceIndex === question.answer ? "correct" : "incorrect") : "";
+                return `<button type="button" class="suite-clip-btn mcq-option ${outcome}" aria-pressed="${selected}" data-listening-answer="${index}:${choiceIndex}">${esc(choice)}</button>`;
+              }).join("")}
+            </div>
+            ${answers[index] !== undefined ? `
+              <div class="suite-banner ${answers[index] === question.answer ? "ok" : "warn"}" id="listening-feedback-${index}" tabindex="-1">
+                <strong>${answers[index] === question.answer ? "Correct." : `Answer: ${esc(question.choices[question.answer])}`}</strong>
+                ${esc(question.reason)}
+              </div>
+            ` : ""}
+          </fieldset>
+        `).join("")}
+        <details class="suite-details">
+          <summary>Read transcript</summary>
+          <p class="suite-passage-preline">${esc(item.script)}</p>
+        </details>
+      </div>
+    `;
+  }
+
+  function bindListeningQuestions(doc) {
+    const rerender = (selector) => {
+      render();
+      doc.querySelector(selector)?.focus();
+    };
+    doc.querySelectorAll("[data-listening-mode]").forEach((button) => {
+      button.addEventListener("click", () => {
+        global.speechSynthesis?.cancel();
+        suiteState.listeningMode = button.dataset.listeningMode;
+        rerender(`[data-listening-mode="${suiteState.listeningMode}"]`);
+      });
+    });
+    doc.querySelector("[data-listening-kind]")?.addEventListener("change", (event) => {
+      global.speechSynthesis?.cancel();
+      suiteState.listeningKind = event.target.value;
+      suiteState.listeningExercise = 0;
+      rerender("#listening-task");
+    });
+    doc.querySelectorAll("[data-listening-move]").forEach((button) => button.addEventListener("click", () => {
+      global.speechSynthesis?.cancel();
+      suiteState.listeningExercise += Number(button.dataset.listeningMove);
+      rerender("#listening-exercise-title");
+    }));
+    doc.querySelectorAll("[data-listening-answer]").forEach((button) => button.addEventListener("click", () => {
+      const item = getListeningExercises()[suiteState.listeningExercise];
+      const [index, choice] = button.dataset.listeningAnswer.split(":").map(Number);
+      suiteState.listeningAnswers[item.id] ??= {};
+      suiteState.listeningAnswers[item.id][index] = choice;
+      rerender(`#listening-feedback-${index}`);
+    }));
+  }
+
+  function renderListeningClips() {
     const bank = getBank();
     if (!bank) return "<p>TOEFL Suite Bank not loaded.</p>";
     const allClips = bank.listening.clips || [];
@@ -618,7 +739,7 @@
     const loopActive = suiteState.loopA !== null && suiteState.loopB !== null && suiteState.loopB > suiteState.loopA;
 
     return `
-      <section class="suite-focus">
+      <div class="suite-stack-sm">
         <div class="suite-toolbar">
           <div class="suite-toolbar-right">
             <label class="sr-only" for="listeningCategorySelect">Category</label>
@@ -658,11 +779,11 @@
             </div>
             <div class="transcript-area suite-mt">
               <label for="suiteListeningNotes">Listening Notes</label>
-              <textarea id="suiteListeningNotes" class="suite-textarea" data-suite-list-notes="true" rows="6" placeholder="Take notes on first play, then transcribe difficult phrases...">${esc(suiteState.listeningNotes)}</textarea>
+              <textarea id="suiteListeningNotes" class="suite-textarea" data-suite-list-notes="true" rows="6" placeholder="Note the main idea and two details. Then replay any part you missed.">${esc(suiteState.listeningNotes)}</textarea>
             </div>
           ` : "<p>No audio clips available.</p>"}
         </div>
-      </section>
+      </div>
     `;
   }
 
@@ -710,7 +831,7 @@
       `;
     } else {
       mainHtml = `
-        <h2>Topic Idea Bank</h2>
+        <h2>Topics to write or talk about</h2>
         <div class="suite-ideas-grid">
           ${(bank.ideaBank || []).map((t) => `
             <article class="suite-idea-card">
@@ -748,79 +869,71 @@
 
   // ---------------- TAB 5: BAND CONVERTER, ROADMAPS & 2026 AI PROMPTS ----------------
   function renderGuidesTab() {
-    const bank = getBank();
-    if (!bank) return "<p>TOEFL Suite Bank not loaded.</p>";
-    const rows = bank.bandConversion || [];
-    const selectedRow = rows.find((r) => Number(r.band) === Number(suiteState.convBand)) || rows[2];
-
     return `
       <section class="suite-focus">
         <div class="practice-board suite-stack-lg">
           <div>
-            <h2>Score Converter (1-6 Band &amp; 0-120)</h2>
-            <div class="control-actions suite-mt-sm">
-              ${rows.map((r) => `
-                <button type="button" class="tool-button ${Number(suiteState.convBand) === Number(r.band) ? "active" : ""}" data-suite-band="${r.band}">Band ${r.band.toFixed(1)}</button>
-              `).join("")}
-            </div>
-            ${selectedRow ? `
-              <div class="suite-banner ok" aria-live="polite">
-                <strong>Band ${selectedRow.band.toFixed(1)} / 6.0</strong> equals roughly
-                <strong>${esc(selectedRow.classic)} / 120</strong> (${esc(selectedRow.cefr)}): ${esc(selectedRow.summary)}
-              </div>
-            ` : ""}
+            <h2>Understand your scores</h2>
+            <p>ETS reports each skill and the overall result on a 1 to 6 scale. Check the ETS comparison table for scores on the older scale.</p>
+            <a class="ghost-button study-reference" href="https://www.ets.org/toefl/test-takers/ibt/scores/understand-scores.html" target="_blank" rel="noopener noreferrer">Compare score scales on ETS</a>
+            <a class="ghost-button study-reference" href="https://www.ets.org/toefl/test-takers/ibt/about/content.html" target="_blank" rel="noopener noreferrer">See test tasks and timing on ETS</a>
           </div>
-
           <div>
-            <h2>Study Plans by Level</h2>
-            <div class="suite-ideas-grid">
-              ${(bank.studyRoadmaps || []).map((rm) => `
-                <article class="suite-idea-card">
-                  <h3>${esc(rm.level)}</h3>
-                  <p class="prompt-note">${esc(rm.focus)}</p>
-                  <ul>${rm.dailyPlan.map((d) => `<li>${esc(d)}</li>`).join("")}</ul>
-                </article>
-              `).join("")}
-            </div>
+            <h2>Choose what to practice</h2>
+            <dl class="study-plan-list">
+              <dt>Build the basics</dt>
+              <dd>Complete one reading passage. Review the spelling or word ending behind each miss, then try two listening prompts and check the transcript.</dd>
+              <dt>Practice under time</dt>
+              <dd>Write one timed email. Check that you addressed every request, then revise the sentence that was hardest to read. Record one interview answer and listen back for your main point and example.</dd>
+              <dt>Review a practice test</dt>
+              <dd>Choose two recurring mistakes from the results. Practice those skills on fresh prompts before you take another timed set.</dd>
+            </dl>
           </div>
-
-          <div>
-            <h2>AI Feedback Prompts (Copy &amp; Paste)</h2>
-            <p class="compact-copy">Copy a prompt to use with ChatGPT, Claude, or Gemini, or add your own API key in Settings.</p>
-            <div class="control-actions suite-mt-sm">
-              ${Object.entries(bank.aiPrompts || {}).map(([k, p]) => `
-                <button type="button" class="tool-button" data-suite-copy-prompt="${esc(k)}">Copy ${esc(p.title.split(":")[0])}</button>
-              `).join("")}
+          <details class="suite-details">
+            <summary>Optional writing feedback</summary>
+            <p>Copy a feedback prompt for use in your preferred tool. You can also request feedback from your draft if you configure a provider in Settings.</p>
+            <div class="control-actions">
+              <button type="button" class="tool-button" data-suite-copy-prompt="writeAnEmail">Copy email feedback prompt</button>
+              <button type="button" class="tool-button" data-suite-copy-prompt="academicDiscussion">Copy discussion feedback prompt</button>
             </div>
-            <div class="suite-stack-sm suite-mt-sm">
-              ${Object.entries(bank.aiPrompts || {}).map(([, p]) => `
-                <details class="suite-details">
-                  <summary><strong>${esc(p.title)}</strong></summary>
-                  <pre class="suite-pre">${esc(p.prompt)}</pre>
-                </details>
-              `).join("")}
-            </div>
-          </div>
+          </details>
         </div>
       </section>
     `;
   }
 
-  // ---------------- SHARED BYOK AI GRADER (Reuses VoxPilot Setup API Key) ----------------
+  const WRITING_FEEDBACK_PROMPTS = {
+    writeAnEmail: "Review this TOEFL practice email. Check whether it addresses all the requests, makes the purpose clear, and uses an appropriate tone. Quote one effective sentence and one sentence to revise. Explain the revision. Give feedback without assigning a test score.",
+    academicDiscussion: "Review this TOEFL practice discussion post. Check that it answers the question, develops a point with a specific reason or example, and is clear to other students. Quote one effective sentence and one sentence to revise. Explain the revision. Give feedback without assigning a test score."
+  };
+
+  async function copyWritingFeedback(prompt) {
+    try {
+      await global.navigator.clipboard.writeText(prompt);
+      showToast("Feedback prompt copied.");
+    } catch {
+      showToast("Could not copy the feedback prompt.");
+    }
+  }
+
   async function gradeWritingWithSetupAi(kind) {
     const bank = getBank();
     if (!bank) return;
     const setup = typeof state !== "undefined" && state.setup ? state.setup.ai : null;
-    if (!setup || !setup.apiKey) {
-      if (typeof showToast === "function") showToast("Add your API key in the Setup tab first (or use Copy 2026 AI Prompt).");
+    if (!setup?.apiKey || !setup.enabled) {
+      if (typeof showToast === "function") showToast("Enable AI feedback and add a key in Settings, or copy the feedback prompt.");
       return;
     }
     const isEmail = kind === "email";
-    const promptObj = isEmail ? bank.aiPrompts.writeAnEmail : bank.aiPrompts.academicDiscussion;
+    const feedbackPrompt = WRITING_FEEDBACK_PROMPTS[isEmail ? "writeAnEmail" : "academicDiscussion"];
     const taskObj = isEmail
       ? bank.writing.emails[suiteState.emailIndex % bank.writing.emails.length]
       : bank.writing.discussions[suiteState.discIndex % bank.writing.discussions.length];
-    const studentText = isEmail ? suiteState.emailText : suiteState.discText;
+    const textKey = isEmail ? "emailText" : "discText";
+    const indexKey = isEmail ? "emailIndex" : "discIndex";
+    const requestIndex = suiteState[indexKey];
+    const studentText = suiteState[textKey];
+    const currentDraft = () => suiteState[indexKey] === requestIndex && suiteState[textKey] === studentText;
     if (!studentText.trim()) {
       if (typeof showToast === "function") showToast("Write your response first before grading.");
       return;
@@ -831,31 +944,28 @@
     if (typeof render === "function") render();
 
     try {
-      const endpoint = setup.endpoint || "https://api.openai.com/v1/chat/completions";
-      const model = setup.model || "gpt-4o-mini";
-      const res = await fetch(endpoint, {
+      const userPrompt = `TASK:\n${isEmail ? taskObj.scenario : taskObj.professorPrompt}\n\nSTUDENT RESPONSE:\n${studentText}`;
+      const body = setup.mode === "chat"
+        ? { model: setup.model, messages: [{ role: "system", content: feedbackPrompt }, { role: "user", content: userPrompt }] }
+        : { model: setup.model, instructions: feedbackPrompt, input: userPrompt };
+      const response = await fetch(setup.endpoint, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${setup.apiKey}`
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: promptObj.prompt },
-            { role: "user", content: `TASK:\n${isEmail ? taskObj.scenario : taskObj.professorPrompt}\n\nSTUDENT RESPONSE:\n${studentText}` }
-          ],
-          temperature: 0.3
-        })
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${setup.apiKey}` },
+        body: JSON.stringify(body)
       });
-      const data = await res.json();
-      const out = data?.choices?.[0]?.message?.content || data?.output_text || JSON.stringify(data, null, 2);
-      if (isEmail) suiteState.emailAiFeedback = out;
-      else suiteState.discAiFeedback = out;
-    } catch (err) {
-      const msg = `AI grading error: ${err?.message || err}. Tip: use "Copy 2026 AI Prompt" to paste manually.`;
-      if (isEmail) suiteState.emailAiFeedback = msg;
-      else suiteState.discAiFeedback = msg;
+      if (!response.ok) throw new Error(`Provider returned HTTP ${response.status}.`);
+      const feedback = extractAiText(await response.json());
+      if (!feedback?.trim()) throw new Error("The provider returned no feedback.");
+      if (currentDraft()) {
+        if (isEmail) suiteState.emailAiFeedback = feedback;
+        else suiteState.discAiFeedback = feedback;
+      }
+    } catch (error) {
+      if (currentDraft()) {
+        const message = `Could not get feedback. ${error.message} You can still copy your draft and feedback prompt.`;
+        if (isEmail) suiteState.emailAiFeedback = message;
+        else suiteState.discAiFeedback = message;
+      }
     } finally {
       if (isEmail) suiteState.emailAiLoading = false;
       else suiteState.discAiLoading = false;
@@ -869,9 +979,11 @@
       suiteState.writingIntervalId = null;
     }
     if (kind === "email") {
+      if (suiteState.emailTimerSec === 0) suiteState.emailTimerSec = 420;
       suiteState.emailTimerActive = !suiteState.emailTimerActive;
       suiteState.discTimerActive = false;
     } else {
+      if (suiteState.discTimerSec === 0) suiteState.discTimerSec = 600;
       suiteState.discTimerActive = !suiteState.discTimerActive;
       suiteState.emailTimerActive = false;
     }
@@ -879,7 +991,18 @@
       suiteState.writingIntervalId = setInterval(() => {
         if (suiteState.emailTimerActive && suiteState.emailTimerSec > 0) suiteState.emailTimerSec -= 1;
         if (suiteState.discTimerActive && suiteState.discTimerSec > 0) suiteState.discTimerSec -= 1;
-        if (typeof render === "function" && typeof state !== "undefined" && state.tab === "writing") render();
+        const isEmail = kind === "email";
+        const seconds = isEmail ? suiteState.emailTimerSec : suiteState.discTimerSec;
+        const timer = global.document?.querySelector(`[data-writing-time="${kind}"]`);
+        if (timer) timer.textContent = `Time: ${fmtSec(seconds)}`;
+        if (seconds === 0) {
+          clearInterval(suiteState.writingIntervalId);
+          suiteState.writingIntervalId = null;
+          suiteState.emailTimerActive = false;
+          suiteState.discTimerActive = false;
+          const button = global.document?.querySelector(isEmail ? "[data-suite-email-timer]" : "[data-suite-disc-timer]");
+          if (button) button.textContent = isEmail ? "Restart 7m timer" : "Restart 10m timer";
+        }
       }, 1000);
     }
     if (typeof render === "function") render();
@@ -1080,8 +1203,7 @@
     if (emCopy) emCopy.addEventListener("click", () => {
       const bank = getBank();
       const t = bank.writing.emails[suiteState.emailIndex % bank.writing.emails.length];
-      global.navigator?.clipboard?.writeText(`${bank.aiPrompts.writeAnEmail.prompt}\n\nSCENARIO:\n${t.scenario}\n\nMY EMAIL:\n${suiteState.emailText}`);
-      if (typeof showToast === "function") showToast("Copied 2026 Email AI Diagnostic Prompt + your draft.");
+      copyWritingFeedback(`${WRITING_FEEDBACK_PROMPTS.writeAnEmail}\n\nSCENARIO:\n${t.scenario}\n\nMY EMAIL:\n${suiteState.emailText}`);
     });
 
     const dcIn = doc.querySelector("[data-suite-disc-input]");
@@ -1103,11 +1225,10 @@
     if (dcCopy) dcCopy.addEventListener("click", () => {
       const bank = getBank();
       const t = bank.writing.discussions[suiteState.discIndex % bank.writing.discussions.length];
-      global.navigator?.clipboard?.writeText(`${bank.aiPrompts.academicDiscussion.prompt}\n\nPROMPT:\n${t.professorPrompt}\n\nMY RESPONSE:\n${suiteState.discText}`);
-      if (typeof showToast === "function") showToast("Copied 2026 Discussion AI Diagnostic Prompt + your draft.");
+      copyWritingFeedback(`${WRITING_FEEDBACK_PROMPTS.academicDiscussion}\n\nPROMPT:\n${t.professorPrompt}\n\nMY RESPONSE:\n${suiteState.discText}`);
     });
 
-    // Listening 2026
+    bindListeningQuestions(doc);
     const lPlayer = doc.querySelector("#suiteListeningPlayer");
     if (lPlayer) {
       lPlayer.playbackRate = suiteState.listeningRate;
@@ -1160,19 +1281,8 @@
       btn.addEventListener("click", () => gradeVocabCard(Number(btn.dataset.suiteVGrade)));
     });
 
-    // Band Converter & AI Prompts
-    doc.querySelectorAll("[data-suite-band]").forEach((btn) => {
-      btn.addEventListener("click", () => { suiteState.convBand = Number(btn.dataset.suiteBand); render(); });
-    });
     doc.querySelectorAll("[data-suite-copy-prompt]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const key = btn.dataset.suiteCopyPrompt;
-        const p = getBank()?.aiPrompts?.[key];
-        if (p) {
-          global.navigator?.clipboard?.writeText(p.prompt);
-          if (typeof showToast === "function") showToast(`Copied ${p.title}.`);
-        }
-      });
+      btn.addEventListener("click", () => copyWritingFeedback(WRITING_FEEDBACK_PROMPTS[btn.dataset.suiteCopyPrompt]));
     });
   }
 
@@ -1180,6 +1290,7 @@
     state: suiteState,
     buildCtwBlanks,
     renderBabblePill,
+    isRoomNoisePlaying: () => suiteState.babblePlaying,
     renderThemeToggle,
     toggleTheme,
     renderTab(tabId) {

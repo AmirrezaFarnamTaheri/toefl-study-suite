@@ -10,6 +10,7 @@ const dataPaths = [
   path.join(root, "data", "interview-sets.js"),
   path.join(root, "data", "training-config.js"),
   path.join(root, "data", "toefl-suite-bank.js"),
+  path.join(root, "data", "listening-practice.js"),
   path.join(root, "data", "toefl-full-mocks.js"),
   path.join(root, "data", "toefl-courses.js"),
   path.join(root, "logic", "scoring-engine.js"),
@@ -127,6 +128,8 @@ globalThis.__voxpilot = {
   INTERVIEW_SETS,
   QUESTION_BANK,
   TOEFL_SUITE_BANK,
+  TOEFL_LISTENING_PRACTICE,
+  TOEFL_FULL_MOCKS,
   startFullRun,
   render
 };
@@ -145,8 +148,11 @@ function assert(condition, message) {
   }
 }
 
-assert(appElement.innerHTML.includes("VoxPilot Speaking Lab"), "initial render failed");
-assert(appElement.innerHTML.includes("Start Easy"), "starter mode did not render");
+assert(appElement.innerHTML.includes("TOEFL study desk"), "home did not render");
+assert(appElement.innerHTML.includes("Start a warm-up"), "warm-up entry point is missing");
+api.state.tab = "starter";
+api.render();
+assert(appElement.innerHTML.includes("Four steps"), "warm-up did not render");
 
 api.state.transcript = "I prefer studying with classmates.";
 api.analyzeStarterStep();
@@ -288,7 +294,31 @@ assert(context.window.TOEFL_FULL_MOCKS.mocks.length >= 3, "Full mocks bank shoul
 context.window.ToeflFullMock.startMock(context.window.TOEFL_FULL_MOCKS.mocks[0]);
 assert(context.window.ToeflFullMock.state.phase === "reading1", "Full mock did not start in reading1");
 context.window.ToeflFullMock.finishAndScore();
-assert(context.window.ToeflFullMock.state.phase === "results" && context.window.ToeflFullMock.state.lastReport.overallBand >= 1, "Full mock scoring failed");
+const marked = context.window.ToeflSuiteModules.buildCtwBlanks("An example. The {stu|dent} left.");
+assert(marked.blanks.length === 1 && marked.blanks[0].word === "student", "Marked reading words must use the supplied blanks");
+assert(!marked.parts.some((part) => part.raw?.includes("{")), "Reading markup leaked into visible text");
+api.state.tab = "listening";
+api.render();
+assert(appElement.innerHTML.includes("Borrowing headphones") && appElement.innerHTML.includes("Read transcript"), "Listening questions did not render");
+const listeningAssets = [
+  ...api.TOEFL_LISTENING_PRACTICE.map(({ id }) => id),
+  ...api.TOEFL_FULL_MOCKS.mocks.flatMap((mock) =>
+    [1, 2].flatMap((part) => mock.listening["module" + part].items.map(
+      (_, index) => mock.id + "-listening" + part + "-" + index
+    ))
+  )
+];
+for (const name of listeningAssets) {
+  const audio = fs.readFileSync(path.join(root, "assets", "audio", "prompts", `${name}.wav`));
+  assert(audio.length > 44 && audio.toString("ascii", 0, 4) === "RIFF" && audio.toString("ascii", 8, 12) === "WAVE", `Invalid listening audio: ${name}`);
+}
+const mockReport = context.window.ToeflFullMock.state.lastReport;
+assert(context.window.ToeflFullMock.state.phase === "results" && mockReport.reading.total > 0 && mockReport.listening.total > 0, "Full mock results failed");
+assert(!Object.hasOwn(mockReport, "overallBand"), "Text-only mock must not report an overall TOEFL band");
+const randomMock = context.window.ToeflFullMock.pickRandomMock();
+assert(randomMock && randomMock.listeningMockId, "Random full mock must carry listeningMockId for audio assets");
+const randomAudio = fs.readFileSync(path.join(root, "assets", "audio", "prompts", `${randomMock.listeningMockId}-listening1-0.wav`));
+assert(randomAudio.length > 44 && randomAudio.toString("ascii", 0, 4) === "RIFF", "Random full mock listening audio missing");
 const ctwBuilt = context.window.ToeflSuiteModules.buildCtwBlanks(api.TOEFL_SUITE_BANK.reading.completeTheWords[0].text);
 assert(ctwBuilt.blanks.length === 10, "Complete the Words generator should create 10 blanks");
 

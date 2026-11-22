@@ -1,7 +1,7 @@
 const SpeechRecognitionApi = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 const state = {
-  tab: "starter",
+  tab: "home",
   mode: "repeat",
   currentRepeat: QUESTION_BANK.repeat[0],
   currentInterview: QUESTION_BANK.interview[0],
@@ -38,8 +38,6 @@ const state = {
   bankDifficulty: "all",
   mistakeBookMode: "sounds",
   wordMistakeFilter: "all",
-  mobileNavOpen: false,
-  moreToolsOpen: false,
   toast: "",
   full: {
     active: false,
@@ -63,9 +61,10 @@ function render() {
   app.innerHTML = `
     <div class="app-shell">
       <a href="#main-content" class="skip-link">Skip to main content</a>
-      ${renderTopbar()}
-      ${renderNav()}
-      <main id="main-content" class="content">
+      ${isFullTestActive() ? "" : renderTopbar()}
+      ${isFullTestActive() ? "" : renderNav()}
+      <main id="main-content" class="content" tabindex="-1">
+        ${renderPageHeading()}
         ${renderActiveTab()}
       </main>
       ${state.toast ? `<div class="toast" role="status" aria-live="polite">${escapeHtml(state.toast)}</div>` : ""}
@@ -75,90 +74,138 @@ function render() {
   updateTimerDom();
 }
 
+const STUDY_SECTIONS = [
+  { name: "Practice", tabs: [
+    ["practice", "Speaking", "Repeat sentences or answer interview questions"],
+    ["reading", "Reading", "Complete words and answer passage questions"],
+    ["listening", "Listening", "Answer questions about short recordings"],
+    ["writing", "Writing", "Build sentences, write emails, and join a discussion"],
+    ["vocab", "Vocabulary", "Review words with flashcards"]
+  ] },
+  { name: "Tests", tabs: [
+    ["fullmock", "Four-section tests", "Timed practice sets with results for review"],
+    ["full", "Speaking test", "A timed set of repeat and interview prompts"]
+  ] },
+  { name: "Learn", tabs: [
+    ["courses", "Lessons", "Worked examples and short quizzes"],
+    ["starter", "Speaking warm-up", "Work through one answer in four steps"],
+    ["ladder", "Speaking plan", "Choose a speaking goal and build up to it"],
+    ["guides", "Scores and study plans", "Compare score scales and plan your practice"],
+    ["bank", "Speaking prompts", "Find a sentence or interview question"]
+  ] },
+  { name: "Review", tabs: [
+    ["history", "Speaking history", "Revisit your recorded attempts"],
+    ["mistakes", "Pronunciation practice", "Work on words and sounds you missed"]
+  ] }
+];
+
+function isFullTestActive() {
+  const phase = window.ToeflFullMock?.state.phase;
+  return state.tab === "fullmock" && phase && !["select", "results"].includes(phase);
+}
+
 function renderTopbar() {
+  const activeSection = STUDY_SECTIONS.find(({ tabs }) => tabs.some(([id]) => id === state.tab));
   return `
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-mark" aria-hidden="true">TS</div>
-        <div>
-          <h1 class="brand-title">VoxPilot Speaking Lab</h1>
-          <p class="brand-subtitle">TOEFL 2026 Study Suite</p>
+    <header class="study-header">
+      <div class="study-header-inner">
+        <button type="button" class="study-brand" data-tab="home" aria-label="TOEFL study desk home"
+          ${state.tab === "home" ? 'aria-current="page"' : ""}>TOEFL Study</button>
+        <nav class="study-primary" aria-label="Study navigation">
+          ${STUDY_SECTIONS.map((section) => `
+            <button type="button" class="study-nav-button" data-tab="${section.tabs[0][0]}"
+              ${section === activeSection ? 'aria-current="location"' : ""}>${section.name}</button>
+          `).join("")}
+        </nav>
+        <div class="study-header-actions">
+          <button type="button" class="study-nav-button" data-tab="setup" ${state.tab === "setup" ? 'aria-current="page"' : ""}>Settings</button>
+          ${window.ToeflSuiteModules?.renderThemeToggle() || ""}
         </div>
-      </div>
-      <div class="top-actions">
-        ${window.ToeflSuiteModules ? window.ToeflSuiteModules.renderBabblePill() : ""}
-        ${window.ToeflSuiteModules ? window.ToeflSuiteModules.renderThemeToggle() : ""}
       </div>
     </header>
   `;
 }
 
 function renderNav() {
-  const primaryTabs = [
-    ["starter", "Start Easy"],
-    ["courses", "Courses"],
-    ["fullmock", "Full Mock"],
-    ["practice", "Speaking"],
-    ["reading", "Reading"],
-    ["writing", "Writing"],
-    ["listening", "Listening"],
-    ["vocab", "Vocab"]
-  ];
-  const secondaryTabs = [
-    ["ladder", "Guided Path"],
-    ["full", "Full Speaking Test"],
-    ["guides", "Scores & Plans"],
-    ["bank", "All Prompts"],
-    ["mistakes", "Mistakes"],
-    ["history", "History"],
-    ["setup", "Settings"]
-  ];
-  const inSecondary = secondaryTabs.some(([id]) => id === state.tab);
-  const showSecondary = state.moreToolsOpen || inSecondary;
-  const activeEntry = [...primaryTabs, ...secondaryTabs].find(([id]) => id === state.tab) || primaryTabs[0];
-
+  const section = STUDY_SECTIONS.find(({ tabs }) => tabs.some(([id]) => id === state.tab));
+  const roomNoise = ["practice", "full", "starter", "ladder"].includes(state.tab)
+    || window.ToeflSuiteModules?.isRoomNoisePlaying();
+  if (!section && !roomNoise) return "";
   return `
-    <nav class="main-nav-bar" aria-label="Primary navigation">
-      <div class="nav-mobile-bar">
-        <span class="nav-mobile-active"><strong>${escapeHtml(activeEntry[1])}</strong></span>
-        <button type="button" class="ghost-button nav-mobile-toggle" data-mobile-nav-toggle="true" aria-expanded="${state.mobileNavOpen ? "true" : "false"}" aria-controls="primaryNavGroups">
-          ${state.mobileNavOpen ? "Close" : "Menu"}
-        </button>
-      </div>
-      <div id="primaryNavGroups" class="nav-groups ${state.mobileNavOpen ? "open" : ""}">
-        <div class="nav-primary-row">
-          ${primaryTabs
-            .map(
-              ([id, label]) => `
-                <button type="button" class="nav-button ${state.tab === id ? "active" : ""}" data-tab="${id}" aria-current="${state.tab === id ? "page" : "false"}">
-                  ${label}
-                </button>
-              `
-            )
-            .join("")}
-          <button type="button" class="nav-button nav-more-btn ${showSecondary ? "expanded" : ""}" data-more-tools-toggle="true" aria-expanded="${showSecondary ? "true" : "false"}">
-            ${showSecondary ? "Less" : "More"}
-          </button>
-        </div>
-        ${showSecondary ? `
-          <div class="nav-secondary-row" aria-label="Additional tools">
-            ${secondaryTabs
-              .map(
-                ([id, label]) => `
-                  <button type="button" class="nav-button nav-sub-btn ${state.tab === id ? "active" : ""}" data-tab="${id}" aria-current="${state.tab === id ? "page" : "false"}">
-                    ${label}
-                  </button>
-                `
-              )
-              .join("")}
-          </div>
-        ` : ""}
-      </div>
-    </nav>
+    <div class="study-section-bar">
+      ${section ? `
+        <nav class="study-secondary" aria-label="${section.name} pages">
+          ${section.tabs.map(([id, title]) => `
+            <button type="button" class="study-nav-button" data-tab="${id}"
+              ${state.tab === id ? 'aria-current="page"' : ""}>${title}</button>
+          `).join("")}
+        </nav>
+      ` : ""}
+      ${roomNoise ? window.ToeflSuiteModules?.renderBabblePill() || "" : ""}
+    </div>
   `;
 }
 
+function renderStudyHome() {
+  const attempts = loadHistory().length;
+  const shortcuts = [
+    ["fullmock", "Timed tests", "Practice all four skills under timed conditions"],
+    ["courses", "Lessons", "See how each task works before you try it"],
+    ["history", "Speaking history", attempts ? `${attempts} saved ${attempts === 1 ? "attempt" : "attempts"}` : "Your attempts will appear here"]
+  ];
+
+  return `
+    <div class="study-home">
+      <header class="study-home-hero">
+        <div>
+          <h1>TOEFL study desk</h1>
+          <p>Choose a skill to practice or work through a timed test.</p>
+        </div>
+        <div class="study-home-start">
+          <h2>Start with speaking</h2>
+          <p>Try one prompt in four short steps.</p>
+          <button type="button" class="primary-button" data-tab="starter">Start a warm-up</button>
+        </div>
+      </header>
+      <div class="study-home-columns">
+        <section aria-labelledby="study-home-skills">
+          <h2 id="study-home-skills">Practice a skill</h2>
+          ${renderStudyRows(STUDY_SECTIONS[0].tabs)}
+        </section>
+        <section class="study-home-side" aria-labelledby="study-home-other">
+          <h2 id="study-home-other">Plan and review</h2>
+          ${renderStudyRows(shortcuts)}
+        </section>
+      </div>
+    </div>
+  `;
+}
+
+function renderStudyRows(rows) {
+  return `
+    <ul class="study-home-list">
+      ${rows.map(([id, name, detail]) => `
+        <li>
+          <button type="button" class="study-home-link" data-tab="${id}">
+            <span><strong>${name}</strong><small>${detail}</small></span>
+            <span class="study-home-arrow" aria-hidden="true">→</span>
+          </button>
+        </li>
+      `).join("")}
+    </ul>
+  `;
+}
+
+function renderPageHeading() {
+  if (state.tab === "home" || state.tab === "fullmock") return "";
+  const page = STUDY_SECTIONS.flatMap(({ tabs }) => tabs).find(([id]) => id === state.tab);
+  const title = state.tab === "setup" ? "Settings" : page?.[1];
+  const wide = !["reading", "writing", "listening", "vocab", "guides"].includes(state.tab);
+  return title ? `<h1 class="study-page-title${wide ? " wide" : ""}">${title}</h1>` : "";
+}
+
 function renderActiveTab() {
+  if (state.tab === "home") return renderStudyHome();
   if (state.tab === "starter") return renderStarterView();
   if (state.tab === "courses" && window.ToeflCourses) return window.ToeflCourses.render();
   if (state.tab === "fullmock" && window.ToeflFullMock) return window.ToeflFullMock.render();
@@ -178,8 +225,7 @@ function renderPracticeView() {
   return `
     <section class="workspace">
       <aside class="panel">
-        <h2>Daily Studio</h2>
-        <p class="compact-copy">Listen carefully, speak steadily. Review diagnostic feedback immediately after each attempt and record a focused retake.</p>
+        <h2>Practice type</h2>
         <div class="segmented" role="group" aria-label="Practice mode">
           <button class="${state.mode === "repeat" ? "active" : ""}" data-mode="repeat">Listen & Repeat</button>
           <button class="${state.mode === "interview" ? "active" : ""}" data-mode="interview">Interview</button>
@@ -204,9 +250,8 @@ function renderStarterView() {
   return `
     <section class="workspace starter-workspace">
       <aside class="panel starter-panel">
-        <span class="badge blue">Start Easy</span>
-        <h2>Start Easy (4 Short Steps)</h2>
-        <p class="compact-copy">Practice speaking one small step at a time. Steps 1-3 check one simple goal each; Step 4 scores your full answer.</p>
+        <h2>Four steps</h2>
+        <p class="compact-copy">Build your answer one step at a time.</p>
         <div class="segmented" role="group" aria-label="Starter mode">
           <button class="${starter.mode === "interview" ? "active" : ""}" data-starter-mode="interview">Interview</button>
           <button class="${starter.mode === "repeat" ? "active" : ""}" data-starter-mode="repeat">Listen &amp; Repeat</button>
@@ -238,11 +283,8 @@ function renderStarterView() {
           <div class="practice-header">
             <div>
               <div class="badge-row">
-                <span class="badge">Start Easy</span>
                 <span class="badge ${isRepeat ? "violet" : "blue"}">${isRepeat ? "Listen & Repeat" : "Take an Interview"}</span>
                 <span class="badge orange">Step ${starter.step}/4</span>
-                <span class="badge">${escapeHtml(step.interactionLabel)}</span>
-                <span class="badge blue">${escapeHtml(question.category)}</span>
               </div>
               <h2 class="question-text starter-question">${escapeHtml(step.displayText)}</h2>
               <p class="prompt-note">${escapeHtml(step.promptNote)}</p>
@@ -256,7 +298,6 @@ function renderStarterView() {
 
           <div class="starter-mission">
             <div>
-              <span class="badge">Step Goal</span>
               <h3>${escapeHtml(step.title)}</h3>
               <p>${escapeHtml(step.mission)}</p>
             </div>
@@ -360,7 +401,7 @@ function renderStarterFeedback() {
       </div>
       ${feedback.fullFeedback ? `
         <section class="feedback-section wide-section">
-          <h3>Full Prompt Local Evaluation</h3>
+          <h3>Feedback on your full answer</h3>
           <p class="compact-copy">${escapeHtml(feedback.fullFeedback.summary)}</p>
           ${feedback.fullFeedback.confidence ? renderScoringConfidence(feedback.fullFeedback.confidence) : ""}
           ${feedback.fullFeedback.detailScores ? renderScoreBreakdown(feedback.fullFeedback.detailScores) : ""}
@@ -463,7 +504,7 @@ function renderLadderView() {
       <section class="feedback-section wide-section">
         <div class="history-top">
           <div>
-            <h3>Today's Ladder</h3>
+            <h3>Today's practice</h3>
             <p class="compact-copy">Follow the sequence: Warm-up, Core Task, Weakness Fix, and Checkpoint. Your Ladder rank updates automatically after each scored item.</p>
           </div>
           <button class="ghost-button" data-reset-ladder-plan="true"><span class="button-icon">↻</span>Regenerate Plan</button>
@@ -478,7 +519,7 @@ function renderLadderView() {
       <section class="feedback-section wide-section">
         <div class="history-top">
           <div>
-            <h3>Level Control</h3>
+            <h3>Practice level</h3>
             <p class="compact-copy">Want to recalibrate your placement level? Retake the 6-item diagnostic anytime.</p>
           </div>
           <button class="danger-button" data-reset-ladder="true"><span class="button-icon">×</span>Reset Ladder</button>
@@ -503,7 +544,7 @@ function renderLadderDiagnostic(profile) {
             <span class="badge violet">VoxPilot Ladder</span>
             <span class="badge blue">Diagnostic</span>
           </div>
-          <h2>Start From Your Real Level</h2>
+          <h2>Find your starting level</h2>
           <p>Complete a 6-item diagnostic (3 Listen & Repeat + 3 Interview questions). The engine assigns your starting Ladder tier and training focus.</p>
         </div>
         <div class="ladder-score">
@@ -672,11 +713,11 @@ function renderFeedback() {
         </aside>
         <div class="feedback-columns">
           <section class="feedback-section">
-            <h3>Key Strengths</h3>
+            <h3>What worked</h3>
             <ul>${feedback.strengths.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
           </section>
           <section class="feedback-section">
-            <h3>Priority Fixes</h3>
+            <h3>What to work on</h3>
             <ul>${feedback.issues.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
           </section>
           ${feedback.detailScores ? renderScoreBreakdown(feedback.detailScores) : ""}
@@ -686,7 +727,7 @@ function renderFeedback() {
           ${feedback.pronunciation ? renderPronunciationSection(feedback.pronunciation) : ""}
           ${feedback.alignment ? renderDiffSection(feedback.alignment) : ""}
           <section class="feedback-section wide-section">
-            <h3>${feedback.type === "repeat" ? "How to Improve Next Attempt" : "Model Upgraded Response"}</h3>
+            <h3>${feedback.type === "repeat" ? "How to Improve Next Attempt" : "Example answer"}</h3>
             <p class="upgrade-answer">${escapeHtml(feedback.improvedAnswer)}</p>
           </section>
         </div>
@@ -704,13 +745,13 @@ function renderCoachEntryFromFeedback() {
     <section class="coach-entry">
       <div>
         <div class="badge-row">
-          <span class="badge violet">Coach Capsule</span>
+          <span class="badge violet">Guided retry</span>
           <span class="badge">${aiReady ? "AI Deep Coach Ready" : "Local Rule Coach"}</span>
         </div>
-        <h3>Want a targeted micro-drill for your retake?</h3>
+        <h3>Practice one improvement</h3>
         <p class="compact-copy">Coach isolates your single highest-leverage weakness, builds a focused micro-drill, and compares your retake against your first attempt.</p>
       </div>
-      <button class="primary-button" data-start-coach-current="true"><span class="button-icon">◎</span>Launch Coach Capsule</button>
+      <button class="primary-button" data-start-coach-current="true"><span class="button-icon">◎</span>Try again with guidance</button>
     </section>
   `;
 }
@@ -728,7 +769,7 @@ function renderCoachCapsule() {
             <span class="badge blue">${escapeHtml(modeLabel)}</span>
             <span class="badge">${escapeHtml(coach.source || "practice")}</span>
           </div>
-          <h2>From Feedback to Action</h2>
+          <h2>Try your answer again</h2>
           <p class="compact-copy">Target one primary bottleneck at a time: Diagnose → Micro-Drill → Retake → Compare.</p>
         </div>
         <button class="ghost-button" data-coach-reset="true"><span class="button-icon">×</span>Close Coach</button>
@@ -767,7 +808,7 @@ function renderCoachDiagnosis() {
   if (coach.phase === "diagnosing") {
     return `
       <section class="coach-card coach-diagnosis">
-        <h3>Step 1 · Diagnosis</h3>
+        <h3>Step 1 · What to improve</h3>
         <p class="upgrade-answer">Coach is analyzing the prompt, transcript, rubric scores, audio telemetry, and recent weakness history...</p>
       </section>
     `;
@@ -777,7 +818,7 @@ function renderCoachDiagnosis() {
   return `
     <section class="coach-card coach-diagnosis">
       <div class="section-title-row">
-        <h3>Step 1 · Diagnosis</h3>
+        <h3>Step 1 · What to improve</h3>
         <span class="badge orange">${escapeHtml(weaknessLabel)}</span>
       </div>
       <p class="upgrade-answer">${escapeHtml(coach.diagnosis.mainDiagnosis)}</p>
@@ -795,7 +836,7 @@ function renderCoachDrill() {
   return `
     <section class="coach-card coach-drill">
       <div class="section-title-row">
-        <h3>Step 2 · Micro-Drill</h3>
+        <h3>Step 2 · Short drill</h3>
         <span class="badge violet">${escapeHtml(coach.drill.title)}</span>
       </div>
       <p class="upgrade-answer">${escapeHtml(coach.drill.instruction)}</p>
@@ -824,7 +865,7 @@ function renderCoachRetake() {
   return `
     <section class="coach-card">
       <div class="section-title-row">
-        <h3>Step 3 · Retake</h3>
+        <h3>Step 3 · Try again</h3>
         <span class="badge">${retakeText ? `${normalizeWords(retakeText).length} words` : "Awaiting Retake"}</span>
       </div>
       <div class="recorder-row compact-recorder">
@@ -854,7 +895,7 @@ function renderCoachReflection() {
   return `
     <section class="coach-card coach-reflection">
       <div class="section-title-row">
-        <h3>Step 4 · Reflection</h3>
+        <h3>Step 4 · Compare answers</h3>
         <span class="badge ${coach.reflection.improved ? "blue" : "orange"}">${coach.reflection.improved ? "Clear Improvement" : "Needs Another Pass"}</span>
       </div>
       <div class="coach-before-after">
@@ -932,7 +973,7 @@ function renderScoringConfidence(confidence) {
 function renderDiffSection(alignment) {
   return `
     <section class="feedback-section wide-section">
-      <h3>Verbatim Alignment</h3>
+      <h3>Compare words</h3>
       <div class="diff-line">
         ${alignment
           .map((token) => {
@@ -1018,7 +1059,7 @@ function renderExternalAiSection(externalAi) {
   const dimensions = Object.entries(externalAi.dimensionScores || {}).slice(0, 8);
   return `
     <section class="feedback-section wide-section">
-      <h3>AI Evaluation Enhancement</h3>
+      <h3>AI feedback</h3>
       <div class="external-grid">
         <div class="pron-tile">
           <span>AI Band</span>
@@ -1057,7 +1098,7 @@ function renderPronunciationSection(pronunciation) {
 
   return `
     <section class="feedback-section wide-section">
-      <h3>Intelligibility & Acoustic Telemetry</h3>
+      <h3>Speech clarity and pacing</h3>
       <div class="pron-grid">
         ${statsItems
           .map(
@@ -1138,8 +1179,8 @@ function renderFullRunView() {
       <section class="full-run-board">
         <div class="full-setup">
           <div>
-            <h2>Full 11-Item Simulation</h2>
-            <p class="compact-copy">Complete a full 11-item speaking set: 7 Listen & Repeat items followed by 4 Interview prompts, the same order as the 2026 test. Exam mode auto-plays audio and locks sentence reveals.</p>
+            <h2>11 prompts</h2>
+            <p class="compact-copy">Repeat seven sentences, then answer four interview questions. Test mode plays prompts automatically and hides the sentences.</p>
           </div>
           <button class="primary-button" data-start-full="true"><span class="button-icon">▶</span>Start Full Simulation</button>
         </div>
@@ -1215,7 +1256,7 @@ function renderBankView() {
     <section>
       <div class="history-top">
         <div>
-          <h2>Simulation Prompt Bank</h2>
+          <h2>Find a prompt</h2>
           <p class="compact-copy">Browse all ${QUESTION_BANK.repeat.length + QUESTION_BANK.interview.length} prompts: originals modeled on public ETS task descriptions plus adapted Independent Speaking prompts. No leaked exam content is included.</p>
         </div>
         <button class="primary-button" data-random-bank="true"><span class="button-icon">↻</span>Practice Random Prompt</button>
@@ -1262,7 +1303,7 @@ function renderHistoryView() {
     <section>
       <div class="history-top">
         <div>
-          <h2>Local Practice History</h2>
+          <h2>Saved attempts</h2>
           <p class="compact-copy">All practice logs are stored privately in your browser localStorage and never uploaded to a server.</p>
         </div>
         <div class="control-actions">
@@ -1320,11 +1361,11 @@ function renderMistakeBookView() {
     <section class="mistake-book">
       <div class="history-top">
         <div>
-          <h2>Pronunciation & Recall Error Log</h2>
+          <h2>Words and sounds to practice</h2>
           <p class="compact-copy">Automatically compiled from your local pronunciation diagnostics, Listen & Repeat word alignments, and word-level accuracy scores.</p>
         </div>
         <div class="control-actions">
-          <button class="ghost-button" data-tab="history"><span class="button-icon">↗</span>View Source History</button>
+          <button class="ghost-button" data-tab="history"><span class="button-icon">↗</span>See speaking history</button>
           <button class="ghost-button" data-export-local-data="true"><span class="button-icon">⇩</span>Export Local Data</button>
         </div>
       </div>
@@ -2800,7 +2841,7 @@ function renderLocalDataPanel(history = loadHistory()) {
   return `
     <section class="feedback-section wide-section data-panel">
       <div class="section-title-row">
-        <h3>Local Data Management</h3>
+        <h3>Practice data</h3>
         <span class="badge">Browser-Local Only</span>
       </div>
       <div class="summary-grid compact-summary">
@@ -2826,33 +2867,24 @@ function renderLocalDataPanel(history = loadHistory()) {
 function renderSetupView() {
   const setup = state.setup;
   return `
-    <section class="setup-board">
+    <section class="setup-board study-settings">
       <div class="history-top">
         <div>
-          <h2>API Setup</h2>
-          <p class="compact-copy">API keys, endpoints, and model names are saved exclusively in your browser localStorage and never committed to git.</p>
+          <h2>Feedback settings</h2>
+          <p class="compact-copy">Practice feedback works without an API key. Your browser’s speech recognition service may process audio online.</p>
         </div>
         <div class="control-actions">
-          <button class="primary-button" data-save-setup="true"><span class="button-icon">✓</span>Save Settings</button>
-          <button class="ghost-button" data-clear-setup="true"><span class="button-icon">×</span>Reset Settings</button>
+          <button class="primary-button" data-save-setup="true">Save settings</button>
+          <button class="ghost-button" data-clear-setup="true">Reset settings</button>
         </div>
       </div>
 
-      <div class="setup-grid">
-        <section class="feedback-section setup-basic">
-          <h3>Built-In Local Engine (Zero API Required)</h3>
-          <ul>
-            <li>Simulated 1–6 half-band scoring, rubric breakdown, acoustic telemetry, and weakness tracking run 100% locally by default.</li>
-            <li>Adaptive Ladder and Coach Capsule work out of the box using local diagnostic rules without sending audio or text to external servers.</li>
-            <li>All practice history, Ladder progression, and Coach profiles persist privately in browser localStorage.</li>
-          </ul>
-        </section>
-
-        <section class="feedback-section">
-          <h3>Optional AI Content Evaluation</h3>
+      <div class="study-settings-panels">
+        <details class="feedback-section suite-details">
+          <summary>Optional AI feedback</summary>
           <label class="check-row">
             <input id="aiEnabled" type="checkbox" ${setup.ai.enabled ? "checked" : ""}>
-            <span>Enable external AI content evaluation</span>
+            <span>Send transcripts for AI feedback</span>
           </label>
           <label class="setup-field">
             <span>API Provider Format</span>
@@ -2877,14 +2909,14 @@ function renderSetupView() {
             <span>Temperature</span>
             <input id="aiTemperature" type="number" step="0.1" min="0" max="1" value="${escapeHtml(String(setup.ai.temperature))}">
           </label>
-          <p class="compact-copy">Supplements local scoring with LLM-powered rubric critique and upgraded sample responses. Falls back to local scoring when unconfigured.</p>
-        </section>
+          <p class="compact-copy">The provider receives your transcript and prompt and can return feedback and an example answer.</p>
+        </details>
 
-        <section class="feedback-section">
-          <h3>Optional Phoneme-Level Pronunciation API</h3>
+        <details class="feedback-section suite-details">
+          <summary>Optional pronunciation feedback</summary>
           <label class="check-row">
             <input id="pronEnabled" type="checkbox" ${setup.pronunciation.enabled ? "checked" : ""}>
-            <span>Enable external phoneme pronunciation assessment</span>
+            <span>Send recordings for pronunciation feedback</span>
           </label>
           <label class="setup-field">
             <span>Provider</span>
@@ -2905,18 +2937,18 @@ function renderSetupView() {
             <span>API Key</span>
             <input id="pronKey" type="password" value="${escapeHtml(setup.pronunciation.apiKey)}" placeholder="Azure Speech key or custom endpoint key">
           </label>
-          <p class="compact-copy">Azure mode converts audio to 16kHz mono WAV for Pronunciation Assessment. Custom mode posts JSON to your configured endpoint.</p>
-        </section>
+          <p class="compact-copy">The selected provider receives your recording.</p>
+        </details>
 
-        <section class="feedback-section">
-          <h3>Agentic Coach</h3>
+        <details class="feedback-section suite-details">
+          <summary>Guided retries</summary>
           <label class="check-row">
             <input id="coachEnabled" type="checkbox" ${setup.coach.enabled ? "checked" : ""}>
-            <span>Enable Coach Capsule retake workflow</span>
+            <span>Show guided retries after speaking practice</span>
           </label>
           <label class="check-row">
             <input id="coachUseAi" type="checkbox" ${setup.coach.useAi ? "checked" : ""}>
-            <span>Use AI to generate Coach diagnostics and micro-drills</span>
+            <span>Use AI to suggest feedback and drills</span>
           </label>
           <label class="setup-field">
             <span>Coach Feedback Tone</span>
@@ -2928,20 +2960,13 @@ function renderSetupView() {
           </label>
           <label class="check-row">
             <input id="coachSingleWeaknessOnly" type="checkbox" ${setup.coach.singleWeaknessOnly ? "checked" : ""}>
-            <span>Focus on one primary bottleneck per retake</span>
+            <span>Focus on one improvement per retry</span>
           </label>
-          <p class="compact-copy">Coach AI reuses the AI Content Evaluation endpoint, key, and model above, automatically falling back to local diagnostic rules if unconfigured.</p>
-        </section>
+          <p class="compact-copy">AI suggestions use the feedback provider above.</p>
+        </details>
       </div>
 
-      <section class="feedback-section setup-note">
-        <h3>Privacy & Security</h3>
-        <ul>
-          <li>No personal API keys are stored in source code.</li>
-          <li>Keys exist only in your current browser localStorage and are redacted from data exports.</li>
-          <li>Requests are made directly from the client browser using your local configuration.</li>
-        </ul>
-      </section>
+      <p class="compact-copy">API keys are saved in this browser and excluded from practice exports.</p>
     </section>
   `;
 }
@@ -2972,7 +2997,7 @@ function renderWeaknessPanel(history) {
 
   return `
     <section class="feedback-section wide-section weakness-panel">
-      <h3>Weakness Telemetry</h3>
+      <h3>Patterns in recent attempts</h3>
       <div class="weakness-grid">
         ${weakScores
           .map(
@@ -3326,28 +3351,17 @@ function bindEvents() {
   if (window.ToeflCourses) {
     window.ToeflCourses.bindEvents();
   }
-  const mobileNavBtn = document.querySelector("[data-mobile-nav-toggle]");
-  if (mobileNavBtn) {
-    mobileNavBtn.addEventListener("click", () => {
-      state.mobileNavOpen = !state.mobileNavOpen;
-      render();
-    });
-  }
-  const moreToolsBtn = document.querySelector("[data-more-tools-toggle]");
-  if (moreToolsBtn) {
-    moreToolsBtn.addEventListener("click", () => {
-      state.moreToolsOpen = !state.moreToolsOpen;
-      render();
-    });
-  }
   document.querySelectorAll("[data-tab]").forEach((button) => {
     button.addEventListener("click", () => {
-      state.tab = button.dataset.tab;
-      state.mobileNavOpen = false;
+      const nextTab = button.dataset.tab;
+      if (nextTab === state.tab) return;
+      if (state.tab === "listening") window.speechSynthesis?.cancel();
+      if (state.tab === "fullmock") window.ToeflFullMock?.leaveResults();
+      state.tab = nextTab;
       render();
+      document.querySelector("#main-content")?.focus();
     });
   });
-
   document.querySelectorAll("[data-mode]").forEach((button) => {
     button.addEventListener("click", () => {
       state.mode = button.dataset.mode;
@@ -3588,13 +3602,13 @@ function bindMistakeReviewSwipe() {
 
 async function startCoachFromCurrentAttempt(source = "practice") {
   if (!state.setup.coach?.enabled) {
-    showToast("Coach Capsule is currently disabled in Setup.");
+    showToast("Guided retry is currently disabled in Settings.");
     return;
   }
   const question = getActiveQuestion(state.tab === "full" && state.full.active);
   const transcript = cleanupSpacing(state.transcript);
   if (!state.feedback || !transcript) {
-    showToast("Score a practice response first before launching Coach Capsule.");
+    showToast("Score a practice response first before launching guided retry.");
     return;
   }
 
@@ -3613,7 +3627,7 @@ async function startCoachFromCurrentAttempt(source = "practice") {
 
 async function startCoachFromLadder() {
   if (!state.setup.coach?.enabled) {
-    showToast("Coach Capsule is currently disabled in Setup.");
+    showToast("Guided retry is currently disabled in Settings.");
     return;
   }
   if (state.feedback && cleanupSpacing(state.transcript)) {
@@ -3668,7 +3682,7 @@ async function startCoachFromLadder() {
 
 async function startCoachFromHistory(historyId) {
   if (!state.setup.coach?.enabled) {
-    showToast("Coach Capsule is currently disabled in Setup.");
+    showToast("Guided retry is currently disabled in Settings.");
     return;
   }
   const item = loadHistory().find((entry) => entry.id === historyId);
@@ -3782,7 +3796,7 @@ function buildLocalCoachDiagnosis(payload) {
 async function runAiCoachDiagnosis(payload) {
   const config = state.setup.ai;
   if (!config.endpoint || !config.apiKey || !config.model) {
-    throw new Error("Please configure your AI endpoint, API key, and model in Setup.");
+    throw new Error("Please configure your AI endpoint, API key, and model in Settings.");
   }
   const systemPrompt = [
     "You are VoxPilot, an adaptive TOEFL-style speaking coach.",
@@ -3917,7 +3931,7 @@ async function runCoachReflection() {
 async function runAiCoachReflection(payload) {
   const config = state.setup.ai;
   if (!config.endpoint || !config.apiKey || !config.model) {
-    throw new Error("Please configure your AI endpoint, API key, and model in Setup.");
+    throw new Error("Please configure your AI endpoint, API key, and model in Settings.");
   }
   const systemPrompt = [
     "You are VoxPilot's retake evaluator.",

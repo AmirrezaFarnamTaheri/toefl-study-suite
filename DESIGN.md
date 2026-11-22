@@ -38,13 +38,7 @@ All primary text, muted text, and interactive button pairings exceed WCAG 2.1 AA
 
 ## 3. Navigation Architecture
 
-To eliminate flat 13-tab cognitive overload, primary navigation is grouped into three semantic clusters:
-
-1. **Speaking**: Start Easy, Ladder, Speaking Studio, Full Sim
-2. **2026 Skills**: Reading 2026, Writing 2026, Listening, Vocab & Ideas, Band & Plans
-3. **Workspace**: Prompt Bank, Error Log, History, Setup
-
-On screens below `768px`, the grouped bar collapses cleanly behind a labeled `Menu` toggle showing the active tab name so mobile viewports stay clutter-free with zero horizontal overflow.
+The home page links directly to each skill and offers a speaking warm-up. The header groups the remaining views under Practice, Tests, Learn, and Review, with Settings beside the theme control. Each group has a second row of specific activities. The header becomes two rows on narrow screens, and the four-section test uses its own compact toolbar during a run.
 
 ## 4. Accessibility & Interaction Standards
 
