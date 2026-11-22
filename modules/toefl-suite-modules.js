@@ -31,6 +31,62 @@
         }
       }
     }
+    if (!TOEFL_SUITE_BANK.__mergedExtra && typeof TOEFL_EXTRA_PRACTICE !== "undefined") {
+      TOEFL_SUITE_BANK.__mergedExtra = true;
+      const seenRp = new Set((TOEFL_SUITE_BANK.reading.passages || []).map((p) => p.title));
+      for (const p of TOEFL_EXTRA_PRACTICE.readingPassages || []) {
+        if (!seenRp.has(p.title)) {
+          TOEFL_SUITE_BANK.reading.passages.push(p);
+          seenRp.add(p.title);
+        }
+      }
+      const seenBas = new Set((TOEFL_SUITE_BANK.writing.buildASentence || []).map((b) => b.prompt));
+      for (const b of TOEFL_EXTRA_PRACTICE.buildASentence || []) {
+        if (!seenBas.has(b.prompt)) {
+          TOEFL_SUITE_BANK.writing.buildASentence.push(b);
+          seenBas.add(b.prompt);
+        }
+      }
+    }
+    if (!TOEFL_SUITE_BANK.__mergedStudyTools && typeof TOEFL_STUDYTOOLS_ABSORBED !== "undefined") {
+      TOEFL_SUITE_BANK.__mergedStudyTools = true;
+      const seenRp = new Set((TOEFL_SUITE_BANK.reading.passages || []).map((p) => p.title));
+      for (const p of TOEFL_STUDYTOOLS_ABSORBED.readingPassages || []) {
+        if (!seenRp.has(p.title)) {
+          TOEFL_SUITE_BANK.reading.passages.push(p);
+          seenRp.add(p.title);
+        }
+      }
+      const seenBas = new Set((TOEFL_SUITE_BANK.writing.buildASentence || []).map((b) => b.prompt));
+      for (const b of TOEFL_STUDYTOOLS_ABSORBED.buildASentence || []) {
+        if (!seenBas.has(b.prompt)) {
+          TOEFL_SUITE_BANK.writing.buildASentence.push(b);
+          seenBas.add(b.prompt);
+        }
+      }
+      const seenEm = new Set((TOEFL_SUITE_BANK.writing.emails || []).map((e) => e.title));
+      for (const e of TOEFL_STUDYTOOLS_ABSORBED.emails || []) {
+        if (!seenEm.has(e.title)) {
+          TOEFL_SUITE_BANK.writing.emails.push(e);
+          seenEm.add(e.title);
+        }
+      }
+      const seenDisc = new Set((TOEFL_SUITE_BANK.writing.discussions || []).map((d) => d.title));
+      for (const d of TOEFL_STUDYTOOLS_ABSORBED.discussions || []) {
+        if (!seenDisc.has(d.title)) {
+          TOEFL_SUITE_BANK.writing.discussions.push(d);
+          seenDisc.add(d.title);
+        }
+      }
+      const seenVocab = new Set((TOEFL_SUITE_BANK.vocab || []).map((v) => String(v.word || "").toLowerCase()));
+      for (const v of TOEFL_STUDYTOOLS_ABSORBED.vocab || []) {
+        const wl = String(v.word || "").toLowerCase();
+        if (wl && !seenVocab.has(wl)) {
+          TOEFL_SUITE_BANK.vocab.push(v);
+          seenVocab.add(wl);
+        }
+      }
+    }
     return TOEFL_SUITE_BANK;
   }
 
@@ -361,6 +417,12 @@
     const rightPanel =
       suiteState.readingMode === "passages" && rpItem
         ? `
+          <div class="exam-target-bar" aria-label="Exam task target">
+            <span class="exam-target-tag">Exam target: TOEFL 2026 Reading - ${rpItem.kind === "Academic Passage" ? "Task 3: Read an Academic Passage" : "Task 2: Read in Daily Life"}</span>
+            <p class="exam-target-detail">${rpItem.kind === "Academic Passage"
+              ? "Short academic reading testing main idea, detail, inference, and vocabulary in context."
+              : "Real-world notices, emails, schedules, and message threads testing dates, rules, and next actions."}</p>
+          </div>
           <div class="practice-header">
             <div>
               <div class="badge-row">
@@ -406,6 +468,10 @@
         `
         : passage && built
         ? `
+            <div class="exam-target-bar" aria-label="Exam task target">
+              <span class="exam-target-tag">Exam target: TOEFL 2026 Reading - Task 1: Complete the Words</span>
+              <p class="exam-target-detail">Multistage adaptive cloze task: read sentence 1 intact, then complete 10 half-blanked words using context and grammar endings.</p>
+            </div>
             <div class="practice-header">
               <div>
                 <div class="badge-row">
@@ -490,6 +556,10 @@
         item.answer.every((ans, i) => (suiteState.basSlots[i] || "").toLowerCase() === ans.toLowerCase());
 
       bodyHtml = `
+        <div class="exam-target-bar" aria-label="Exam task target">
+          <span class="exam-target-tag">Exam target: TOEFL 2026 Writing - Task 1: Build a Sentence</span>
+          <p class="exam-target-detail">10 items on the real exam testing English word order, indirect questions, clause links, and agreement.</p>
+        </div>
         <div class="practice-header">
           <div>
             <div class="badge-row">
@@ -537,6 +607,10 @@
       const item = list[suiteState.emailIndex % list.length];
       const wc = countWords(suiteState.emailText);
       bodyHtml = `
+        <div class="exam-target-bar" aria-label="Exam task target">
+          <span class="exam-target-tag">Exam target: TOEFL 2026 Writing - Task 2: Write an Email (7 minutes)</span>
+          <p class="exam-target-detail">Write a clear, polite 90-130 word email that completes all three prompt requests with time left to proofread.</p>
+        </div>
         <div class="practice-header">
           <div>
             <div class="badge-row">
@@ -558,6 +632,14 @@
           <textarea id="suiteEmailEditor" class="suite-textarea" data-suite-email-input="true" rows="10" placeholder="Subject: ...&#10;&#10;Dear ...,&#10;&#10;Write your email here.">${esc(suiteState.emailText)}</textarea>
         </div>
         ${buildWordMeterHtml(wc, 90, 130, "suite-email-wc")}
+        <details class="revision-checklist">
+          <summary>Self-revision checklist (before you finish)</summary>
+          <div class="revision-check-items">
+            <label><input type="checkbox"><span>Opening clearly states why you are writing and matches the reader's tone.</span></label>
+            <label><input type="checkbox"><span>Every required detail or request from the prompt is directly answered.</span></label>
+            <label><input type="checkbox"><span>Checked verb tenses, articles (a/an/the), and clear sentence punctuation.</span></label>
+          </div>
+        </details>
         <div class="control-actions suite-mt">
           <button type="button" class="primary-button" data-suite-email-ai="true" ${suiteState.emailAiLoading ? "disabled" : ""}>${suiteState.emailAiLoading ? "Checking..." : "Get AI Feedback"}</button>
           <button type="button" class="tool-button" data-suite-copy-email-prompt="true">Copy Prompt for AI</button>
@@ -571,6 +653,10 @@
       const item = list[suiteState.discIndex % list.length];
       const wc = countWords(suiteState.discText);
       bodyHtml = `
+        <div class="exam-target-bar" aria-label="Exam task target">
+          <span class="exam-target-tag">Exam target: TOEFL 2026 Writing - Task 3: Write for an Academic Discussion (10 minutes)</span>
+          <p class="exam-target-detail">Write 100-140 words engaging one classmate and adding your own fresh reason with a concrete example.</p>
+        </div>
         <div class="practice-header">
           <div>
             <div class="badge-row">
@@ -592,6 +678,14 @@
           <textarea id="suiteDiscEditor" class="suite-textarea" data-suite-disc-input="true" rows="10" placeholder="State your position clearly, engage with a classmate's point, and develop one sharp reason with a concrete example (100-140 words)...">${esc(suiteState.discText)}</textarea>
         </div>
         ${buildWordMeterHtml(wc, 100, 140, "suite-disc-wc")}
+        <details class="revision-checklist">
+          <summary>Self-revision checklist (before you finish)</summary>
+          <div class="revision-check-items">
+            <label><input type="checkbox"><span>Sentence 1 states a clear position without copying the prompt verbatim.</span></label>
+            <label><input type="checkbox"><span>Engages a classmate's point briefly and adds a new, concrete example.</span></label>
+            <label><input type="checkbox"><span>Checked subject-verb agreement, comma splices, and clear transitions.</span></label>
+          </div>
+        </details>
         <div class="control-actions suite-mt">
           <button type="button" class="primary-button" data-suite-disc-ai="true" ${suiteState.discAiLoading ? "disabled" : ""}>${suiteState.discAiLoading ? "Checking..." : "Get AI Feedback"}</button>
           <button type="button" class="tool-button" data-suite-copy-disc-prompt="true">Copy Prompt for AI</button>
@@ -649,8 +743,18 @@
     const item = items[suiteState.listeningExercise];
     const kinds = [...new Set(TOEFL_LISTENING_PRACTICE.map(({ kind }) => kind))];
     const answers = suiteState.listeningAnswers[item.id] || {};
+    const taskMap = {
+      "Choose a response": "Task 1: Listen and Choose a Response (short 1-turn everyday reply)",
+      "Conversation": "Task 2: Listen to a Conversation (campus problem, condition & next step)",
+      "Announcement": "Task 3: Listen to an Announcement (schedule change, rule & action required)",
+      "Academic talk": "Task 4: Listen to an Academic Talk (main idea, contrast & purpose of examples)"
+    };
+    const taskTarget = taskMap[item.kind] || item.kind;
     return `
       <div class="practice-board suite-stack-md">
+        <div class="exam-target-bar" aria-label="Exam task target">
+          <span class="exam-target-tag">Exam target: TOEFL 2026 Listening - ${esc(taskTarget)}</span>
+        </div>
         <div class="suite-toolbar">
           <div class="listening-filter">
             <label for="listening-task">Task type</label>
@@ -757,6 +861,10 @@
           </div>
         </div>
         <div class="practice-board">
+          <div class="exam-target-bar" aria-label="Exam task target">
+            <span class="exam-target-tag">Exam target: TOEFL 2026 Listening - Note-Taking &amp; Shadowing Drill</span>
+            <p class="exam-target-detail">Trains real-time note-taking and connected-speech recognition for Campus Conversations and Academic Talks.</p>
+          </div>
           ${clip ? `
             <div class="practice-header">
               <div>
@@ -862,7 +970,14 @@
             </div>
           ` : ""}
         </div>
-        <div class="practice-board">${mainHtml}</div>
+        <div class="practice-board">
+          <div class="exam-target-bar" aria-label="Exam task target">
+            <span class="exam-target-tag">${suiteState.vocabMode === "srs"
+              ? "Exam target: TOEFL 2026 Reading (Complete the Words & Academic Passages) and Writing/Speaking word choice"
+              : "Exam target: TOEFL 2026 Speaking (Take an Interview) and Writing (Academic Discussion) brainstorming"}</span>
+          </div>
+          ${mainHtml}
+        </div>
       </section>
     `;
   }

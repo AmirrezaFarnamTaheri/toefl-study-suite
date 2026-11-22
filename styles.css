@@ -3492,3 +3492,231 @@ select,
 .study-settings-panels { display: grid; gap: 10px; }
 .study-settings-panels details summary { cursor: pointer; padding-block: 8px; }
 .study-settings-panels details[open] summary { margin-bottom: 12px; }
+
+/* ---------------- Exam Task Target Bar & Revision Checklist ---------------- */
+.exam-target-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--teal);
+  background: var(--surface-strong);
+}
+
+.exam-target-tag {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.exam-target-detail {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.revision-checklist {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+}
+
+.revision-checklist summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.revision-check-items {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.revision-check-items label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+/* ---------------- Study Timer / Pomodoro Widget ---------------- */
+.study-timer-wrap {
+  position: relative;
+}
+
+.study-timer-trigger.active {
+  border-color: var(--teal);
+  color: var(--teal);
+  font-weight: 700;
+}
+
+.study-timer-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 50;
+  width: min(340px, calc(100vw - 24px));
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
+  display: grid;
+  gap: 10px;
+}
+
+.study-timer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.study-timer-head-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.study-timer-mini {
+  min-height: 36px;
+  padding: 4px 10px;
+  font-size: 12.5px;
+}
+
+.study-timer-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.study-timer-tab {
+  min-height: 44px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.study-timer-tab.active {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--teal-fg);
+}
+
+.study-timer-readout {
+  text-align: center;
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+}
+
+.study-timer-phase {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.study-timer-clock {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 32px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
+.study-timer-notice {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--ok-bg);
+  color: var(--ok-fg);
+  border: 1px solid var(--ok-border);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.study-timer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.study-timer-controls > button {
+  flex: 1 1 auto;
+}
+
+.study-timer-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.study-timer-chip {
+  min-height: 38px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.study-timer-chip.active {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--teal-fg);
+}
+
+.study-timer-goal {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.study-timer-goal-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.study-timer-goal-row strong {
+  color: var(--ink);
+}
+
+.study-timer-goal-picks {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+@media (max-width: 710px) {
+  .study-timer-panel {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: 68px;
+    width: auto;
+  }
+}

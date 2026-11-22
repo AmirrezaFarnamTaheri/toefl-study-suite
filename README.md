@@ -6,6 +6,9 @@ A local-first, zero-login study suite built for the TOEFL iBT 2026 format across
 
 ## Features
 
+- **Exam Task Targets & Focus Study Tools**:
+  - Every Reading, Listening, Speaking, Writing, Vocab, and Course screen clearly displays which TOEFL iBT 2026 exam task it targets.
+  - Built-in **Study Timer** in the header (Pomodoro `25/5`, `50/10`, `15/3`, TOEFL sprint timers `7m/10m/18m/25m`, stopwatch, daily focus goal, and streak tracker).
 - **Guided Courses & Interactive Lessons (`Courses` tab)**:
   - **11 structured lessons** across 5 tracks (Reading, Listening, Speaking, Writing, Grammar & Strategy) with key rules, worked examples, 22 interactive quick-check quiz items, progress tracking, and one-click jumps directly into matching practice sessions.
 - **Full 4-Section TOEFL 2026 Practice Tests (`Full Mock` tab)**:
@@ -16,16 +19,16 @@ A local-first, zero-login study suite built for the TOEFL iBT 2026 format across
   - **Exam-Room Babble Noise Mixer** (`assets/audio/babble_speaking.mp3`) with live volume control to simulate real test-center background noise.
 - **Reading 2026 Lab**:
   - **115 Complete the Words** interactive cloze passages across 15 ETS topics with deterministic blank generation, Enter/Space blank navigation, and accuracy tracking.
-  - **32 Daily Life & Academic Reading MCQ passage sets** with instant answer explanations.
+  - **53 Daily Life & Academic Reading MCQ passage sets** with instant answer explanations.
 - **Writing 2026 Lab**:
-  - **61 Build a Sentence** interactive word-tile grammar drills.
-  - **50 Write an Email** scenarios (7-minute timer, live 90-130 word progress meter, Band 5-6 model emails, BYOK AI grader).
-  - **40 Pastel Academic Discussion** prompts (10-minute timer, live 100-140 word progress meter, Band 5-6 model responses, BYOK AI grader).
+  - **95 Build a Sentence** interactive word-tile grammar drills.
+  - **54 Write an Email** scenarios (7-minute timer, live 90-130 word progress meter, offline self-revision checklist, model emails, BYOK AI grader).
+  - **63 Academic Discussion** prompts (10-minute timer, live 100-140 word progress meter, offline self-revision checklist, Band 5-6 model responses, BYOK AI grader).
   - Official **ETS RR-106 Writing Scoring Guide** and phrase sheets.
 - **Listening & Dictation Lab**:
-  - **24 real MP3 micro-quizzes** with playback speed controls (`0.8x` to `1.25x`), A-B loop playback for shadowing, and dictation note pad.
+  - **24 standalone TOEFL 2026 Listening exercises** across all 4 tasks (Choose a Response, Campus Conversations, Announcements, Academic Talks) with offline audio & transcripts, plus **24 real MP3 micro-quizzes** with playback speed controls (`0.8x` to `1.25x`), A-B loop playback for shadowing, and dictation note pad.
 - **Vocab SRS & Topic Idea Bank**:
-  - **1,448 vocabulary and Complete-the-Words collocation cards** with keyboard shortcuts (`Space`, `1`-`4`) and local mastery tracking.
+  - **1,937 vocabulary, Academic Word List (AWL), and Complete-the-Words collocation cards** with keyboard shortcuts (`Space`, `1`-`4`) and local mastery tracking.
   - **6 curated Topic Idea Banks** with high-yield reasons, academic collocations, and 45-second interview angles.
 - **Band & Plans Hub**:
   - **1-6 Band / Classic 0-120 / CEFR Converter**, **B1 / B2 / C1 daily study roadmaps**, and one-click copy **2026 AI Diagnostic Prompts**.

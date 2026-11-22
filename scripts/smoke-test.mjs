@@ -12,11 +12,14 @@ const dataPaths = [
   path.join(root, "data", "toefl-suite-bank.js"),
   path.join(root, "data", "listening-practice.js"),
   path.join(root, "data", "toefl-full-mocks.js"),
+  path.join(root, "data", "toefl-extra-practice.js"),
+  path.join(root, "data", "toefl-studytools-absorbed.js"),
   path.join(root, "data", "toefl-courses.js"),
   path.join(root, "logic", "scoring-engine.js"),
   path.join(root, "modules", "toefl-suite-modules.js"),
   path.join(root, "modules", "toefl-full-mock.js"),
-  path.join(root, "modules", "toefl-courses.js")
+  path.join(root, "modules", "toefl-courses.js"),
+  path.join(root, "modules", "toefl-study-timer.js")
 ];
 const appPath = path.join(root, "app.js");
 const source = [
@@ -321,6 +324,14 @@ const randomAudio = fs.readFileSync(path.join(root, "assets", "audio", "prompts"
 assert(randomAudio.length > 44 && randomAudio.toString("ascii", 0, 4) === "RIFF", "Random full mock listening audio missing");
 const ctwBuilt = context.window.ToeflSuiteModules.buildCtwBlanks(api.TOEFL_SUITE_BANK.reading.completeTheWords[0].text);
 assert(ctwBuilt.blanks.length === 10, "Complete the Words generator should create 10 blanks");
+
+assert(api.TOEFL_LISTENING_PRACTICE.length >= 24, "Listening practice should have >=24 exercises across all 4 tasks");
+assert(api.TOEFL_SUITE_BANK.reading.passages.length >= 50, "Merged Reading passages should have >=50 sets");
+assert(api.TOEFL_SUITE_BANK.writing.buildASentence.length >= 90, "Merged Build-a-Sentence drills should have >=90 items");
+assert(api.TOEFL_SUITE_BANK.vocab.length >= 1800, "Merged Vocab bank should have >=1800 cards");
+assert(context.window.ToeflStudyTimer && appElement.innerHTML.includes("Study timer"), "Study timer header control did not render");
+context.window.ToeflStudyTimer.selectMode("countdown");
+assert(context.window.ToeflStudyTimer.state.mode === "countdown", "Study timer mode switch failed");
 
 api.startFullRun();
 const run = api.state.full.sequence;

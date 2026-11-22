@@ -76,11 +76,11 @@ function render() {
 
 const STUDY_SECTIONS = [
   { name: "Practice", tabs: [
-    ["practice", "Speaking", "Repeat sentences or answer interview questions"],
-    ["reading", "Reading", "Complete words and answer passage questions"],
-    ["listening", "Listening", "Answer questions about short recordings"],
-    ["writing", "Writing", "Build sentences, write emails, and join a discussion"],
-    ["vocab", "Vocabulary", "Review words with flashcards"]
+    ["practice", "Speaking", "Targets Speaking Task 1 (Listen & Repeat) and Task 2 (Take an Interview)"],
+    ["reading", "Reading", "Targets Reading Task 1 (Complete the Words), Task 2 (Daily Life) & Task 3 (Academic)"],
+    ["listening", "Listening", "Targets Listening Tasks 1-4 (Responses, Conversations, Announcements & Talks)"],
+    ["writing", "Writing", "Targets Writing Task 1 (Build a Sentence), Task 2 (Email) & Task 3 (Discussion)"],
+    ["vocab", "Vocabulary", "Targets Reading cloze/passages, Speaking interviews & Writing word choice"]
   ] },
   { name: "Tests", tabs: [
     ["fullmock", "Four-section tests", "Timed practice sets with results for review"],
@@ -118,6 +118,7 @@ function renderTopbar() {
           `).join("")}
         </nav>
         <div class="study-header-actions">
+          ${window.ToeflStudyTimer?.renderHeaderControl() || ""}
           <button type="button" class="study-nav-button" data-tab="setup" ${state.tab === "setup" ? 'aria-current="page"' : ""}>Settings</button>
           ${window.ToeflSuiteModules?.renderThemeToggle() || ""}
         </div>
@@ -222,17 +223,24 @@ function renderActiveTab() {
 }
 
 function renderPracticeView() {
+  const isRepeat = state.mode === "repeat";
   return `
     <section class="workspace">
       <aside class="panel">
         <h2>Practice type</h2>
         <div class="segmented" role="group" aria-label="Practice mode">
-          <button class="${state.mode === "repeat" ? "active" : ""}" data-mode="repeat">Listen & Repeat</button>
+          <button class="${isRepeat ? "active" : ""}" data-mode="repeat">Listen & Repeat</button>
           <button class="${state.mode === "interview" ? "active" : ""}" data-mode="interview">Interview</button>
         </div>
         ${renderMiniStats()}
       </aside>
       <div>
+        <div class="exam-target-bar" aria-label="Exam task target">
+          <span class="exam-target-tag">Exam target: TOEFL 2026 Speaking - ${isRepeat ? "Task 1: Listen and Repeat (7 sentences, ~10s each)" : "Task 2: Take an Interview (4 turns, 45s each, 0s prep)"}</span>
+          <p class="exam-target-detail">${isRepeat
+            ? "Repeat the spoken sentence accurately at a calm, steady pace with clear word endings."
+            : "Answer right away with a direct point, one clear reason, and one concrete example."}</p>
+        </div>
         ${renderPracticeCard(false)}
         ${renderFeedback()}
       </div>
@@ -279,6 +287,9 @@ function renderStarterView() {
         </div>
       </aside>
       <div>
+        <div class="exam-target-bar" aria-label="Exam task target">
+          <span class="exam-target-tag">Exam target: TOEFL 2026 Speaking - ${isRepeat ? "Task 1: Listen and Repeat (step-by-step scaffold)" : "Task 2: Take an Interview (step-by-step scaffold)"}</span>
+        </div>
         <section class="practice-board starter-board">
           <div class="practice-header">
             <div>
@@ -3350,6 +3361,9 @@ function bindEvents() {
   }
   if (window.ToeflCourses) {
     window.ToeflCourses.bindEvents();
+  }
+  if (window.ToeflStudyTimer) {
+    window.ToeflStudyTimer.bindEvents();
   }
   document.querySelectorAll("[data-tab]").forEach((button) => {
     button.addEventListener("click", () => {

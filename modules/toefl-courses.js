@@ -81,6 +81,15 @@
     if (typeof render === "function") render();
   }
 
+  function getTrackExamTarget(track) {
+    const t = String(track || "").toLowerCase();
+    if (t.includes("reading")) return "Targets TOEFL 2026 Reading (Complete the Words, Daily Life & Academic Passages)";
+    if (t.includes("listening")) return "Targets TOEFL 2026 Listening (Choose a Response, Conversations, Announcements & Academic Talks)";
+    if (t.includes("speaking")) return "Targets TOEFL 2026 Speaking (Task 1: Listen & Repeat, Task 2: Take an Interview)";
+    if (t.includes("writing")) return "Targets TOEFL 2026 Writing (Task 1: Build a Sentence, Task 2: Write an Email, Task 3: Academic Discussion)";
+    return "Targets overall TOEFL 2026 adaptive pacing, grammar clarity, and 1-6 Band performance";
+  }
+
   function renderCoursesView() {
     const list = getCourses();
     if (!list.length) {
@@ -165,6 +174,9 @@
                       </div>
                       <h2 class="course-title">${esc(active.title)}</h2>
                       <p class="compact-copy">${esc(active.summary)}</p>
+                      <div class="exam-target-bar" aria-label="Exam task target">
+                        <span class="exam-target-tag">${esc(getTrackExamTarget(active.track))}</span>
+                      </div>
                     </div>
                   </div>
 
