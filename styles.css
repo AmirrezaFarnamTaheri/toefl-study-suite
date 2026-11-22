@@ -3240,3 +3240,230 @@ select,
   border-color: var(--bad-border);
   color: var(--bad-fg);
 }
+
+/* ---------------- Courses & Guided Practice Sessions ---------------- */
+.course-progress-box {
+  min-width: 200px;
+}
+
+.course-progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.course-progress-label strong {
+  color: var(--ink);
+}
+
+.course-progress-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.course-progress-fill {
+  height: 100%;
+  background: var(--teal);
+  border-radius: inherit;
+  transition: width 0.2s ease;
+}
+
+.course-track-tabs {
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.course-layout {
+  display: grid;
+  grid-template-columns: minmax(250px, 310px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.course-sidebar-title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.course-list {
+  display: grid;
+  gap: 8px;
+}
+
+.course-nav-item {
+  width: 100%;
+  text-align: left;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  gap: 4px;
+  font: inherit;
+}
+
+.course-nav-item:hover {
+  border-color: var(--teal);
+}
+
+.course-nav-item.active {
+  background: var(--teal-soft);
+  border-color: var(--teal);
+}
+
+.course-nav-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.course-nav-item strong {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.course-title {
+  margin: 10px 0 6px;
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+.course-block {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.course-block h3,
+.course-example-box h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.course-rules {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 8px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.course-example-box {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  display: grid;
+  gap: 8px;
+  line-height: 1.55;
+}
+
+.course-example-box p {
+  margin: 0;
+}
+
+.course-takeaway {
+  color: var(--teal);
+}
+
+.course-quiz-list {
+  display: grid;
+  gap: 14px;
+}
+
+.course-quiz-card {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-strong);
+}
+
+.course-quiz-q {
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+
+.course-quiz-choices {
+  display: grid;
+  gap: 8px;
+}
+
+.course-choice {
+  width: 100%;
+  text-align: left;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.course-choice:hover {
+  border-color: var(--teal);
+}
+
+.course-choice.ok {
+  background: var(--ok-bg);
+  border-color: var(--ok-border);
+  color: var(--ok-fg);
+  font-weight: 600;
+}
+
+.course-choice.bad {
+  background: var(--bad-bg);
+  border-color: var(--bad-border);
+  color: var(--bad-fg);
+}
+
+.course-quiz-feedback {
+  margin: 10px 0 0;
+  padding: 9px 11px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.course-quiz-feedback.ok {
+  background: var(--ok-bg);
+  color: var(--ok-fg);
+  border: 1px solid var(--ok-border);
+}
+
+.course-quiz-feedback.bad {
+  background: var(--bad-bg);
+  color: var(--bad-fg);
+  border: 1px solid var(--bad-border);
+}
+
+.course-actions {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 860px) {
+  .course-layout {
+    grid-template-columns: 1fr;
+  }
+}

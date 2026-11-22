@@ -96,6 +96,7 @@ function renderTopbar() {
 function renderNav() {
   const primaryTabs = [
     ["starter", "Start Easy"],
+    ["courses", "Courses"],
     ["fullmock", "Full Mock"],
     ["practice", "Speaking"],
     ["reading", "Reading"],
@@ -159,6 +160,7 @@ function renderNav() {
 
 function renderActiveTab() {
   if (state.tab === "starter") return renderStarterView();
+  if (state.tab === "courses" && window.ToeflCourses) return window.ToeflCourses.render();
   if (state.tab === "fullmock" && window.ToeflFullMock) return window.ToeflFullMock.render();
   if (state.tab === "ladder") return renderLadderView();
   if (state.tab === "full") return renderFullRunView();
@@ -3320,6 +3322,9 @@ function bindEvents() {
   }
   if (window.ToeflFullMock) {
     window.ToeflFullMock.bindEvents();
+  }
+  if (window.ToeflCourses) {
+    window.ToeflCourses.bindEvents();
   }
   const mobileNavBtn = document.querySelector("[data-mobile-nav-toggle]");
   if (mobileNavBtn) {

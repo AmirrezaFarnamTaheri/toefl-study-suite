@@ -11,9 +11,11 @@ const dataPaths = [
   path.join(root, "data", "training-config.js"),
   path.join(root, "data", "toefl-suite-bank.js"),
   path.join(root, "data", "toefl-full-mocks.js"),
+  path.join(root, "data", "toefl-courses.js"),
   path.join(root, "logic", "scoring-engine.js"),
   path.join(root, "modules", "toefl-suite-modules.js"),
-  path.join(root, "modules", "toefl-full-mock.js")
+  path.join(root, "modules", "toefl-full-mock.js"),
+  path.join(root, "modules", "toefl-courses.js")
 ];
 const appPath = path.join(root, "app.js");
 const source = [
@@ -272,11 +274,16 @@ assert(api.TOEFL_SUITE_BANK.writing.discussions.length >= 35, "Academic Discussi
 assert(api.TOEFL_SUITE_BANK.listening.clips.length === 24, "Listening bank should have 24 audio clips");
 assert(api.TOEFL_SUITE_BANK.vocab.length >= 1000, "Vocab & collocations bank should have >=1000 items");
 
-for (const suiteTab of ["fullmock", "reading", "writing", "listening", "vocab", "guides"]) {
+for (const suiteTab of ["courses", "fullmock", "reading", "writing", "listening", "vocab", "guides"]) {
   api.state.tab = suiteTab;
   api.render();
   assert(appElement.innerHTML.length > 500, `Suite tab ${suiteTab} failed to render`);
 }
+assert(context.window.TOEFL_COURSES.length >= 10, "Courses bank should have >=10 lessons");
+context.window.ToeflCourses.toggleDone("r-ctw");
+assert(context.window.ToeflCourses.state.doneIds.includes("r-ctw"), "Courses mark-complete failed");
+context.window.ToeflCourses.launchPracticeSession({ tab: "writing", subKey: "writingMode", subVal: "email" });
+assert(api.state.tab === "writing" && context.window.ToeflSuiteModules.state.writingMode === "email", "Courses practice jump failed");
 assert(context.window.TOEFL_FULL_MOCKS.mocks.length >= 3, "Full mocks bank should have >=3 complete 4-section tests");
 context.window.ToeflFullMock.startMock(context.window.TOEFL_FULL_MOCKS.mocks[0]);
 assert(context.window.ToeflFullMock.state.phase === "reading1", "Full mock did not start in reading1");
