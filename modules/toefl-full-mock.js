@@ -604,13 +604,22 @@
               <h1 class="study-page-title">Four-section tests</h1>
               <p class="prompt-note">These sets vary in length. Listening uses prerecorded device voices. Record your speaking answers or type them if a microphone is unavailable.</p>
             </div>
-            <div class="question-actions">
-              <button type="button" class="primary-button" data-mock-diagnostic="true">Start Evaluation Diagnostic (~25m)</button>
-              <button type="button" class="ghost-button" data-mock-random="true">Choose a test for me</button>
-            </div>
           </div>
 
-          <div class="mock-cards-grid suite-mt">
+          <div class="mock-diag-banner">
+            <div>
+              <h2>Evaluation Diagnostic (~25 min)</h2>
+              <p>Short calibrated check across all four TOEFL 2026 sections (Reading, Listening, Writing, Speaking) with a prioritized weak-area report.</p>
+            </div>
+            <button type="button" class="primary-button" data-mock-diagnostic="true">Start Evaluation Diagnostic</button>
+          </div>
+
+          <div class="mock-section-head">
+            <h2>Full practice tests</h2>
+            <button type="button" class="ghost-button" data-mock-random="true">Choose a test for me</button>
+          </div>
+
+          <div class="mock-cards-grid">
             ${mocks.map((mk, i) => {
               const rCount = [mk.reading.module1, mk.reading.module2].reduce((sum, part) =>
                 sum + buildBlanks(part.ctw.text).blanks.length + part.passages.reduce((total, passage) => total + passage.questions.length, 0), 0);
@@ -1227,6 +1236,10 @@
     buildDiagnosticMock,
     pickRandomMock,
     startMock,
+    startDiagnostic() {
+      const diag = buildDiagnosticMock();
+      if (diag) startMock(diag);
+    },
     leaveResults() {
       if (mockState.phase !== "results") return;
       clearRecordings();

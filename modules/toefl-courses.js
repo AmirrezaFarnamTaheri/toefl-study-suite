@@ -107,8 +107,7 @@
         <div class="suite-card">
           <div class="suite-header-row">
             <div>
-              <h2>Choose a lesson</h2>
-              <p class="compact-copy">Short, practical lessons for every skill, each paired with a quick check and a one-click practice session.</p>
+              <p class="compact-copy" style="margin:0;">Short, practical lessons for every skill, each paired with a quick check and a one-click practice session.</p>
             </div>
             <div class="course-progress-box">
               <div class="course-progress-label">
@@ -120,7 +119,7 @@
               </div>
             </div>
           </div>
-          <div class="segmented course-track-tabs" role="tablist" aria-label="Course tracks">
+          <div class="course-track-tabs" role="tablist" aria-label="Course tracks">
             ${tracks
               .map(
                 (t) => `

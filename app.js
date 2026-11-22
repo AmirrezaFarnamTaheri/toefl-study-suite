@@ -119,7 +119,7 @@ function renderTopbar() {
         </nav>
         <div class="study-header-actions">
           ${window.ToeflStudyTimer?.renderHeaderControl() || ""}
-          <button type="button" class="study-nav-button" data-tab="setup" ${state.tab === "setup" ? 'aria-current="page"' : ""}>Settings</button>
+          <button type="button" class="ghost-button${state.tab === "setup" ? " active-util" : ""}" data-tab="setup" ${state.tab === "setup" ? 'aria-current="page"' : ""}>Settings</button>
           ${window.ToeflSuiteModules?.renderThemeToggle() || ""}
         </div>
       </div>
@@ -150,6 +150,7 @@ function renderNav() {
 function renderStudyHome() {
   const attempts = loadHistory().length;
   const shortcuts = [
+    ["diagnostic", "Evaluation diagnostic", "Check all 4 sections in ~25 min and get your priority plan"],
     ["fullmock", "Timed tests", "Practice all four skills under timed conditions"],
     ["courses", "Lessons", "See how each task works before you try it"],
     ["history", "Speaking history", attempts ? `${attempts} saved ${attempts === 1 ? "attempt" : "attempts"}` : "Your attempts will appear here"]
@@ -2283,7 +2284,7 @@ function getPastEdPronunciation(base) {
 
 function getWordStressHint(word) {
   const clean = normalizeNotebookWord(word);
-  if (clean === "stores") return "\"stores\" is one syllable (/storz/); the final -s is voiced as /z/ after /r/—do not add an extra syllable.";
+  if (clean === "stores") return "\"stores\" is one syllable (/storz/); the final -s is voiced as /z/ after /r/, so do not add an extra syllable.";
   if (/(ches|shes|sses|xes|zes|ces|ges|ses)$/.test(clean)) return "This ending adds a short /iz/ syllable; articulate the base word clearly before linking the final /iz/.";
   if (/[^s]s$/.test(clean) && !/(us|ss|is|ous)$/.test(clean)) {
     const base = /ies$/.test(clean) ? `${clean.slice(0, -3)}y` : clean.slice(0, -1);
@@ -2362,7 +2363,7 @@ function getWordMistakeCategoryMeta(category) {
     },
     uncertain: {
       label: "Uncertain",
-      title: "Mixed Signal — Practice Both Sound & Recall",
+      title: "Mixed Signal: Practice Both Sound & Recall",
       tip: "Listen to the model word first, then complete a two-step word and sentence repetition.",
       badgeClass: ""
     }
@@ -3368,6 +3369,17 @@ function bindEvents() {
   document.querySelectorAll("[data-tab]").forEach((button) => {
     button.addEventListener("click", () => {
       const nextTab = button.dataset.tab;
+      if (nextTab === "diagnostic") {
+        if (state.tab === "listening") window.speechSynthesis?.cancel();
+        state.tab = "fullmock";
+        if (window.ToeflFullMock?.startDiagnostic) {
+          window.ToeflFullMock.startDiagnostic();
+        } else {
+          render();
+        }
+        document.querySelector("#main-content")?.focus();
+        return;
+      }
       if (nextTab === state.tab) return;
       if (state.tab === "listening") window.speechSynthesis?.cancel();
       if (state.tab === "fullmock") window.ToeflFullMock?.leaveResults();
@@ -3977,7 +3989,7 @@ function buildLocalCoachReflection(payload) {
   if (!visibleChanges.length) visibleChanges.push("Retake completed, but the primary target needs one more focused pass.");
   return {
     improved,
-    improvementSummary: improved ? "Noticeable improvement on this retake—your response fulfilled the Coach mission." : "The Coach mission is not yet stable; try one more retake before switching prompts.",
+    improvementSummary: improved ? "Noticeable improvement on this retake: your response fulfilled the Coach mission." : "The Coach mission is not yet stable; try one more retake before switching prompts.",
     visibleChanges,
     remainingIssue: mission.remainingIssue,
     nextAction: improved
@@ -4098,7 +4110,7 @@ function getStarterSteps(question) {
         microGoal: "Anchor Content Words",
         interactionLabel: "Target Words",
         displayText: keywords,
-        promptNote: "Do not repeat the whole sentence yet—just speak the core content words you hear.",
+        promptNote: "Do not repeat the whole sentence yet; just speak the core content words you hear.",
         mission: "Speak only the key content words to train auditory anchoring.",
         templateLabel: "Target Words Only",
         template: keywords,
@@ -4111,7 +4123,7 @@ function getStarterSteps(question) {
         microGoal: "Speak in Thought Groups",
         interactionLabel: "Chunk Builder",
         displayText: chunks.join(" / "),
-        promptNote: "Each slash marks a thought group—deliver each chunk smoothly in one breath.",
+        promptNote: "Each slash marks a thought group; deliver each chunk smoothly in one breath.",
         mission: "Repeat chunk by chunk in order, linking content words into natural phrases.",
         templateLabel: "Chunk Sequence",
         template: chunks.join(" / "),
@@ -4162,7 +4174,7 @@ function getStarterSteps(question) {
       microGoal: "One-Sentence Opening",
       interactionLabel: "Choice Only",
       displayText: question.text,
-      promptNote: "State your choice in one crisp sentence—no reasons or examples yet.",
+      promptNote: "State your choice in one crisp sentence, with no reasons or examples yet.",
       mission: "Deliver one clear opening claim so you never hesitate at the start of an interview question.",
       templateLabel: "Target Frame",
       template: "I prefer ___. / I think ___.",
