@@ -325,6 +325,19 @@
     `;
   }
 
+  function postSqlResult(endpoint, payload) {
+    if (typeof global.fetch !== "function") return;
+    try {
+      global.fetch(`/api/results/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).catch(() => {});
+    } catch {
+      // ignore when running offline/static
+    }
+  }
+
   function countWords(text) {
     const trimmed = String(text || "").trim();
     return trimmed ? trimmed.split(/\s+/).length : 0;
@@ -1340,13 +1353,27 @@
       if (passage && !suiteState.ctwChecked) {
         const built = buildCtwBlanks(passage.text);
         let ok = 0;
+        const sqlItems = [];
         built.blanks.forEach((b) => {
-          if (String(suiteState.ctwInputs[b.idx] || "").trim().toLowerCase() === b.missing.toLowerCase()) ok += 1;
+          const userVal = String(suiteState.ctwInputs[b.idx] || "").trim();
+          const hit = userVal.toLowerCase() === b.missing.toLowerCase();
+          if (hit) ok += 1;
+          sqlItems.push({
+            app: "toefl",
+            section: "reading",
+            qtype: "complete_the_words",
+            topic: passage.category || passage.title || "",
+            questionId: `${passage.id || passage.title}:b${b.idx}`,
+            correct: hit,
+            userAnswer: `${b.prefix}${userVal}`,
+            expectedAnswer: `${b.prefix}${b.missing}`
+          });
         });
         suiteState.ctwStats.completed += 1;
         suiteState.ctwStats.totalBlanks += built.blanks.length;
         suiteState.ctwStats.correctBlanks += ok;
         saveJson(SUITE_CTW_STATS_KEY, suiteState.ctwStats);
+        if (sqlItems.length) postSqlResult("practice", { items: sqlItems });
       }
       suiteState.ctwChecked = true;
       suiteState.ctwShowAnswers = true;
@@ -1380,7 +1407,26 @@
       });
     });
     const basCheck = doc.querySelector("[data-suite-bas-check]");
-    if (basCheck) basCheck.addEventListener("click", () => { suiteState.basChecked = true; render(); });
+    if (basCheck) basCheck.addEventListener("click", () => {
+      suiteState.basChecked = true;
+      const bank = getBank();
+      const item = bank?.writing?.buildASentence?.[suiteState.basIndex % Math.max(1, bank?.writing?.buildASentence?.length || 1)];
+      if (item) {
+        const expected = item.answer.join(" ");
+        const actual = suiteState.basSlots.map((s) => s || "").join(" ").trim();
+        postSqlResult("practice", {
+          app: "toefl",
+          section: "writing",
+          qtype: "build_a_sentence",
+          topic: "grammar",
+          questionId: `bas-${suiteState.basIndex}`,
+          correct: actual.toLowerCase() === expected.toLowerCase(),
+          userAnswer: actual,
+          expectedAnswer: expected
+        });
+      }
+      render();
+    });
     const basClear = doc.querySelector("[data-suite-bas-clear]");
     if (basClear) basClear.addEventListener("click", () => { suiteState.basSlots = suiteState.basSlots.map(() => null); suiteState.basChecked = false; render(); });
     const basPrev = doc.querySelector("[data-suite-bas-prev]");
@@ -1415,11 +1461,39 @@
     const emMod = doc.querySelector("[data-suite-email-model]");
     if (emMod) emMod.addEventListener("click", () => { suiteState.emailShowModel = !suiteState.emailShowModel; render(); });
     const emAi = doc.querySelector("[data-suite-email-ai]");
-    if (emAi) emAi.addEventListener("click", () => gradeWritingWithSetupAi("email"));
+    if (emAi) emAi.addEventListener("click", () => {
+      const bank = getBank();
+      const t = bank.writing.emails[suiteState.emailIndex % bank.writing.emails.length];
+      if (t && suiteState.emailText.trim()) {
+        postSqlResult("writing", {
+          id: `email-${suiteState.emailIndex}-${Date.now()}`,
+          app: "toefl",
+          taskType: "email",
+          promptTitle: t.title,
+          promptText: t.scenario,
+          responseText: suiteState.emailText,
+          wordCount: countWords(suiteState.emailText),
+          elapsedSec: Math.max(0, 420 - suiteState.emailTimerSec)
+        });
+      }
+      gradeWritingWithSetupAi("email");
+    });
     const emCopy = doc.querySelector("[data-suite-copy-email-prompt]");
     if (emCopy) emCopy.addEventListener("click", () => {
       const bank = getBank();
       const t = bank.writing.emails[suiteState.emailIndex % bank.writing.emails.length];
+      if (t && suiteState.emailText.trim()) {
+        postSqlResult("writing", {
+          id: `email-${suiteState.emailIndex}-${Date.now()}`,
+          app: "toefl",
+          taskType: "email",
+          promptTitle: t.title,
+          promptText: t.scenario,
+          responseText: suiteState.emailText,
+          wordCount: countWords(suiteState.emailText),
+          elapsedSec: Math.max(0, 420 - suiteState.emailTimerSec)
+        });
+      }
       copyWritingFeedback(`${WRITING_FEEDBACK_PROMPTS.writeAnEmail}\n\nSCENARIO:\n${t.scenario}\n\nMY EMAIL:\n${suiteState.emailText}`);
     });
 
@@ -1437,11 +1511,39 @@
     const dcMod = doc.querySelector("[data-suite-disc-model]");
     if (dcMod) dcMod.addEventListener("click", () => { suiteState.discShowModel = !suiteState.discShowModel; render(); });
     const dcAi = doc.querySelector("[data-suite-disc-ai]");
-    if (dcAi) dcAi.addEventListener("click", () => gradeWritingWithSetupAi("discussion"));
+    if (dcAi) dcAi.addEventListener("click", () => {
+      const bank = getBank();
+      const t = bank.writing.discussions[suiteState.discIndex % bank.writing.discussions.length];
+      if (t && suiteState.discText.trim()) {
+        postSqlResult("writing", {
+          id: `disc-${suiteState.discIndex}-${Date.now()}`,
+          app: "toefl",
+          taskType: "academic_discussion",
+          promptTitle: t.title,
+          promptText: t.professorPrompt,
+          responseText: suiteState.discText,
+          wordCount: countWords(suiteState.discText),
+          elapsedSec: Math.max(0, 600 - suiteState.discTimerSec)
+        });
+      }
+      gradeWritingWithSetupAi("discussion");
+    });
     const dcCopy = doc.querySelector("[data-suite-copy-disc-prompt]");
     if (dcCopy) dcCopy.addEventListener("click", () => {
       const bank = getBank();
       const t = bank.writing.discussions[suiteState.discIndex % bank.writing.discussions.length];
+      if (t && suiteState.discText.trim()) {
+        postSqlResult("writing", {
+          id: `disc-${suiteState.discIndex}-${Date.now()}`,
+          app: "toefl",
+          taskType: "academic_discussion",
+          promptTitle: t.title,
+          promptText: t.professorPrompt,
+          responseText: suiteState.discText,
+          wordCount: countWords(suiteState.discText),
+          elapsedSec: Math.max(0, 600 - suiteState.discTimerSec)
+        });
+      }
       copyWritingFeedback(`${WRITING_FEEDBACK_PROMPTS.academicDiscussion}\n\nPROMPT:\n${t.professorPrompt}\n\nMY RESPONSE:\n${suiteState.discText}`);
     });
 

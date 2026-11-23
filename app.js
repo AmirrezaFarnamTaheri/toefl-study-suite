@@ -5789,6 +5789,31 @@ function saveHistoryItem(item) {
   const history = loadHistory();
   history.unshift(item);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 50)));
+  if (typeof fetch === "function" && item) {
+    try {
+      fetch("/api/results/speaking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: item.id || `sp-${Date.now()}`,
+          app: "toefl",
+          taskType: item.type || item.mode || "interview",
+          createdAt: item.createdAt || new Date().toISOString(),
+          promptText: item.questionText || item.prompt || "",
+          transcript: item.transcript || "",
+          score: item.score != null ? Number(item.score) : (item.feedback?.score != null ? Number(item.feedback.score) : null),
+          metrics: {
+            summary: item.summary || item.feedback?.summary || "",
+            wordCount: item.wordCount || null,
+            wpm: item.wpm || item.feedback?.metrics?.wpm || null,
+            accuracy: item.accuracy || item.feedback?.metrics?.accuracy || null
+          }
+        })
+      }).catch(() => {});
+    } catch {
+      // ignore offline
+    }
+  }
 }
 
 function exportHistory() {

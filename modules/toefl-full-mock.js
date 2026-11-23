@@ -394,6 +394,54 @@
     mockState.lastReport = null;
     startPhaseTimer(mockObj.reading.module1.minutes || 18);
     if (typeof render === "function") render();
+    if (typeof global.scrollTo === "function") {
+      try { global.scrollTo({ top: 0, behavior: "auto" }); } catch { global.scrollTo(0, 0); }
+    }
+  }
+
+  function syncRunToSql(entry) {
+    if (typeof global.fetch !== "function" || !entry) return;
+    const rep = entry.report || null;
+    const isDiag = /diagnostic/i.test(String(entry.title || rep?.mockTitle || ""));
+    try {
+      global.fetch("/api/results/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: entry.id,
+          app: "toefl",
+          runType: isDiag ? "diagnostic" : "full_mock",
+          title: entry.title || rep?.mockTitle || "TOEFL Practice Test",
+          createdAt: entry.createdAt || (entry.date ? `${entry.date}T00:00:00.000Z` : new Date().toISOString()),
+          scores: {
+            reading: entry.reading || rep?.reading || null,
+            listening: entry.listening || rep?.listening || null,
+            writing: entry.writing || (rep?.writing ? {
+              basCorrect: rep.writing.basCorrect,
+              basTotal: rep.writing.basTotal,
+              emailWc: rep.writing.emailWc,
+              discWc: rep.writing.discWc
+            } : null),
+            speaking: rep?.speaking ? {
+              skipped: rep.speaking.skipped,
+              recorded: rep.speaking.recorded,
+              answered: rep.speaking.answered
+            } : null
+          },
+          details: rep || { summaryOnly: true }
+        })
+      }).catch(() => {});
+    } catch {
+      // ignore when offline/static
+    }
+  }
+
+  let sqlBackfilled = false;
+  function backfillHistoryToSqlOnce() {
+    if (sqlBackfilled || typeof global.fetch !== "function") return;
+    sqlBackfilled = true;
+    const hist = loadHistory();
+    hist.forEach((h) => syncRunToSql(h));
   }
 
   function advancePhase() {
@@ -434,7 +482,11 @@
       return;
     }
     if (typeof render === "function") render();
+    if (typeof global.scrollTo === "function") {
+      try { global.scrollTo({ top: 0, behavior: "auto" }); } catch { global.scrollTo(0, 0); }
+    }
   }
+
 
   function finishAndScore() {
     stopTimer();
@@ -564,10 +616,10 @@
     mockState.lastReport = report;
     mockState.phase = "results";
 
-    const hist = loadHistory();
-    hist.unshift({
+    const histEntry = {
       id: report.id,
       date: report.date,
+      createdAt: new Date().toISOString(),
       title: report.mockTitle,
       reading: report.reading,
       listening: report.listening,
@@ -578,10 +630,17 @@
         discWc: report.writing.discWc
       },
       report
-    });
+    };
+    const hist = loadHistory();
+    hist.unshift(histEntry);
     saveHistory(hist.slice(0, 15));
+    syncRunToSql(histEntry);
     if (typeof render === "function") render();
+    if (typeof global.scrollTo === "function") {
+      try { global.scrollTo({ top: 0, behavior: "auto" }); } catch { global.scrollTo(0, 0); }
+    }
   }
+
 
   function renderStepper() {
     const steps = [
@@ -698,6 +757,11 @@
     const mod = modKey === "reading1" ? mockState.mock.reading.module1 : mockState.mock.reading.module2;
     const built = buildBlanks(mod.ctw.text);
     const userCtw = mockState.ctwInputs[modKey] || {};
+    const ctwAnswered = built.blanks.filter((b) => String(userCtw[b.idx] || "").trim().length > 0).length;
+    const mcqTotal = mod.passages.reduce((sum, p) => sum + p.questions.length, 0);
+    const mcqAnswered = mod.passages.reduce((sum, p) => sum + p.questions.filter((_, qi) => Boolean(mockState.readingMcq[`${modKey}:${p.id}:${qi}`])).length, 0);
+    const totalReadingItems = built.blanks.length + mcqTotal;
+    const totalReadingAnswered = ctwAnswered + mcqAnswered;
 
     return `
       <section class="suite-focus">
@@ -743,6 +807,7 @@
           `).join("")}
 
           <div class="control-actions">
+            <span class="stat-pill">Answered: <strong>${totalReadingAnswered} / ${totalReadingItems}</strong> (Blanks ${ctwAnswered}/${built.blanks.length} · Passages ${mcqAnswered}/${mcqTotal})</span>
             <button type="button" class="primary-button" data-mock-next-phase="true">
               ${modKey === "reading1" ? "Finish Reading Part 1 -> Start Part 2" : "Finish Reading -> Start Listening"}
             </button>
@@ -1138,8 +1203,31 @@
       });
     }
 
+    backfillHistoryToSqlOnce();
+
     const nextPhaseBtn = doc.querySelector("[data-mock-next-phase]");
-    if (nextPhaseBtn) nextPhaseBtn.addEventListener("click", advancePhase);
+    if (nextPhaseBtn) {
+      nextPhaseBtn.addEventListener("click", () => {
+        if ((mockState.phase === "reading1" || mockState.phase === "reading2") && mockState.mock) {
+          const mod = mockState.phase === "reading1" ? mockState.mock.reading.module1 : mockState.mock.reading.module2;
+          const built = buildBlanks(mod.ctw.text);
+          const userCtw = mockState.ctwInputs[mockState.phase] || {};
+          const missCtw = built.blanks.filter((b) => !String(userCtw[b.idx] || "").trim()).length;
+          const missMcq = mod.passages.reduce((sum, p) => sum + p.questions.filter((_, qi) => !mockState.readingMcq[`${mockState.phase}:${p.id}:${qi}`]).length, 0);
+          const missing = missCtw + missMcq;
+          if (missing > 0 && typeof global.confirm === "function") {
+            const ok = global.confirm(`You still have ${missing} unanswered item${missing === 1 ? "" : "s"} in this Reading part (${missCtw} Complete-the-Words blanks, ${missMcq} passage questions). Move to the next part anyway?`);
+            if (!ok) {
+              if (typeof global.scrollTo === "function") {
+                try { global.scrollTo({ top: 0, behavior: "smooth" }); } catch { global.scrollTo(0, 0); }
+              }
+              return;
+            }
+          }
+        }
+        advancePhase();
+      });
+    }
 
     // Reading CTW blanks
     const ctwInputs = Array.from(doc.querySelectorAll("[data-mock-ctw]"));

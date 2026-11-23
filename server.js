@@ -1,9 +1,43 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const resultsDb = require("./db/results-db");
 
 const root = __dirname;
 const requestedPort = Number(process.argv[2]) || Number(process.env.PORT) || 5173;
+
+function readJsonBody(req, maxBytes = 2 * 1024 * 1024) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    req.on("data", (chunk) => {
+      size += chunk.length;
+      if (size > maxBytes) {
+        reject(new Error("Body too large"));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on("end", () => {
+      try {
+        const raw = Buffer.concat(chunks).toString("utf8");
+        resolve(raw ? JSON.parse(raw) : {});
+      } catch (err) {
+        reject(err);
+      }
+    });
+    req.on("error", reject);
+  });
+}
+
+function sendJson(res, status, obj) {
+  res.writeHead(status, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-store"
+  });
+  res.end(JSON.stringify(obj));
+}
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -37,8 +71,41 @@ function sendFile(res, filePath) {
   });
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const safeUrl = decodeURIComponent(req.url.split("?")[0]);
+
+  if (safeUrl.startsWith("/api/results")) {
+    try {
+      if (req.method === "GET" && safeUrl === "/api/results/summary") {
+        sendJson(res, 200, resultsDb.getSummary());
+        return;
+      }
+      if (req.method === "POST") {
+        const body = await readJsonBody(req);
+        if (safeUrl === "/api/results/run") {
+          sendJson(res, 200, resultsDb.saveExamRun(body));
+          return;
+        }
+        if (safeUrl === "/api/results/writing") {
+          sendJson(res, 200, resultsDb.saveWritingSubmission(body));
+          return;
+        }
+        if (safeUrl === "/api/results/speaking") {
+          sendJson(res, 200, resultsDb.saveSpeakingAttempt(body));
+          return;
+        }
+        if (safeUrl === "/api/results/practice") {
+          sendJson(res, 200, resultsDb.savePracticeAttempt(body));
+          return;
+        }
+      }
+      sendJson(res, 404, { ok: false, error: "Unknown results endpoint" });
+    } catch (err) {
+      sendJson(res, 400, { ok: false, error: err && err.message ? err.message : "Bad request" });
+    }
+    return;
+  }
+
   const requestedPath = safeUrl === "/" ? "/index.html" : safeUrl;
   const filePath = path.normalize(path.join(root, requestedPath));
 
