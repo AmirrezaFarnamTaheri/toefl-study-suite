@@ -522,18 +522,39 @@
     });
     const emailWc = countWords(mockState.emailText);
     const discWc = countWords(mockState.discText);
+    const repeatItems = (mockState.speakingItems?.repeat || []).map((item, idx) => ({
+      prompt: item.text || "",
+      response: String(mockState.repeatResponses[idx] || "").trim()
+    }));
+    const interviewItems = (mockState.speakingItems?.interview || []).map((item, idx) => ({
+      prompt: item.text || "",
+      response: String(mockState.interviewResponses[idx] || "").trim()
+    }));
     const report = {
       id: `run-${Date.now()}`,
       date: new Date().toISOString().slice(0, 10),
       mockTitle: m.title,
       reading: { correct: rCorrect, total: rTotal },
       listening: { correct: lCorrect, total: lTotal },
-      writing: { basCorrect: basOk, basTotal: basList.length, emailWc, discWc },
+      writing: {
+        basCorrect: basOk,
+        basTotal: basList.length,
+        emailWc,
+        discWc,
+        emailScenario: m.writing.email?.scenario || "",
+        emailText: mockState.emailText || "",
+        emailModel: m.writing.email?.modelEmail || "",
+        discPrompt: m.writing.discussion?.professorPrompt || "",
+        discText: mockState.discText || "",
+        discModel: m.writing.discussion?.modelResponse || ""
+      },
       speaking: {
         skipped: mockState.speakSkipped,
         recorded: recordings.size,
         answered: [...Object.values(mockState.repeatResponses), ...Object.values(mockState.interviewResponses)]
-          .filter((response) => String(response || "").trim()).length
+          .filter((response) => String(response || "").trim()).length,
+        repeatItems,
+        interviewItems
       },
       rReview,
       lReview,
@@ -549,9 +570,16 @@
       date: report.date,
       title: report.mockTitle,
       reading: report.reading,
-      listening: report.listening
+      listening: report.listening,
+      writing: {
+        basCorrect: report.writing.basCorrect,
+        basTotal: report.writing.basTotal,
+        emailWc: report.writing.emailWc,
+        discWc: report.writing.discWc
+      },
+      report
     });
-    saveHistory(hist);
+    saveHistory(hist.slice(0, 15));
     if (typeof render === "function") render();
   }
 
@@ -642,15 +670,17 @@
               <div class="mock-table-wrap">
                 <table class="mock-table">
                   <thead>
-                    <tr><th scope="col">Date</th><th scope="col">Test</th><th scope="col">Reading</th><th scope="col">Listening</th></tr>
+                    <tr><th scope="col">Date</th><th scope="col">Test</th><th scope="col">Reading</th><th scope="col">Listening</th><th scope="col">Writing</th><th scope="col">Report</th></tr>
                   </thead>
                   <tbody>
-                    ${hist.slice(0, 8).map((h) => `
+                    ${hist.slice(0, 10).map((h) => `
                       <tr>
                         <td>${esc(h.date)}</td>
                         <td>${esc(displayMockTitle(h.title || "Practice test"))}</td>
                         <td>${formatCorrect(h.reading)}</td>
                         <td>${formatCorrect(h.listening)}</td>
+                        <td>${h.writing ? `${h.writing.basCorrect}/${h.writing.basTotal} · ${h.writing.emailWc}w / ${h.writing.discWc}w` : "-"}</td>
+                        <td>${h.report ? `<button type="button" class="ghost-button" data-mock-view-history="${esc(h.id)}">View report</button>` : "<span class=\"suite-meta-inline\">Summary only</span>"}</td>
                       </tr>
                     `).join("")}
                   </tbody>
@@ -986,6 +1016,7 @@
           })()}
 
           <div class="control-actions">
+            <button type="button" class="primary-button" data-mock-copy-report="true">Copy full report</button>
             <button type="button" class="tool-button" data-mock-copy-writing="true">Copy writing for feedback</button>
           </div>
 
@@ -1024,7 +1055,7 @@
           </details>
 
           <details class="suite-details">
-            <summary><strong>Writing Review (Build a Sentence ${rep.writing.basCorrect}/${rep.writing.basTotal} + Sample Essays)</strong></summary>
+            <summary><strong>Writing Review (Build a Sentence ${rep.writing.basCorrect}/${rep.writing.basTotal} + Your Drafts &amp; Samples)</strong></summary>
             <div class="suite-stack-sm suite-mt-sm">
               ${rep.basReview.map((item) => `
                 <div class="mock-review-row ${item.ok ? "ok" : "bad"}">
@@ -1032,8 +1063,10 @@
                   <div>Yours: ${esc(item.yours)} | Correct: <strong>${esc(item.expected)}</strong></div>
                 </div>
               `).join("")}
-              ${m && m.writing.email ? `<div class="suite-model-box"><strong>Sample Email:</strong><pre class="suite-pre">${esc(m.writing.email.modelEmail)}</pre></div>` : ""}
-              ${m && m.writing.discussion ? `<div class="suite-model-box"><strong>Sample Discussion Response:</strong><p>${esc(m.writing.discussion.modelResponse || "")}</p></div>` : ""}
+              ${rep.writing.emailText ? `<div class="suite-idea-card"><strong>Your Email Draft (${rep.writing.emailWc} words):</strong><pre class="suite-pre">${esc(rep.writing.emailText)}</pre></div>` : ""}
+              ${(rep.writing.emailModel || (m && m.writing.email?.modelEmail)) ? `<div class="suite-model-box"><strong>Sample Email:</strong><pre class="suite-pre">${esc(rep.writing.emailModel || m.writing.email.modelEmail)}</pre></div>` : ""}
+              ${rep.writing.discText ? `<div class="suite-idea-card"><strong>Your Discussion Draft (${rep.writing.discWc} words):</strong><pre class="suite-pre">${esc(rep.writing.discText)}</pre></div>` : ""}
+              ${(rep.writing.discModel || (m && m.writing.discussion?.modelResponse)) ? `<div class="suite-model-box"><strong>Sample Discussion Response:</strong><p>${esc(rep.writing.discModel || m.writing.discussion.modelResponse || "")}</p></div>` : ""}
             </div>
           </details>
         </div>
@@ -1042,6 +1075,7 @@
   }
 
   function renderView() {
+    if (mockState.phase === "results" && mockState.lastReport) return renderResultsScreen();
     if (mockState.phase === "select" || !mockState.mock) return renderSelectScreen();
     if (mockState.phase === "reading1" || mockState.phase === "reading2") return renderReadingPhase();
     if (mockState.phase === "listening1" || mockState.phase === "listening2") return renderListeningPhase();
@@ -1071,6 +1105,17 @@
     }
     const randBtn = doc.querySelector("[data-mock-random]");
     if (randBtn) randBtn.addEventListener("click", () => startMock(pickRandomMock()));
+
+    doc.querySelectorAll("[data-mock-view-history]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.mockViewHistory;
+        const found = loadHistory().find((h) => h.id === id && h.report);
+        if (!found) return;
+        mockState.lastReport = found.report;
+        mockState.phase = "results";
+        render();
+      });
+    });
 
     const quitBtn = doc.querySelector("[data-mock-quit]");
     if (quitBtn) {
@@ -1220,11 +1265,42 @@
     const spFinish = doc.querySelector("[data-mock-finish]");
     if (spFinish) spFinish.addEventListener("click", () => finishSpeaking());
 
+    const copyReport = doc.querySelector("[data-mock-copy-report]");
+    if (copyReport) {
+      copyReport.addEventListener("click", () => {
+        const rep = mockState.lastReport;
+        if (!rep) return;
+        const missedR = (rep.rReview || []).filter((x) => !x.ok).map((x) => `- ${x.q} | Yours: ${x.yours} | Expected: ${x.expected}`).join("\n");
+        const missedL = (rep.lReview || []).filter((x) => !x.ok).map((x) => `- [${x.section}] ${x.q} | Yours: ${x.yours} | Expected: ${x.expected}`).join("\n");
+        const missedB = (rep.basReview || []).filter((x) => !x.ok).map((x) => `- ${x.q} | Yours: ${x.yours} | Expected: ${x.expected}`).join("\n");
+        const txt = [
+          `TOEFL 2026 REPORT: ${rep.mockTitle} (${rep.date})`,
+          `Reading: ${rep.reading.correct}/${rep.reading.total}`,
+          `Listening: ${rep.listening.correct}/${rep.listening.total}`,
+          `Build a Sentence: ${rep.writing.basCorrect}/${rep.writing.basTotal}`,
+          `Email (${rep.writing.emailWc}w) / Discussion (${rep.writing.discWc}w)`,
+          `Speaking: ${rep.speaking.skipped ? "Skipped" : `${rep.speaking.recorded} recorded, ${rep.speaking.answered} typed`}`,
+          missedR ? `\nMISSED READING:\n${missedR}` : "",
+          missedL ? `\nMISSED LISTENING:\n${missedL}` : "",
+          missedB ? `\nMISSED BUILD A SENTENCE:\n${missedB}` : "",
+          rep.writing.emailText ? `\nEMAIL PROMPT:\n${rep.writing.emailScenario}\n\nMY EMAIL:\n${rep.writing.emailText}` : "",
+          rep.writing.discText ? `\nDISCUSSION PROMPT:\n${rep.writing.discPrompt}\n\nMY DISCUSSION:\n${rep.writing.discText}` : ""
+        ].filter(Boolean).join("\n");
+        global.navigator?.clipboard?.writeText(txt);
+        if (typeof showToast === "function") showToast("Copied full diagnostic report.");
+      });
+    }
+
     const copyEssays = doc.querySelector("[data-mock-copy-writing]");
     if (copyEssays) {
       copyEssays.addEventListener("click", () => {
+        const rep = mockState.lastReport;
         const m = mockState.mock;
-        const txt = `Give feedback on my TOEFL practice writing. For each task, identify one strength and one improvement, and explain why.\n\nEMAIL TASK:\n${m.writing.email.scenario}\n\nMY EMAIL:\n${mockState.emailText}\n\nDISCUSSION TASK:\n${m.writing.discussion.professorPrompt}\n\nMY RESPONSE:\n${mockState.discText}`;
+        const scenario = rep?.writing?.emailScenario || m?.writing?.email?.scenario || "";
+        const emailDraft = rep?.writing?.emailText ?? mockState.emailText ?? "";
+        const discPrompt = rep?.writing?.discPrompt || m?.writing?.discussion?.professorPrompt || "";
+        const discDraft = rep?.writing?.discText ?? mockState.discText ?? "";
+        const txt = `Give feedback on my TOEFL practice writing. For each task, identify one strength and one improvement, and explain why.\n\nEMAIL TASK:\n${scenario}\n\nMY EMAIL:\n${emailDraft}\n\nDISCUSSION TASK:\n${discPrompt}\n\nMY RESPONSE:\n${discDraft}`;
         global.navigator?.clipboard?.writeText(txt);
         if (typeof showToast === "function") showToast("Copied both essays for AI feedback.");
       });
