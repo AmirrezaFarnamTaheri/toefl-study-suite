@@ -9,7 +9,17 @@ const dataPaths = [
   path.join(root, "data", "pytoefl-interview-bank.js"),
   path.join(root, "data", "interview-sets.js"),
   path.join(root, "data", "training-config.js"),
-  path.join(root, "logic", "scoring-engine.js")
+  path.join(root, "data", "toefl-suite-bank.js"),
+  path.join(root, "data", "listening-practice.js"),
+  path.join(root, "data", "toefl-full-mocks.js"),
+  path.join(root, "data", "toefl-extra-practice.js"),
+  path.join(root, "data", "toefl-studytools-absorbed.js"),
+  path.join(root, "data", "toefl-courses.js"),
+  path.join(root, "logic", "scoring-engine.js"),
+  path.join(root, "modules", "toefl-suite-modules.js"),
+  path.join(root, "modules", "toefl-full-mock.js"),
+  path.join(root, "modules", "toefl-courses.js"),
+  path.join(root, "modules", "toefl-study-timer.js")
 ];
 const appPath = path.join(root, "app.js");
 const source = [
@@ -119,7 +129,12 @@ globalThis.__voxpilot = {
   splitWordForPractice,
   getWordStressHint,
   INTERVIEW_SETS,
-  startFullRun
+  QUESTION_BANK,
+  TOEFL_SUITE_BANK,
+  TOEFL_LISTENING_PRACTICE,
+  TOEFL_FULL_MOCKS,
+  startFullRun,
+  render
 };
 `;
 
@@ -136,8 +151,11 @@ function assert(condition, message) {
   }
 }
 
-assert(appElement.innerHTML.includes("VoxPilot Speaking Lab"), "initial render failed");
-assert(appElement.innerHTML.includes("Start Easy"), "starter mode did not render");
+assert(appElement.innerHTML.includes("TOEFL study desk"), "home did not render");
+assert(appElement.innerHTML.includes("Start a warm-up"), "warm-up entry point is missing");
+api.state.tab = "starter";
+api.render();
+assert(appElement.innerHTML.includes("Four steps"), "warm-up did not render");
 
 api.state.transcript = "I prefer studying with classmates.";
 api.analyzeStarterStep();
@@ -255,7 +273,79 @@ api.analyzeWordDrillPart("sentence");
 api.finishMistakeReviewCard("pass");
 assert(api.state.mistakeReview.results.length === 1, "mistake review did not record a completed card");
 
-assert(api.INTERVIEW_SETS.length >= 8 && api.INTERVIEW_SETS.every((s) => s.turns.length === 4 && s.scenario), "interview sets must have a scenario and four turns");
+assert(api.INTERVIEW_SETS.length >= 45 && api.INTERVIEW_SETS.every((s) => s.turns.length === 4 && s.scenario), "interview sets must have >=45 sets with a scenario and four turns");
+assert(api.QUESTION_BANK.repeat.length >= 300, "expanded repeat bank should have >=300 sentences");
+assert(api.TOEFL_SUITE_BANK.reading.completeTheWords.length >= 100, "CTW reading bank should have >=100 passages");
+assert(api.TOEFL_SUITE_BANK.reading.passages.length >= 8, "Reading Daily Life & Academic passages should have >=8 sets");
+assert(api.TOEFL_SUITE_BANK.writing.buildASentence.length >= 20, "Build-a-Sentence bank should have >=20 items");
+assert(api.TOEFL_SUITE_BANK.writing.emails.length >= 45, "Email bank should have >=45 model emails");
+assert(api.TOEFL_SUITE_BANK.writing.discussions.length >= 35, "Academic Discussion bank should have >=35 Pastel topics");
+assert(api.TOEFL_SUITE_BANK.listening.clips.length === 24, "Listening bank should have 24 audio clips");
+assert(api.TOEFL_SUITE_BANK.vocab.length >= 1000, "Vocab & collocations bank should have >=1000 items");
+
+for (const suiteTab of ["courses", "fullmock", "reading", "writing", "listening", "vocab", "guides"]) {
+  api.state.tab = suiteTab;
+  api.render();
+  assert(appElement.innerHTML.length > 500, `Suite tab ${suiteTab} failed to render`);
+}
+assert(context.window.TOEFL_COURSES.length >= 10, "Courses bank should have >=10 lessons");
+context.window.ToeflCourses.toggleDone("r-ctw");
+assert(context.window.ToeflCourses.state.doneIds.includes("r-ctw"), "Courses mark-complete failed");
+context.window.ToeflCourses.launchPracticeSession({ tab: "writing", subKey: "writingMode", subVal: "email" });
+assert(api.state.tab === "writing" && context.window.ToeflSuiteModules.state.writingMode === "email", "Courses practice jump failed");
+assert(context.window.TOEFL_FULL_MOCKS.mocks.length >= 3, "Full mocks bank should have >=3 complete 4-section tests");
+context.window.ToeflFullMock.startMock(context.window.TOEFL_FULL_MOCKS.mocks[0]);
+assert(context.window.ToeflFullMock.state.phase === "reading1", "Full mock did not start in reading1");
+context.window.ToeflFullMock.finishAndScore();
+const marked = context.window.ToeflSuiteModules.buildCtwBlanks("An example. The {stu|dent} left.");
+assert(marked.blanks.length === 1 && marked.blanks[0].word === "student", "Marked reading words must use the supplied blanks");
+assert(!marked.parts.some((part) => part.raw?.includes("{")), "Reading markup leaked into visible text");
+api.state.tab = "listening";
+api.render();
+assert(appElement.innerHTML.includes("Borrowing headphones") && appElement.innerHTML.includes("Read transcript"), "Listening questions did not render");
+const listeningAssets = [
+  ...api.TOEFL_LISTENING_PRACTICE.map(({ id }) => id),
+  ...api.TOEFL_FULL_MOCKS.mocks.flatMap((mock) =>
+    [1, 2].flatMap((part) => mock.listening["module" + part].items.map(
+      (_, index) => mock.id + "-listening" + part + "-" + index
+    ))
+  )
+];
+for (const name of listeningAssets) {
+  const audio = fs.readFileSync(path.join(root, "assets", "audio", "prompts", `${name}.wav`));
+  assert(audio.length > 44 && audio.toString("ascii", 0, 4) === "RIFF" && audio.toString("ascii", 8, 12) === "WAVE", `Invalid listening audio: ${name}`);
+}
+const mockReport = context.window.ToeflFullMock.state.lastReport;
+assert(context.window.ToeflFullMock.state.phase === "results" && mockReport.reading.total > 0 && mockReport.listening.total > 0, "Full mock results failed");
+assert(!Object.hasOwn(mockReport, "overallBand"), "Text-only mock must not report an overall TOEFL band");
+const randomMock = context.window.ToeflFullMock.pickRandomMock();
+assert(randomMock && randomMock.listeningMockId, "Random full mock must carry listeningMockId for audio assets");
+const randomAudio = fs.readFileSync(path.join(root, "assets", "audio", "prompts", `${randomMock.listeningMockId}-listening1-0.wav`));
+assert(randomAudio.length > 44 && randomAudio.toString("ascii", 0, 4) === "RIFF", "Random full mock listening audio missing");
+const diagMock = context.window.ToeflFullMock.buildDiagnosticMock();
+assert(diagMock && diagMock.isDiagnostic && diagMock.listening.module1.items.length === 2 && diagMock.listening.module2.items.length === 2, "Evaluation diagnostic mock build failed");
+for (const it of [...diagMock.listening.module1.items, ...diagMock.listening.module2.items]) {
+  const wav = fs.readFileSync(path.join(root, "assets", "audio", "prompts", `${it.audioFile}.wav`));
+  assert(wav.length > 44 && wav.toString("ascii", 0, 4) === "RIFF", `Diagnostic listening audio missing: ${it.audioFile}`);
+}
+const ctwBuilt = context.window.ToeflSuiteModules.buildCtwBlanks(api.TOEFL_SUITE_BANK.reading.completeTheWords[0].text);
+assert(ctwBuilt.blanks.length === 10, "Complete the Words generator should create 10 blanks");
+api.state.tab = "reading";
+api.render();
+assert(
+  appElement.innerHTML.includes(`--ctw-slots:${ctwBuilt.blanks[0].missing.length}`) &&
+  appElement.innerHTML.includes(`maxlength="${ctwBuilt.blanks[0].missing.length}"`),
+  "Complete the Words must render exact per-letter slots matching missing letter count"
+);
+
+assert(api.TOEFL_LISTENING_PRACTICE.length >= 24, "Listening practice should have >=24 exercises across all 4 tasks");
+assert(api.TOEFL_SUITE_BANK.reading.passages.length >= 50, "Merged Reading passages should have >=50 sets");
+assert(api.TOEFL_SUITE_BANK.writing.buildASentence.length >= 90, "Merged Build-a-Sentence drills should have >=90 items");
+assert(api.TOEFL_SUITE_BANK.vocab.length >= 1800, "Merged Vocab bank should have >=1800 cards");
+assert(context.window.ToeflStudyTimer && appElement.innerHTML.includes("Study timer"), "Study timer header control did not render");
+context.window.ToeflStudyTimer.selectMode("countdown");
+assert(context.window.ToeflStudyTimer.state.mode === "countdown", "Study timer mode switch failed");
+
 api.startFullRun();
 const run = api.state.full.sequence;
 assert(run.length === 11, "full run should have 11 items");
@@ -263,4 +353,4 @@ assert(run.slice(0, 7).every((q) => q.type === "repeat") && run.slice(7).every((
 assert(new Set(run.slice(7).map((q) => q.setId)).size === 1, "the four interview turns should come from one set");
 assert(run.slice(7).map((q) => q.turn).join() === "1,2,3,4", "interview turns should be in order");
 
-console.log("VoxPilot smoke test passed");
+console.log("VoxPilot TOEFL 2026 Study Suite smoke test passed");
